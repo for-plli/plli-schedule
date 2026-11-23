@@ -1,0 +1,26 @@
+[
+ {
+  "id": "bbe05ce3-47d6-4db8-bbe4-d72314cd4814",
+  "title": "[KEEP IT MANIC] Encore",
+  "utcStart": "2027-01-22T10:00:00.000Z",
+  "isAllDay": false,
+  "category": "f0df43d2-9591-4044-8430-dbc1d78bd743",
+  "links": []
+ },
+ {
+  "id": "aab6f858-7de8-4a0e-9bf6-202639aa587a",
+  "title": "[KEEP IT MANIC] Encore",
+  "utcStart": "2027-01-23T09:00:00.000Z",
+  "isAllDay": false,
+  "category": "f0df43d2-9591-4044-8430-dbc1d78bd743",
+  "links": []
+ },
+ {
+  "id": "d36887f1-5047-4900-8cf5-9ab848d831c3",
+  "title": "[KEEP IT MANIC] Encore",
+  "utcStart": "2027-01-24T08:00:00.000Z",
+  "isAllDay": false,
+  "category": "f0df43d2-9591-4044-8430-dbc1d78bd743",
+  "links": []
+ }
+]

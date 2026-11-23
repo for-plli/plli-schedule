@@ -264,6 +264,18 @@
   "links": []
  },
  {
+  "id": "b4e0246f-374c-4ee9-ba6d-dc9b9dbf5541",
+  "title": "WEVERSE LIVE 💜",
+  "utcStart": "2026-11-20T09:48:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": [
+   {
+    "url": "https://weverse.io/plave/live/3-244028084?hl=ko"
+   }
+  ]
+ },
+ {
   "id": "9b0e3d7f-06ba-4b27-8e5d-960489f8d054",
   "title": "‘Lowkey’ RELEASE",
   "utcStart": "2026-11-30T03:00:00.000Z",
