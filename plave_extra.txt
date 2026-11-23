@@ -1,0 +1,11 @@
+# 플레이브 일정 중 공식 사이트(plave.global)에 아직 없는 것을 직접 적는 파일
+# 형식은 ticketing.txt 와 같아요:  날짜 시간 | 제목 | 메모 | 링크 | 시간대(선택)
+# 여기에 적으면 '플레이브 일정'으로 분류돼요. (예매·예약 일정은 ticketing.txt 에 적어요)
+
+2027-01-22 19:00 | [KEEP IT MANIC Encore] 1일차 (금) | 고척스카이돔 / 12세 이상 | https://weverse.io/plave/notice/41168?hl=ko
+2027-01-23 18:00 | [KEEP IT MANIC Encore] 2일차 (토) | 고척스카이돔 / 12세 이상 | https://weverse.io/plave/notice/41168?hl=ko
+2027-01-24 17:00 | [KEEP IT MANIC Encore] 3일차 (일) | 고척스카이돔 / 12세 이상 | https://weverse.io/plave/notice/41168?hl=ko
+
+# ---- 2026-11-23 VLAST 공지: 재정비 기간 안내 ----
+2026-11-23 | 재정비 기간 시작 (다음 앨범 작업·휴식) | 11/23(월)부터 휴식과 다음 앨범 곡 작업. 재정비 기간에도 여러 콘텐츠와 위버스 '보이는 개인 라이브'로 소통 예정 |
+2026-12-14 | 활동 재개 (PLAVE LIVE 및 콘텐츠) | 12/14(월)부터 PLAVE LIVE와 여러 콘텐츠로 팬들을 다시 만나요 |

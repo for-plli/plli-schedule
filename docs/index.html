@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바쁘다 바빠 플리사회 🤍</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
+:root{
+  --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
+  --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
+  --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
+  --n-bg:#eceef6; --n-fg:#2b2f45;
+  --sun:#c8707a; --sat:#5da3de; --sun-bg:#fbebee;
+  --font-body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-num:"Outfit","Noto Sans KR",-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
+    --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
+    --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+    --n-bg:#22263a; --n-fg:#dfe2f2;
+    --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
+  --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
+  --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+  --n-bg:#22263a; --n-fg:#dfe2f2;
+  --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 16px 56px;display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+
+.src-plave{--cb:var(--p-bg);--cf:var(--p-fg);--cbar:var(--p-bar)}
+.src-fan{--cb:var(--f-bg);--cf:var(--f-fg);--cbar:var(--f-bar)}
+
+/* 선택한 날짜 */
+.sel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 18px}
+.sel .eyebrow{font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 4px}
+.seldate{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.seldate .big{font-family:var(--font-num);font-weight:700;font-size:25px;line-height:1.2}
+.seldate .dowl{font-size:13.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border:1px solid var(--line);border-radius:999px;padding:1px 11px}
+.seldate .dowl.sun{background:var(--sun-bg);color:var(--sun);border-color:var(--sun)}
+.seldate .dowl.sat{background:var(--p-bg);color:var(--p-fg);border-color:var(--p-bar)}
+.badge{font-size:12px;font-weight:700;background:var(--p-bg);color:var(--p-fg);border:1px solid var(--p-bar);border-radius:999px;padding:1px 10px}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:10px 12px 10px 14px;background:var(--cb);border-left:5px solid var(--cbar);border-radius:8px}
+.item .t{font-family:var(--font-num);font-weight:700;font-size:32px;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--cf)}
+.item .t.allday{font-family:var(--font-body);font-size:20px;padding-top:6px}
+.item .ti{font-weight:500;font-size:16px;overflow-wrap:anywhere}
+.item .who{display:inline-block;font-size:11px;font-weight:700;color:var(--cf);border:1px solid var(--cbar);border-radius:999px;padding:0 7px;margin-bottom:3px}
+.memo{font-size:13px;color:var(--cf);opacity:.85;margin-top:2px;overflow-wrap:anywhere}
+.links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.links a{font-size:12.5px;color:var(--cf);text-decoration:none;background:var(--surface);border:1px solid var(--cbar);border-radius:6px;padding:2px 10px}
+.links a:hover{text-decoration:underline}
+.empty{color:var(--muted);font-size:14.5px;margin:0}
+
+/* 컨트롤 */
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{font-weight:700;background:var(--n-bg);color:var(--n-fg)}
+.seg button[data-k="plave"][aria-pressed="true"]{background:var(--p-bg);color:var(--p-fg)}
+.seg button[data-k="fan"][aria-pressed="true"]{background:var(--f-bg);color:var(--f-fg)}
+
+.cal{display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;align-items:center;gap:8px}
+.bar .title{font-family:var(--font-num);font-size:21px;font-weight:700;min-width:7.5em;text-align:center}
+.nav{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;line-height:1}
+.today-btn{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.note{margin:0;font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:8px 12px}
+
+/* 월간 */
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.dow{background:var(--surface);text-align:center;font-size:12px;font-weight:700;padding:6px 0;color:var(--muted)}
+.dow.sun{color:var(--sun)} .dow.sat{color:var(--sat)}
+.day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
+.blank{background:var(--bg)}
+.day{cursor:pointer}
+.day[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--p-bar)}
+.num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
+.day.today .num{background:var(--p-bg);color:var(--p-fg);box-shadow:0 0 0 1.5px var(--p-bar)}
+.chip{font-size:11.5px;line-height:1.3;padding:2px 5px;border-radius:4px;border-left:3px solid var(--cbar);background:var(--cb);color:var(--cf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.chip b{font-family:var(--font-num);font-weight:700;font-size:12px;margin-right:4px}
+.more{font-size:11px;color:var(--muted);padding-left:2px}
+.dots{display:none;gap:3px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
+
+/* 주간 */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wcol{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.wcol.selected{box-shadow:0 0 0 2px var(--p-bar)}
+.wh{border:0;background:transparent;cursor:pointer;text-align:left;padding:8px 10px;display:flex;align-items:baseline;gap:6px;border-bottom:1px solid var(--line)}
+.wh .d{font-family:var(--font-num);font-weight:700;font-size:24px;line-height:1.1}
+.wh .w{font-size:13px;font-weight:700}
+.wh.sun .d,.wh.sun .w{color:var(--sun)} .wh.sat .d,.wh.sat .w{color:var(--sat)}
+.wcol.today .wh{background:var(--p-bg);color:var(--p-fg)}
+.wcol.today .wh .d,.wcol.today .wh .w{color:var(--p-fg)}
+.wlist{display:flex;flex-direction:column;gap:6px;padding:8px;min-height:60px}
+.wev{background:var(--cb);color:var(--cf);border-left:4px solid var(--cbar);border-radius:6px;padding:5px 7px;min-width:0}
+.wev .wt{font-family:var(--font-num);font-weight:700;font-size:17px;line-height:1.15;font-variant-numeric:tabular-nums}
+.wev .wt.allday{font-family:var(--font-body);font-size:13px}
+.wev .wn{font-size:12.5px;overflow-wrap:anywhere}
+.wnone{color:var(--muted);font-size:12.5px;margin:0}
+
+footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px}
+
+@media (max-width:760px){
+  .week{grid-template-columns:1fr}
+  .wcol{flex-direction:row}
+  .wh{flex-direction:column;align-items:flex-start;gap:0;width:64px;flex:0 0 64px;border-bottom:0;border-right:1px solid var(--line)}
+  .wlist{flex:1}
+}
+@media (max-width:600px){
+  .wrap{padding-top:14px}
+  .day,.blank{min-height:58px;padding:4px}
+  .chip,.more{display:none}
+  .dots{display:flex}
+  .bar .title{font-size:18px;min-width:6.5em}
+  .seldate .big{font-size:22px}
+  .item{grid-template-columns:86px 1fr}
+  .item .t{font-size:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>바쁘다 바빠 플리사회 🤍</h1>
+
+  <section class="sel" aria-live="polite" aria-label="선택한 날짜의 일정">
+    <p class="eyebrow" id="eyebrow"></p>
+    <div class="seldate" id="seldate"></div>
+    <ul class="items" id="items"></ul>
+  </section>
+
+  <div class="controls">
+    <div class="seg" id="viewseg" role="group" aria-label="보기 방식">
+      <button type="button" data-k="month">월간</button>
+      <button type="button" data-k="week">주간</button>
+    </div>
+    <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
+      <button type="button" data-k="all">전체</button>
+      <button type="button" data-k="plave">플레이브 일정</button>
+      <button type="button" data-k="fan">플리 일정</button>
+    </div>
+  </div>
+
+  <section class="cal" aria-label="달력">
+    <div class="bar">
+      <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
+      <div class="title" id="title" aria-live="polite"></div>
+      <button class="nav" id="next" type="button" aria-label="다음">›</button>
+      <button class="today-btn" id="todaybtn" type="button">오늘</button>
+    </div>
+    <p class="note" id="note" hidden></p>
+    <div id="cal"></div>
+  </section>
+
+  <footer>
+    <span>비공식 팬 제작 캘린더입니다. 플레이브 일정은 plave.global 공식 스케줄이 출처이며, 정확한 내용은 공식 채널에서 다시 확인해 주세요.</span>
+    <span>시간은 모두 한국 시간입니다. 플리 일정(티켓팅·예약)은 팬이 공식 공지를 보고 직접 정리해서 넣습니다.</span>
+    <span id="updated"></span>
+  </footer>
+</div>
+
+<script>
+var RAW = [{"id":"1e94c874-b8d5-458c-86d1-2b09ca3e3f99","title":"'Star Trace' Dance Practice","utcStart":"2026-10-30T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/_BL8tzJQDco"}]},{"id":"8b1a1d4b-a091-4405-ab82-64928529c1a9","title":"[KEEP IT MANIC] in Macao","utcStart":"2026-10-31T10:00:00.000Z","isAllDay":false,"links":[]},{"id":"ANNIV-2026-11-01","title":"Happy HAMIN's Day","utcStart":"2026-11-01T00:00:00.000Z","isAllDay":true,"links":[]},{"id":"07b6301f-6a61-4b44-8da5-67c4bd1f4b84","title":"[PLAVE BIRTHDAY GIFT] HAMIN's Playlist 🎶🖤","utcStart":"2026-11-01T01:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/RGCbjiYXEbA"}]},{"id":"1e9bc1ee-1d29-4df8-a2a6-61562d0b0659","title":"WEVERSE LIVE 💙","utcStart":"2026-11-01T03:54:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243302579?hl=ko"}]},{"id":"375d6c6b-56fc-4ff8-996d-e272afc42149","title":"[KEEP IT MANIC] in Macao","utcStart":"2026-11-01T08:00:00.000Z","isAllDay":false,"links":[]},{"id":"16fb7d39-913b-46f2-b883-c8e1ef5c9a94","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-01T14:15:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243318837?hl=ko"}]},{"id":"536074e4-bf3e-4630-8110-5be6c90881c9","title":"WEVERSE LIVE 💜","utcStart":"2026-11-02T03:26:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181334450?hl=ko"}]},{"id":"e0dd469c-5cf6-44a3-8e7f-e235c82af1ff","title":"HAMIN B-DAY LIVE 🖤","utcStart":"2026-11-05T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"091d8ee2-d5db-45a2-a8af-df26d318a63e","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙","utcStart":"2026-11-06T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=zvmhyUU5t1Q"}]},{"id":"f8ebcb40-483c-453d-8a4e-fb2c4eb3093b","title":"[BIRTHDAY GIFT] 0+0 (원곡 : 한로로) Covered by HAMIN & BAMBY","utcStart":"2026-11-07T04:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/7IZ79kGHCGM"}]},{"id":"e3b8513e-e93b-43e9-82a8-3462c0e793c8","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙🩷","utcStart":"2026-11-07T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=I4xwNaYeflI"}]},{"id":"fb0f8c2b-b41a-41a7-b117-71c260dea461","title":"WEVERSE LIVE 💜","utcStart":"2026-11-07T16:35:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-243515910?hl=ko"}]},{"id":"4cf12eef-2ea8-4c1d-a49d-b8512722fae7","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙","utcStart":"2026-11-08T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"7d4f4a67-d460-4159-bc25-a8f2be60d074","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-08T13:17:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-243590296"}]},{"id":"b6e70f18-44a0-40e9-9e2a-461e9ff5cd7b","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-08T13:54:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243598980"}]},{"id":"d3bf7c83-e6af-42d3-a23d-4aceaa399c80","title":"WEVERSE LIVE 💙💜🖤","utcStart":"2026-11-09T10:23:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181478911?hl=ko"}]},{"id":"d2a11ec6-0604-41dc-965c-5c2007e1fbc2","title":"WEVERSE LIVE 🩷","utcStart":"2026-11-09T13:48:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181479305?hl=ko"}]},{"id":"4168e1ed-1d26-481f-9928-6de4291c3827","title":"WEVERSE LIVE 💜","utcStart":"2026-11-13T11:25:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181544638"}]},{"id":"79c97667-6478-4f61-9faf-c479e92c0760","title":"[KEEP IT MANIC] in U.S.","utcStart":"2026-11-15T03:00:00.000Z","isAllDay":false,"links":[]},{"id":"93968f72-fa67-446b-a85e-32855003b97a","title":"2026 멜론 뮤직 어워드 💙💜🩷❤️🖤","utcStart":"2026-11-15T09:00:00.000Z","isAllDay":false,"links":[]},{"id":"6f52767e-2f38-4f05-be88-2fd5c236122e","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-17T09:18:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/0-181610009?hl=ko"}]},{"id":"62b32614-ad2b-46d5-bb9c-ac6234f2e7b5","title":"PLAVE LIVE 💙💜🩷❤️🖤","utcStart":"2026-11-17T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"fa4d6008-b658-473e-a8f6-c8e0ee46aa23","title":"WEVERSE LIVE ❤️","utcStart":"2026-11-17T15:34:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243945249?hl=ko"},{"url":"https://weverse.io/plave/live/3-243945475?hl=ko"}]},{"id":"a1ba1f3f-ca19-4b2a-af67-7ed372c2e52e","title":"2026 더아동페스타 💙💜🩷❤️🖤","utcStart":"2026-11-20T04:50:00.000Z","isAllDay":false,"links":[]},{"id":"9b0e3d7f-06ba-4b27-8e5d-960489f8d054","title":"‘Lowkey’ RELEASE","utcStart":"2026-11-30T03:00:00.000Z","isAllDay":false,"links":[]}];
+var DOW = ["일","월","화","수","목","금","토"];
+var DOWL = ["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
+var LOADED = ["2026-11"];
+var UPDATED = "2026-11-19 13:12 (직접 복사한 11월 데이터)";
+var SRC_NAME = {plave:"플레이브", fan:"플리"};
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function kst(ms){ return new Date(ms + 9*3600000); }
+function keyOf(d){ return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate()); }
+function parseKey(k){ var p = k.split("-").map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+function addDays(k,n){ var d = parseKey(k); d.setUTCDate(d.getUTCDate()+n); return keyOf(d); }
+function hostLabel(u){
+  if(u.indexOf("youtu")>-1) return "YouTube";
+  if(u.indexOf("weverse")>-1) return "Weverse";
+  return "링크";
+}
+function norm(e, src){
+  var ms = Date.parse(e.utcStart);
+  var allDay = !!e.isAllDay;
+  var d = allDay ? new Date(ms) : kst(ms);
+  return {
+    id:e.id, title:e.title, ms:ms, allDay:allDay, key:keyOf(d), src:src,
+    time: allDay ? "종일" : pad(d.getUTCHours())+":"+pad(d.getUTCMinutes()),
+    note: e.note || "",
+    links:(e.links||[]).map(function(l){return l.url;}).filter(function(u){return typeof u==="string" && u.indexOf("https://")===0;})
+  };
+}
+/* 플리 일정(티켓팅·예약): 한 번만 있는 일정은 FAN_RAW 에, 매달 반복되는 일정은 FAN_MONTHLY 에 적습니다. */
+var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 기간 11/23 14:00 ~ 12/1 23:59 / 예매처 NOL / 회차당 1인 1매(선예매 포함)","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"12/1 20:00 ~ 23:59 / 예매처 NOL / 회차당 1인 1매 / 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"선예매를 하려면 이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"예매처 NOL / 회차당 1인 2매 / VIP 198,000원, 일반석 154,000원(부가세 포함)","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]}];
+var FAN_MONTHLY = [{"id":"m-5e8b5dd4","title":"십카페 예약","nth":3,"dow":4,"hour":16,"minute":0,"note":"","links":[]}];   /* ticketing.txt 의 '매월 N번째 요일 시각' 줄 */
+var REPEAT_FROM = "2026-11", REPEAT_UNTIL = "2029-05";
+function monthlyEvents(){
+  var out = [];
+  var a = REPEAT_FROM.split("-").map(Number), b = REPEAT_UNTIL.split("-").map(Number);
+  for(var y=a[0], m=a[1]; y*12+m <= b[0]*12+b[1]; m++){
+    if(m === 13){ y++; m = 1; }
+    FAN_MONTHLY.forEach(function(r){
+      var first = new Date(Date.UTC(y,m-1,1)).getUTCDay();
+      var day = 1 + (r.dow - first + 7) % 7 + 7*(r.nth-1);
+      if(day > new Date(Date.UTC(y,m,0)).getUTCDate()) return;
+      var ms = Date.UTC(y,m-1,day,r.hour-9,r.minute);
+      out.push({id:"fan-"+r.id+"-"+y+"-"+pad(m), title:r.title, utcStart:new Date(ms).toISOString(), isAllDay:false, note:r.note||"", links:r.links||[]});
+    });
+  }
+  return out;
+}
+/* 공식 사이트에 아직 없지만 플레이브 일정으로 보여줄 것(공연 등) */
+var PLAVE_EXTRA = [{"id":"x-47457a621e","title":"[KEEP IT MANIC Encore] 1일차 (금)","utcStart":"2027-01-22T10:00:00.000Z","isAllDay":false,"note":"고척스카이돔 / 12세 이상","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-be1437b586","title":"[KEEP IT MANIC Encore] 2일차 (토)","utcStart":"2027-01-23T09:00:00.000Z","isAllDay":false,"note":"고척스카이돔 / 12세 이상","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-2434441d29","title":"[KEEP IT MANIC Encore] 3일차 (일)","utcStart":"2027-01-24T08:00:00.000Z","isAllDay":false,"note":"고척스카이돔 / 12세 이상","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-8861e8f51e","title":"재정비 기간 시작 (다음 앨범 작업·휴식)","utcStart":"2026-11-23T00:00:00.000Z","isAllDay":true,"note":"11/23(월)부터 휴식과 다음 앨범 곡 작업. 재정비 기간에도 여러 콘텐츠와 위버스 '보이는 개인 라이브'로 소통 예정","links":[]},{"id":"x-2c9398bfa6","title":"활동 재개 (PLAVE LIVE 및 콘텐츠)","utcStart":"2026-12-14T00:00:00.000Z","isAllDay":true,"note":"12/14(월)부터 PLAVE LIVE와 여러 콘텐츠로 팬들을 다시 만나요","links":[]}];
+var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
+  .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}));
+ALL.sort(function(a,b){
+  if(a.key !== b.key) return a.key < b.key ? -1 : 1;
+  if(a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+  return a.ms - b.ms;
+});
+
+var todayKey = keyOf(kst(Date.now()));
+var state = { sel: todayKey, view: "month", show: "all" };
+
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(text != null) n.textContent = text;
+  return n;
+}
+function visible(e){ return state.show === "all" || state.show === e.src; }
+function eventsOn(key){ return ALL.filter(function(e){ return e.key === key && visible(e); }); }
+function dowOf(key){ return parseKey(key).getUTCDay(); }
+function monthOf(key){ return key.slice(0,7); }
+function monthName(ym){ var p = ym.split("-").map(Number); return p[0]+"년 "+p[1]+"월"; }
+
+function selectKey(k){
+  state.sel = k;
+  render();
+  var s = document.querySelector(".sel");
+  try{
+    if(s && s.getBoundingClientRect().top < 0) s.scrollIntoView({block:"start"});
+  }catch(x){}
+}
+
+function renderSelected(){
+  var key = state.sel;
+  var p = key.split("-").map(Number);
+  var wd = dowOf(key);
+  document.getElementById("eyebrow").textContent = key === todayKey ? "오늘의 일정" : "선택한 날짜의 일정";
+  var head = document.getElementById("seldate");
+  head.textContent = "";
+  head.appendChild(el("span","big",p[1]+"월 "+p[2]+"일"));
+  head.appendChild(el("span","dowl"+(wd===0?" sun":wd===6?" sat":""),DOWL[wd]));
+  if(key === todayKey) head.appendChild(el("span","badge","오늘"));
+
+  var ul = document.getElementById("items");
+  ul.textContent = "";
+  var list = eventsOn(key);
+  if(!list.length){
+    var li = el("li");
+    var msg = key === todayKey ? "오늘은 일정이 없어요." : "이 날은 일정이 없어요.";
+    if(LOADED.indexOf(monthOf(key)) === -1 && state.show !== "fan"){
+      msg = monthName(monthOf(key))+" 플레이브 공식 일정은 아직 불러오지 않았어요.";
+    } else if(state.show === "fan" && !ALL.some(function(e){return e.src==="fan";})){
+      msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
+    }
+    li.appendChild(el("p","empty",msg));
+    ul.appendChild(li);
+    return;
+  }
+  list.forEach(function(e){
+    var li = el("li","item src-"+e.src);
+    li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
+    var body = el("div");
+    if(state.show === "all") body.appendChild(el("span","who",SRC_NAME[e.src]));
+    body.appendChild(el("div","ti",e.title));
+    if(e.note) body.appendChild(el("div","memo",e.note));
+    if(e.links.length){
+      var ls = el("div","links");
+      e.links.forEach(function(u,i){
+        var a = el("a",null,hostLabel(u)+(e.links.length>1 ? " "+(i+1) : "")+" 열기");
+        a.href = u; a.target = "_blank"; a.rel = "noopener noreferrer";
+        ls.appendChild(a);
+      });
+      body.appendChild(ls);
+    }
+    li.appendChild(body);
+    ul.appendChild(li);
+  });
+}
+
+function setPressed(boxId, key){
+  var bs = document.getElementById(boxId).querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){
+    bs[i].setAttribute("aria-pressed", bs[i].getAttribute("data-k") === key ? "true" : "false");
+  }
+}
+
+function weekKeys(){
+  var start = addDays(state.sel, -dowOf(state.sel));
+  var out = [];
+  for(var i=0;i<7;i++) out.push(addDays(start,i));
+  return out;
+}
+
+function renderTitleAndNote(){
+  var months = [];
+  var title;
+  if(state.view === "month"){
+    months = [monthOf(state.sel)];
+    title = monthName(months[0]);
+  } else {
+    var wk = weekKeys();
+    wk.forEach(function(k){ if(months.indexOf(monthOf(k)) === -1) months.push(monthOf(k)); });
+    var a = wk[0].split("-").map(Number), b = wk[6].split("-").map(Number);
+    title = a[0]+"년 "+a[1]+"월 "+a[2]+"일 – "+(a[1]===b[1] ? "" : b[1]+"월 ")+b[2]+"일";
+  }
+  document.getElementById("title").textContent = title;
+  var missing = months.filter(function(m){ return LOADED.indexOf(m) === -1; });
+  var note = document.getElementById("note");
+  if(missing.length && state.show !== "fan"){
+    note.hidden = false;
+    note.textContent = missing.map(monthName).join(", ")+" 플레이브 공식 일정은 아직 불러오지 않았어요."+(LOADED.length ? " 지금은 "+monthName(LOADED[0])+(LOADED.length>1 ? " ~ "+monthName(LOADED[LOADED.length-1]) : "")+" 공식 일정이 들어 있습니다." : "");
+  } else { note.hidden = true; }
+}
+
+function renderMonth(box){
+  var ym = monthOf(state.sel);
+  var p = ym.split("-").map(Number);
+  var y = p[0], m = p[1];
+  var byDay = {};
+  ALL.forEach(function(e){
+    if(monthOf(e.key) !== ym || !visible(e)) return;
+    (byDay[e.key] = byDay[e.key] || []).push(e);
+  });
+  var grid = el("div","grid");
+  DOW.forEach(function(d,i){ grid.appendChild(el("div","dow"+(i===0?" sun":i===6?" sat":""),d)); });
+  var lead = new Date(Date.UTC(y,m-1,1)).getUTCDay();
+  var days = new Date(Date.UTC(y,m,0)).getUTCDate();
+  for(var i=0;i<lead;i++) grid.appendChild(el("div","blank"));
+  for(var d=1; d<=days; d++){
+    var key = y+"-"+pad(m)+"-"+pad(d);
+    var wd = (lead + d - 1) % 7;
+    var list = byDay[key] || [];
+    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":""));
+    b.type = "button";
+    b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
+    b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
+    b.appendChild(el("span","num",String(d)));
+    list.slice(0,3).forEach(function(e){
+      var c = el("span","chip src-"+e.src);
+      c.appendChild(el("b",null,e.time));
+      c.appendChild(document.createTextNode(e.title));
+      b.appendChild(c);
+    });
+    if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
+    var dots = el("span","dots");
+    list.slice(0,6).forEach(function(e){ dots.appendChild(el("span","dot src-"+e.src)); });
+    b.appendChild(dots);
+    (function(k){ b.addEventListener("click", function(){ selectKey(k); }); })(key);
+    grid.appendChild(b);
+  }
+  var tail = (7 - (lead + days) % 7) % 7;
+  for(var j=0;j<tail;j++) grid.appendChild(el("div","blank"));
+  box.appendChild(grid);
+}
+
+function renderWeek(box){
+  var wrap = el("div","week");
+  weekKeys().forEach(function(key){
+    var wd = dowOf(key);
+    var p = key.split("-").map(Number);
+    var col = el("div","wcol"+(key===todayKey?" today":"")+(key===state.sel?" selected":""));
+    var h = el("button","wh"+(wd===0?" sun":wd===6?" sat":""));
+    h.type = "button";
+    h.setAttribute("aria-label", p[1]+"월 "+p[2]+"일 "+DOWL[wd]+" 선택");
+    h.appendChild(el("span","d",String(p[2])));
+    h.appendChild(el("span","w",DOW[wd]));
+    h.addEventListener("click", function(){ selectKey(key); });
+    col.appendChild(h);
+    var list = el("div","wlist");
+    var evs = eventsOn(key);
+    if(!evs.length) list.appendChild(el("p","wnone","일정 없음"));
+    evs.forEach(function(e){
+      var w = el("div","wev src-"+e.src);
+      w.appendChild(el("div","wt"+(e.allDay?" allday":""),e.time));
+      w.appendChild(el("div","wn",e.title));
+      list.appendChild(w);
+    });
+    col.appendChild(list);
+    wrap.appendChild(col);
+  });
+  box.appendChild(wrap);
+}
+
+function render(){
+  setPressed("viewseg", state.view);
+  setPressed("showseg", state.show);
+  renderSelected();
+  renderTitleAndNote();
+  var box = document.getElementById("cal");
+  box.textContent = "";
+  if(state.view === "month") renderMonth(box); else renderWeek(box);
+}
+
+function step(dir){
+  if(state.view === "week"){
+    state.sel = addDays(state.sel, 7*dir);
+  } else {
+    var p = monthOf(state.sel).split("-").map(Number);
+    var d = new Date(Date.UTC(p[0], p[1]-1+dir, 1));
+    var ym = d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1);
+    state.sel = ym === monthOf(todayKey) ? todayKey : ym+"-01";
+  }
+  render();
+}
+document.getElementById("prev").addEventListener("click", function(){ step(-1); });
+document.getElementById("next").addEventListener("click", function(){ step(1); });
+document.getElementById("todaybtn").addEventListener("click", function(){ state.sel = todayKey; render(); });
+document.getElementById("viewseg").addEventListener("click", function(ev){
+  var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
+  if(k){ state.view = k; render(); }
+});
+document.getElementById("showseg").addEventListener("click", function(ev){
+  var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
+  if(k){ state.show = k; render(); }
+});
+document.getElementById("updated").textContent = "공식 일정 마지막 확인: " + UPDATED + " (한국 시간)";
+render();
+</script>
+</body>
+</html>
