@@ -93,7 +93,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
-.day[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--p-bar)}
+.day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
 .day.today .num{background:var(--p-bg);color:var(--p-fg);box-shadow:0 0 0 1.5px var(--p-bar)}
@@ -125,8 +125,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 dialog.daydlg{border:0;padding:0;background:var(--surface);color:var(--ink);border-radius:16px;width:min(520px,calc(100% - 24px));max-height:82vh;box-shadow:0 12px 40px rgba(20,23,43,.25);overflow:hidden}
 dialog.daydlg::backdrop{background:rgba(20,23,43,.38)}
 .dlg-in{padding:16px 16px 20px;overflow:auto;max-height:82vh;position:relative}
-.dlg-x{position:absolute;top:14px;right:16px;border:0;border-radius:999px;background:var(--n-bg);color:var(--n-fg);font:500 12.5px var(--font-body);padding:5px 12px;cursor:pointer}
-.dlg-in .seldate{padding-right:56px;margin-bottom:8px}
+.dlg-x{position:absolute;top:8px;right:10px;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:6px 8px;cursor:pointer}
+.dlg-x:focus,.dlg-x:focus-visible,dialog.daydlg:focus,dialog.daydlg:focus-visible,.dlg-in:focus{outline:none}
+.dlg-in .seldate{padding-right:36px;margin-bottom:8px}
 .daydlg .seldate{margin-bottom:10px;gap:6px}
 .daydlg .seldate .big{font-size:17px}
 .daydlg .seldate .dowl{font-size:12px;padding:0 9px}
@@ -167,12 +168,13 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .links a{font-size:11px;padding:1px 8px}
   .empty{font-size:13px}
   /* 컨트롤 */
-  .row1,.row2{flex-wrap:nowrap;gap:6px}
+  .row1{flex-wrap:nowrap;gap:6px}
+  .sfx{display:none}
   .seg{border-radius:9px}
-  .seg button{padding:5px 11px;font-size:12.5px}
-  .nav{width:30px;height:30px;font-size:16px;border-radius:8px}
+  .seg button{padding:4px 9px;font-size:12px}
+  .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
   .bar{gap:4px}
-  .bar .title{font-size:15px;min-width:5.4em}
+  .bar .title{font-size:13.5px;min-width:5.6em}
   .today-btn{padding:4px 11px;font-size:12px}
   .cal{gap:8px}
   /* 월간 달력 */
@@ -181,10 +183,10 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .day,.blank{min-height:78px;padding:3px 2px;gap:2px}
   .num{font-size:12.5px;width:22px;height:22px}
   .more{display:none}
-  .more2{display:block;font-size:9.5px;color:var(--muted);padding-left:2px;line-height:1.2}
-  .chip{font-size:9.5px;line-height:1.2;padding:1px 2px 1px 3px;border-left-width:2px;white-space:normal}
+  .more2{display:block;font-size:9px;color:var(--muted);padding-left:2px;line-height:1.2}
+  .chip{font-size:8.5px;line-height:1.2;padding:1px 2px 1px 3px;border-left-width:2px;white-space:normal}
   .chip:nth-of-type(n+4){display:none}
-  .chip b{display:block;font-size:10px;margin:0}
+  .chip b{display:block;font-size:9.5px;margin:0}
   .ct-full{display:none}
   .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .note{font-size:12px;padding:6px 10px}
@@ -207,7 +209,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
 
   <dialog class="daydlg" id="daydlg" aria-label="선택한 날짜의 일정">
     <div class="dlg-in" id="dlgin">
-      <button type="button" class="dlg-x" id="dlgx">닫기</button>
+      <button type="button" class="dlg-x" id="dlgx" aria-label="닫기">✕</button>
       <p class="eyebrow" id="d-eyebrow"></p>
       <div class="seldate" id="d-seldate"></div>
       <ul class="items" id="d-items"></ul>
@@ -215,21 +217,15 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   </dialog>
 
   <div class="row1">
-    <div class="seg" id="viewseg" role="group" aria-label="보기 방식">
-      <button type="button" data-k="month">월간</button>
-      <button type="button" data-k="week">주간</button>
+    <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
+      <button type="button" data-k="all">전체</button>
+      <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
+      <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
     </div>
     <div class="bar">
       <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
       <div class="title" id="title" aria-live="polite"></div>
       <button class="nav" id="next" type="button" aria-label="다음">›</button>
-    </div>
-  </div>
-  <div class="row2">
-    <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
-      <button type="button" data-k="all">전체</button>
-      <button type="button" data-k="plave">플레이브 일정</button>
-      <button type="button" data-k="fan">플리 일정</button>
     </div>
   </div>
 
@@ -490,7 +486,6 @@ function renderWeek(box){
 }
 
 function render(){
-  setPressed("viewseg", state.view);
   setPressed("showseg", state.show);
   renderSelected();
   renderTitleAndNote();
@@ -514,10 +509,6 @@ document.getElementById("prev").addEventListener("click", function(){ step(-1); 
 document.getElementById("next").addEventListener("click", function(){ step(1); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
-document.getElementById("viewseg").addEventListener("click", function(ev){
-  var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
-  if(k){ state.view = k; render(); }
-});
 document.getElementById("showseg").addEventListener("click", function(ev){
   var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
   if(k){ state.show = k; render(); }
