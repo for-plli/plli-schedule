@@ -209,11 +209,15 @@ def refresh_videos(offline):
     if not offline:
         try:
             cid = youtube_channel_id()
-            try:   # 쇼츠를 뺀 영상 목록 (UULF + 채널 ID 에서 UC 뺀 것)
-                xml_text = http_get("https://www.youtube.com/feeds/videos.xml?playlist_id=UULF" + cid[2:])
-            except Exception:
-                xml_text = http_get("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid)
-            new = parse_feed(xml_text)
+            new = []
+            # 일반 영상(UULF) + 쇼츠(UUSH) 목록을 각각 읽어서 합침. 하나가 안 읽혀도 나머지는 사용
+            for pre in ("UULF", "UUSH"):
+                try:
+                    new += parse_feed(http_get("https://www.youtube.com/feeds/videos.xml?playlist_id=" + pre + cid[2:]))
+                except Exception as ex2:
+                    print(f"유튜브 {pre} 목록을 읽지 못함: {ex2}", file=sys.stderr)
+            if not new:
+                new = parse_feed(http_get("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid))
             for e in new:
                 saved[e["id"]] = e
             keep = sorted(saved.values(), key=lambda e: e["utcStart"], reverse=True)[:400]
