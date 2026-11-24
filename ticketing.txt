@@ -13,10 +13,10 @@
 매월 3번째 목 16:00 | 십카페 예약
 
 # ---- 2026 PLAVE World Tour [KEEP IT MANIC] Encore (고척스카이돔) ----
-2026-11-23 14:00 | [앙코르] 팬클럽 선예매 인증 시작 | 인증 기간 11/23 14:00 ~ 12/1 23:59 / 예매처 NOL / 회차당 1인 1매(선예매 포함) | https://weverse.io/plave/notice/41168?hl=ko
-2026-12-01 20:00 | [앙코르] 팬클럽 선예매 | 12/1 20:00 ~ 23:59 / 예매처 NOL / 회차당 1인 1매 / 인증 필요 | https://weverse.io/plave/notice/41168?hl=ko
-2026-12-01 23:59 | [앙코르] 팬클럽 선예매 인증 마감 | 선예매를 하려면 이 시간 전에 인증 완료 | https://weverse.io/plave/notice/41168?hl=ko
-2026-12-04 20:00 | [앙코르] 일반예매 | 예매처 NOL / 회차당 1인 2매 / VIP 198,000원, 일반석 154,000원(부가세 포함) | https://weverse.io/plave/notice/41168?hl=ko
+2026-11-23 14:00 | [앙코르] 팬클럽 선예매 인증 시작 | 인증 ~12/1 23:59 · NOL · 회차당 1인 1매 | https://weverse.io/plave/notice/41168?hl=ko
+2026-12-01 20:00 | [앙코르] 팬클럽 선예매 | 20:00~23:59 · NOL · 인증 필요 | https://weverse.io/plave/notice/41168?hl=ko
+2026-12-01 23:59 | [앙코르] 팬클럽 선예매 인증 마감 | 이 시간 전에 인증 완료 | https://weverse.io/plave/notice/41168?hl=ko
+2026-12-04 20:00 | [앙코르] 일반예매 | NOL · 1인 2매 · VIP 198,000 / 일반 154,000원 | https://weverse.io/plave/notice/41168?hl=ko
 
 # ---- 2026 넥스트 크리에이티브 서울 (DDP 어울림광장, 12/10~12/13 17:30~23:00, 무료 관람) ----
-2026-12-12 17:30 | [넥스트 크리에이티브 서울] 플레이브 데이 | DDP 어울림광장 / 무료 관람 / 12/12(토) 17:30~23:00 행사 중 플레이브 데이 (DDP 222m 외벽 스페셜 무대). 플레이브 무대 정확한 시간은 공지 없음 | https://ddp.or.kr/index.html?menuno=239 https://www.youtube.com/watch?v=ZSmWvj1TLWM
+2026-12-12 17:30 | [넥스트 크리에이티브 서울] 플레이브 데이 | DDP 어울림광장 · 무료 · 무대 시간 미공지 | https://ddp.or.kr/index.html?menuno=239 https://www.youtube.com/watch?v=ZSmWvj1TLWM

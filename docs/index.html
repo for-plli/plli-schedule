@@ -63,7 +63,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .item .t.allday{font-family:var(--font-body);font-size:20px;padding-top:6px}
 .item .ti{font-weight:500;font-size:16px;overflow-wrap:anywhere}
 .item .who{display:inline-block;font-size:11px;font-weight:700;color:var(--cf);border:1px solid var(--cbar);border-radius:999px;padding:0 7px;margin-bottom:3px}
-.memo{font-size:13px;color:var(--cf);opacity:.85;margin-top:2px;overflow-wrap:anywhere}
+.memo{font-size:13px;color:var(--cf);opacity:.85;margin-top:2px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .links a{font-size:12.5px;color:var(--cf);text-decoration:none;background:var(--surface);border:1px solid var(--cbar);border-radius:6px;padding:2px 10px}
 .links a:hover{text-decoration:underline}
@@ -276,7 +276,7 @@ function norm(e, src){
   };
 }
 /* 플리 일정(티켓팅·예약): 한 번만 있는 일정은 FAN_RAW 에, 매달 반복되는 일정은 FAN_MONTHLY 에 적습니다. */
-var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 기간 11/23 14:00 ~ 12/1 23:59 / 예매처 NOL / 회차당 1인 1매(선예매 포함)","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"12/1 20:00 ~ 23:59 / 예매처 NOL / 회차당 1인 1매 / 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"선예매를 하려면 이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"예매처 NOL / 회차당 1인 2매 / VIP 198,000원, 일반석 154,000원(부가세 포함)","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-741fbb4aa2","title":"[넥스트 크리에이티브 서울] 플레이브 데이","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"DDP 어울림광장 / 무료 관람 / 12/12(토) 17:30~23:00 행사 중 플레이브 데이 (DDP 222m 외벽 스페셜 무대). 플레이브 무대 정확한 시간은 공지 없음","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}]}];
+var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-741fbb4aa2","title":"[넥스트 크리에이티브 서울] 플레이브 데이","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"DDP 어울림광장 · 무료 · 무대 시간 미공지","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}]}];
 var FAN_MONTHLY = [{"id":"m-5e8b5dd4","title":"십카페 예약","nth":3,"dow":4,"hour":16,"minute":0,"note":"","links":[]}];   /* ticketing.txt 의 '매월 N번째 요일 시각' 줄 */
 var REPEAT_FROM = "2026-11", REPEAT_UNTIL = "2029-05";
 function monthlyEvents(){
@@ -295,7 +295,7 @@ function monthlyEvents(){
   return out;
 }
 /* 공식 사이트에 아직 없지만 플레이브 일정으로 보여줄 것(공연 등) */
-var PLAVE_EXTRA = [{"id":"x-8861e8f51e","title":"재정비 기간 시작 (다음 앨범 작업·휴식)","utcStart":"2026-11-23T00:00:00.000Z","isAllDay":true,"note":"11/23(월)부터 휴식과 다음 앨범 곡 작업. 재정비 기간에도 여러 콘텐츠와 위버스 '보이는 개인 라이브'로 소통 예정","links":[]},{"id":"x-2c9398bfa6","title":"활동 재개 (PLAVE LIVE 및 콘텐츠)","utcStart":"2026-12-14T00:00:00.000Z","isAllDay":true,"note":"12/14(월)부터 PLAVE LIVE와 여러 콘텐츠로 팬들을 다시 만나요","links":[]}];
+var PLAVE_EXTRA = [{"id":"x-8861e8f51e","title":"재정비 기간 시작 (다음 앨범 작업·휴식)","utcStart":"2026-11-23T00:00:00.000Z","isAllDay":true,"note":"~12/13 · 콘텐츠·보이는 개인 라이브는 진행","links":[]},{"id":"x-2c9398bfa6","title":"활동 재개 (PLAVE LIVE 및 콘텐츠)","utcStart":"2026-12-14T00:00:00.000Z","isAllDay":true,"note":"","links":[]}];
 var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
   .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}));
 ALL.sort(function(a,b){
