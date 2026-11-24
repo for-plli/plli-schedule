@@ -75,6 +75,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 
 /* 컨트롤 */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.lhs{display:flex;align-items:center;gap:6px}
+.vidbtn{border:1px solid var(--v-bar);background:var(--surface);color:var(--v-fg);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;cursor:pointer}
+.vidbtn[aria-pressed="true"]{background:var(--v-bg);font-weight:700}
 .row1,.row2{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:transparent;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
@@ -82,7 +85,6 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .seg button[aria-pressed="true"]{font-weight:700;background:var(--n-bg);color:var(--n-fg)}
 .seg button[data-k="plave"][aria-pressed="true"]{background:var(--p-bg);color:var(--p-fg)}
 .seg button[data-k="fan"][aria-pressed="true"]{background:var(--f-bg);color:var(--f-fg)}
-.seg button[data-k="video"][aria-pressed="true"]{background:var(--v-bg);color:var(--v-fg)}
 
 .cal{display:flex;flex-direction:column;gap:10px}
 .bar{display:flex;align-items:center;gap:8px}
@@ -107,6 +109,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
 .more2{display:none}
 .ct-short{display:none}
+.sh{display:none}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
 
 /* 주간 */
@@ -176,7 +179,9 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .row1{flex-wrap:nowrap;gap:6px}
   .sfx{display:none}
   .seg{border-radius:9px}
-  .seg button{padding:4px 7px;font-size:12px}
+  .seg button{padding:4px 8px;font-size:12px}
+  .vidbtn{padding:4px 9px;font-size:12px}
+  .lhs{gap:4px}
   .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
   .bar{gap:4px}
   .bar .title{font-size:13.5px;min-width:5.6em}
@@ -193,6 +198,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .chip:nth-of-type(n+4){display:none}
   .chip b{display:block;font-size:9.5px;margin:0}
   .ct-full{display:none}
+  .sh{display:block}
+  .chip.is-short .tm{display:none}
   .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
@@ -222,11 +229,13 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   </dialog>
 
   <div class="row1">
-    <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
-      <button type="button" data-k="all">전체</button>
-      <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
-      <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
-      <button type="button" data-k="video">영상</button>
+    <div class="lhs">
+      <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
+        <button type="button" data-k="all">전체</button>
+        <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
+        <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
+      </div>
+      <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false">영상</button>
     </div>
     <div class="bar">
       <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
@@ -298,7 +307,7 @@ function monthlyEvents(){
 /* 공식 사이트에 아직 없지만 플레이브 일정으로 보여줄 것(공연 등) */
 var PLAVE_EXTRA = [{"id":"x-8861e8f51e","title":"재정비 기간 시작 (다음 앨범 작업·휴식)","utcStart":"2026-11-23T00:00:00.000Z","isAllDay":true,"note":"~12/13 · 콘텐츠·보이는 개인 라이브는 진행","links":[]},{"id":"x-2c9398bfa6","title":"활동 재개 (PLAVE LIVE 및 콘텐츠)","utcStart":"2026-12-14T00:00:00.000Z","isAllDay":true,"note":"","links":[]}];
 /* 공식 유튜브 새 영상 (영상 탭을 눌렀을 때만 보여요) */
-var VIDEOS = [{"id":"yt-9q_T5JHv0po","title":"(SUB) [BEHIND] [KEEP IT MANIC] 🌌 월드 투어 비하인드 #1","utcStart":"2026-11-24T10:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=9q_T5JHv0po"}]},{"id":"yt-eBsEiim6Mmk","title":"I keep 멍밍 Awoo🐾 #PLAVE #플레이브 #NOAH #EUNHO #XLOV #투스젬치와와 @XLOV_official","utcStart":"2026-11-20T10:00:28Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=eBsEiim6Mmk"}]},{"id":"yt-_4hTRavHp6U","title":"2026 PLAVE World Tour [KEEP IT MANIC] in Incheon Highlight","utcStart":"2026-11-19T03:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_4hTRavHp6U"}]},{"id":"yt-6db8dE4TH6Q","title":"[KEEP IT MANIC] IN U.S. Behind 🎇 #PLAVE","utcStart":"2026-11-18T10:00:07Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=6db8dE4TH6Q"}]},{"id":"yt-cexr-M8u-R0","title":"🤫 #꾼 with #TVXQ! #MAXCHANGMIN #PLAVE #NOAH @TVXQ","utcStart":"2026-11-16T09:00:30Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=cexr-M8u-R0"}]},{"id":"yt-VVhClSexZxY","title":"하민이가 잡아먹을지도 몰라요 🤫 #PLAVE #HAMIN #꾼 #PLAVE_꾼 #HYPERDRIVE","utcStart":"2026-11-13T09:30:17Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=VVhClSexZxY"}]},{"id":"yt-t_i3jfsfHQo","title":"은호가 잡아먹을지도 몰라요 🤫 #PLAVE #EUNHO #꾼 #PLAVE_꾼 #HYPERDRIVE","utcStart":"2026-11-13T09:15:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=t_i3jfsfHQo"}]},{"id":"yt-3c3SL0rIYHo","title":"예준이가 잡아먹을지도 몰라요 🤫 #PLAVE #YEJUN #꾼 #PLAVE_꾼 #HYPERDRIVE","utcStart":"2026-11-13T09:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=3c3SL0rIYHo"}]},{"id":"yt-TN7ygxI9oDY","title":"U.S. ARE YOU READY? 🔥 #PLAVE #YEJUN #NOAH #EUNHO","utcStart":"2026-11-13T04:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=TN7ygxI9oDY"}]},{"id":"yt-GRI1bSapfc8","title":"밤비가 잡아먹을지도 몰라요 🤫 #PLAVE #BAMBY #꾼 #PLAVE_꾼 #HYPERDRIVE","utcStart":"2026-11-12T09:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GRI1bSapfc8"}]},{"id":"yt-Lsm1HWCU0LM","title":"노아가 잡아먹을지도 몰라요 🤫 #PLAVE #NOAH #꾼 #PLAVE_꾼 #HYPERDRIVE","utcStart":"2026-11-12T09:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Lsm1HWCU0LM"}]},{"id":"yt-GhoOWFs-XZg","title":"U.S. ARE YOU READY? 🔥 #PLAVE #BAMBY #HAMIN","utcStart":"2026-11-12T04:00:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GhoOWFs-XZg"}]},{"id":"yt--MXLE7j4v-s","title":"[BEHIND] 플레이브의 어이력(?) 대결 #PLAVE #플레이브 #StarTrace #PLAVE_StarTrace #HYPERDRIVE #shorts","utcStart":"2026-11-10T10:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-MXLE7j4v-s"}]},{"id":"yt-dI8fA5I7dvw","title":"(SUB) [BEHIND] 'Star Trace' M/V (Performance Ver.) 비하인드","utcStart":"2026-11-10T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=dI8fA5I7dvw"}]},{"id":"yt-gH2eDJzaOSE","title":"Neon and beyond 💫 #PLAVE #플레이브 #BAMBY #밤비 #HAMIN #하민 #shorts","utcStart":"2026-11-09T12:00:39Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=gH2eDJzaOSE"}]},{"id":"yt-YXCYFujG2iU","title":"PLAVE 'Star Trace' M/V (Performance Ver.)","utcStart":"2026-11-08T10:00:02Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=YXCYFujG2iU"}]},{"id":"yt-QGkF7Rtkg3s","title":"PLAVE 'Star Trace' M/V (Performance Ver.) #PLAVE #플레이브","utcStart":"2026-11-08T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=QGkF7Rtkg3s"}]},{"id":"yt-7IZ79kGHCGM","title":"[PLAVE BIRTHDAY GIFT] 하민 & 밤비 '0+0' (원곡 : 한로로)","utcStart":"2026-11-07T04:00:09Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=7IZ79kGHCGM"}]},{"id":"yt--GCDMkoTvI4","title":"하민이 오빠가 체포하겠어!🐈‍⬛🚨 #PLAVE #플레이브 #HAMIN #하민 #shorts","utcStart":"2026-11-06T09:01:34Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-GCDMkoTvI4"}]},{"id":"yt-AB9KM61SIG0","title":"#StarTrace 🏎️ with #KO1KEYZ #SHINHAENG #PLAVE #YEJUN @KO1KEYZOFFICIAL","utcStart":"2026-11-05T09:01:18Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=AB9KM61SIG0"}]},{"id":"yt-RGCbjiYXEbA","title":"[PLAVE BIRTHDAY GIFT] HAMIN's Playlist 🎶🖤","utcStart":"2026-11-01T01:00:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=RGCbjiYXEbA"}]},{"id":"yt-_BL8tzJQDco","title":"PLAVE(플레이브) 'Star Trace' Dance Practice","utcStart":"2026-10-30T11:00:29Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_BL8tzJQDco"}]},{"id":"yt-ll-Uefui-SI","title":"PLAVE 'The Answer Is Yes' Special Video","utcStart":"2026-10-22T09:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=ll-Uefui-SI"}]},{"id":"yt-fsu8L3jCLvA","title":"[하이라이트] 'Star Trace' PERFORMANCE LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-20T11:00:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=fsu8L3jCLvA"}]},{"id":"yt-2UZ4MLjFDG0","title":"PLAVE(플레이브) 'Star Trace' 응원법 가이드 (Fanchants Guide)","utcStart":"2026-10-13T11:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=2UZ4MLjFDG0"}]},{"id":"yt-jWA9S5I3dO4","title":"[하이라이트] 'HYPERDRIVE' COMEBACK 전곡 LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-13T11:00:04Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=jWA9S5I3dO4"}]},{"id":"yt-GBRzoOeHV9c","title":"PLAVE 'Rewind' Official Audio","utcStart":"2026-10-12T09:15:58Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GBRzoOeHV9c"}]},{"id":"yt-vXeI6GkYgk4","title":"PLAVE 'The Answer Is Yes' Official Audio","utcStart":"2026-10-12T09:15:40Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=vXeI6GkYgk4"}]},{"id":"yt-E7CSVaczMJU","title":"PLAVE '푸른 하늘에 단비' Official Audio","utcStart":"2026-10-12T09:15:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=E7CSVaczMJU"}]},{"id":"yt-iYMYQSJ4_Iw","title":"PLAVE '꾼' Official Audio","utcStart":"2026-10-12T09:15:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=iYMYQSJ4_Iw"}]}];
+var VIDEOS = [{"id":"yt-9q_T5JHv0po","title":"(SUB) [BEHIND] [KEEP IT MANIC] 🌌 월드 투어 비하인드","utcStart":"2026-11-24T10:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=9q_T5JHv0po"}]},{"id":"yt-eBsEiim6Mmk","title":"I keep 멍밍 Awoo🐾","utcStart":"2026-11-20T10:00:28Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=eBsEiim6Mmk"}]},{"id":"yt-_4hTRavHp6U","title":"2026 PLAVE World Tour [KEEP IT MANIC] in Incheon Highlight","utcStart":"2026-11-19T03:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_4hTRavHp6U"}]},{"id":"yt-6db8dE4TH6Q","title":"[KEEP IT MANIC] IN U.S. Behind 🎇","utcStart":"2026-11-18T10:00:07Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=6db8dE4TH6Q"}]},{"id":"yt-cexr-M8u-R0","title":"🤫 #꾼 with","utcStart":"2026-11-16T09:00:30Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=cexr-M8u-R0"}]},{"id":"yt-VVhClSexZxY","title":"하민이가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:30:17Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=VVhClSexZxY"}]},{"id":"yt-t_i3jfsfHQo","title":"은호가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:15:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=t_i3jfsfHQo"}]},{"id":"yt-3c3SL0rIYHo","title":"예준이가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=3c3SL0rIYHo"}]},{"id":"yt-TN7ygxI9oDY","title":"U.S. ARE YOU READY? 🔥","utcStart":"2026-11-13T04:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=TN7ygxI9oDY"}]},{"id":"yt-GRI1bSapfc8","title":"밤비가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-12T09:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GRI1bSapfc8"}]},{"id":"yt-Lsm1HWCU0LM","title":"노아가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-12T09:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Lsm1HWCU0LM"}]},{"id":"yt-GhoOWFs-XZg","title":"U.S. ARE YOU READY? 🔥","utcStart":"2026-11-12T04:00:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GhoOWFs-XZg"}]},{"id":"yt--MXLE7j4v-s","title":"[BEHIND] 플레이브의 어이력(?) 대결","utcStart":"2026-11-10T10:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-MXLE7j4v-s"}]},{"id":"yt-dI8fA5I7dvw","title":"(SUB) [BEHIND] 'Star Trace' M/V (Performance Ver.) 비하인드","utcStart":"2026-11-10T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=dI8fA5I7dvw"}]},{"id":"yt-gH2eDJzaOSE","title":"Neon and beyond 💫","utcStart":"2026-11-09T12:00:39Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=gH2eDJzaOSE"}]},{"id":"yt-YXCYFujG2iU","title":"PLAVE 'Star Trace' M/V (Performance Ver.)","utcStart":"2026-11-08T10:00:02Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=YXCYFujG2iU"}]},{"id":"yt-QGkF7Rtkg3s","title":"PLAVE 'Star Trace' M/V (Performance Ver.)","utcStart":"2026-11-08T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=QGkF7Rtkg3s"}]},{"id":"yt-7IZ79kGHCGM","title":"[PLAVE BIRTHDAY GIFT] 하민 & 밤비 '0+0' (원곡 : 한로로)","utcStart":"2026-11-07T04:00:09Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=7IZ79kGHCGM"}]},{"id":"yt--GCDMkoTvI4","title":"하민이 오빠가 체포하겠어!🐈‍⬛🚨","utcStart":"2026-11-06T09:01:34Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-GCDMkoTvI4"}]},{"id":"yt-AB9KM61SIG0","title":"#StarTrace 🏎️ with","utcStart":"2026-11-05T09:01:18Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=AB9KM61SIG0"}]},{"id":"yt-RGCbjiYXEbA","title":"[PLAVE BIRTHDAY GIFT] HAMIN's Playlist 🎶🖤","utcStart":"2026-11-01T01:00:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=RGCbjiYXEbA"}]},{"id":"yt-_BL8tzJQDco","title":"PLAVE(플레이브) 'Star Trace' Dance Practice","utcStart":"2026-10-30T11:00:29Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_BL8tzJQDco"}]},{"id":"yt-ll-Uefui-SI","title":"PLAVE 'The Answer Is Yes' Special Video","utcStart":"2026-10-22T09:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=ll-Uefui-SI"}]},{"id":"yt-fsu8L3jCLvA","title":"[하이라이트] 'Star Trace' PERFORMANCE LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-20T11:00:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=fsu8L3jCLvA"}]},{"id":"yt-2UZ4MLjFDG0","title":"PLAVE(플레이브) 'Star Trace' 응원법 가이드 (Fanchants Guide)","utcStart":"2026-10-13T11:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=2UZ4MLjFDG0"}]},{"id":"yt-jWA9S5I3dO4","title":"[하이라이트] 'HYPERDRIVE' COMEBACK 전곡 LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-13T11:00:04Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=jWA9S5I3dO4"}]},{"id":"yt-GBRzoOeHV9c","title":"PLAVE 'Rewind' Official Audio","utcStart":"2026-10-12T09:15:58Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GBRzoOeHV9c"}]},{"id":"yt-vXeI6GkYgk4","title":"PLAVE 'The Answer Is Yes' Official Audio","utcStart":"2026-10-12T09:15:40Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=vXeI6GkYgk4"}]},{"id":"yt-E7CSVaczMJU","title":"PLAVE '푸른 하늘에 단비' Official Audio","utcStart":"2026-10-12T09:15:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=E7CSVaczMJU"}]},{"id":"yt-iYMYQSJ4_Iw","title":"PLAVE '꾼' Official Audio","utcStart":"2026-10-12T09:15:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=iYMYQSJ4_Iw"}]}];
 var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
   .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}))
   .concat(VIDEOS.map(function(e){return norm(e,"video");}));
@@ -454,9 +463,14 @@ function renderMonth(box){
     b.appendChild(el("span","num",String(d)));
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
-      c.appendChild(el("b",null,e.time));
+      var isShort = e.title.indexOf("쇼츠 · ") === 0;
+      var bt = el("b",null,e.time);
+      bt.className = "tm";
+      c.appendChild(bt);
+      if(isShort){ c.className += " is-short"; c.appendChild(el("b","sh","쇼츠")); }
       c.appendChild(el("span","ct-full",e.title));
-      c.appendChild(el("span","ct-short",e.title.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || e.title));
+      var base = isShort ? e.title.slice(5) : e.title;
+      c.appendChild(el("span","ct-short",base.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || base));
       b.appendChild(c);
     });
     if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
@@ -499,6 +513,7 @@ function renderWeek(box){
 
 function render(){
   setPressed("showseg", state.show);
+  document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");
@@ -521,6 +536,7 @@ document.getElementById("prev").addEventListener("click", function(){ step(-1); 
 document.getElementById("next").addEventListener("click", function(){ step(1); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
+document.getElementById("vidbtn").addEventListener("click", function(){ state.show = state.show === "video" ? "all" : "video"; render(); });
 document.getElementById("showseg").addEventListener("click", function(ev){
   var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
   if(k){ state.show = k; render(); }

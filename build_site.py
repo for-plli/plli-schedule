@@ -183,7 +183,7 @@ def youtube_channel_id():
     raise ValueError("채널 ID를 찾지 못함")
 
 
-def parse_feed(xml_text):
+def parse_feed(xml_text, short=False):
     ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015"}
     out = []
     for en in ET.fromstring(xml_text).findall("a:entry", ns):
@@ -194,7 +194,8 @@ def parse_feed(xml_text):
             continue
         t = datetime.fromisoformat(pub.replace("Z", "+00:00")).astimezone(timezone.utc)
         out.append({"id": "yt-" + vid, "title": title, "utcStart": t.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "isAllDay": False, "links": [{"url": "https://www.youtube.com/watch?v=" + vid}]})
+                    "isAllDay": False, "links": [{"url": "https://www.youtube.com/watch?v=" + vid}],
+                    **({"short": True} if short else {})})
     return out
 
 
@@ -213,7 +214,7 @@ def refresh_videos(offline):
             # 일반 영상(UULF) + 쇼츠(UUSH) 목록을 각각 읽어서 합침. 하나가 안 읽혀도 나머지는 사용
             for pre in ("UULF", "UUSH"):
                 try:
-                    new += parse_feed(http_get("https://www.youtube.com/feeds/videos.xml?playlist_id=" + pre + cid[2:]))
+                    new += parse_feed(http_get("https://www.youtube.com/feeds/videos.xml?playlist_id=" + pre + cid[2:]), short=(pre == "UUSH"))
                 except Exception as ex2:
                     print(f"유튜브 {pre} 목록을 읽지 못함: {ex2}", file=sys.stderr)
             if not new:
@@ -228,6 +229,22 @@ def refresh_videos(offline):
         except Exception as ex:
             print(f"유튜브 영상은 읽지 못했어요 (보관본 사용): {ex}", file=sys.stderr)
     return list(saved.values())
+
+
+RE_TAIL_TAGS = re.compile(r"(?:\s+[#@]\S+)+\s*$")
+
+
+def video_view(videos):
+    """달력에 보일 제목 다듬기: 끝에 줄줄이 붙은 #해시태그/@멘션 은 떼고, 쇼츠는 앞에 '쇼츠 · ' 를 붙임"""
+    out = []
+    for e in videos:
+        t = RE_TAIL_TAGS.sub("", e["title"]).strip() or e["title"]
+        if e.get("short"):
+            t = "쇼츠 · " + t
+        d = dict(e)
+        d["title"] = t
+        out.append(d)
+    return out
 
 
 def video_filter(videos):
@@ -289,7 +306,7 @@ def main():
 
     ok = refresh_cache(a.offline)
     official, loaded = load_official()
-    videos = video_filter(refresh_videos(a.offline))
+    videos = video_view(video_filter(refresh_videos(a.offline)))
     plave_extra, extra_monthly = parse_manual("plave_extra.txt")
     fan_once, fan_monthly = parse_manual("ticketing.txt")
     if extra_monthly:

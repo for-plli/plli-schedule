@@ -75,6 +75,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 
 /* 컨트롤 */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.lhs{display:flex;align-items:center;gap:6px}
+.vidbtn{border:1px solid var(--v-bar);background:var(--surface);color:var(--v-fg);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;cursor:pointer}
+.vidbtn[aria-pressed="true"]{background:var(--v-bg);font-weight:700}
 .row1,.row2{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:transparent;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
@@ -82,7 +85,6 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .seg button[aria-pressed="true"]{font-weight:700;background:var(--n-bg);color:var(--n-fg)}
 .seg button[data-k="plave"][aria-pressed="true"]{background:var(--p-bg);color:var(--p-fg)}
 .seg button[data-k="fan"][aria-pressed="true"]{background:var(--f-bg);color:var(--f-fg)}
-.seg button[data-k="video"][aria-pressed="true"]{background:var(--v-bg);color:var(--v-fg)}
 
 .cal{display:flex;flex-direction:column;gap:10px}
 .bar{display:flex;align-items:center;gap:8px}
@@ -107,6 +109,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
 .more2{display:none}
 .ct-short{display:none}
+.sh{display:none}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
 
 /* 주간 */
@@ -176,7 +179,9 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .row1{flex-wrap:nowrap;gap:6px}
   .sfx{display:none}
   .seg{border-radius:9px}
-  .seg button{padding:4px 7px;font-size:12px}
+  .seg button{padding:4px 8px;font-size:12px}
+  .vidbtn{padding:4px 9px;font-size:12px}
+  .lhs{gap:4px}
   .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
   .bar{gap:4px}
   .bar .title{font-size:13.5px;min-width:5.6em}
@@ -193,6 +198,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .chip:nth-of-type(n+4){display:none}
   .chip b{display:block;font-size:9.5px;margin:0}
   .ct-full{display:none}
+  .sh{display:block}
+  .chip.is-short .tm{display:none}
   .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
@@ -222,11 +229,13 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   </dialog>
 
   <div class="row1">
-    <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
-      <button type="button" data-k="all">전체</button>
-      <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
-      <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
-      <button type="button" data-k="video">영상</button>
+    <div class="lhs">
+      <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
+        <button type="button" data-k="all">전체</button>
+        <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
+        <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
+      </div>
+      <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false">영상</button>
     </div>
     <div class="bar">
       <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
@@ -454,9 +463,14 @@ function renderMonth(box){
     b.appendChild(el("span","num",String(d)));
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
-      c.appendChild(el("b",null,e.time));
+      var isShort = e.title.indexOf("쇼츠 · ") === 0;
+      var bt = el("b",null,e.time);
+      bt.className = "tm";
+      c.appendChild(bt);
+      if(isShort){ c.className += " is-short"; c.appendChild(el("b","sh","쇼츠")); }
       c.appendChild(el("span","ct-full",e.title));
-      c.appendChild(el("span","ct-short",e.title.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || e.title));
+      var base = isShort ? e.title.slice(5) : e.title;
+      c.appendChild(el("span","ct-short",base.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || base));
       b.appendChild(c);
     });
     if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
@@ -499,6 +513,7 @@ function renderWeek(box){
 
 function render(){
   setPressed("showseg", state.show);
+  document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");
@@ -521,6 +536,7 @@ document.getElementById("prev").addEventListener("click", function(){ step(-1); 
 document.getElementById("next").addEventListener("click", function(){ step(1); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
+document.getElementById("vidbtn").addEventListener("click", function(){ state.show = state.show === "video" ? "all" : "video"; render(); });
 document.getElementById("showseg").addEventListener("click", function(ev){
   var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
   if(k){ state.show = k; render(); }
