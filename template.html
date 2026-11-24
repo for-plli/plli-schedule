@@ -190,8 +190,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
   /* 팝업 */
-  dialog.daydlg{margin:auto 0 0 0;width:100%;max-width:100%;border-radius:18px 18px 0 0;max-height:86vh}
-  .dlg-in{max-height:86vh;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  dialog.daydlg{margin:auto;width:calc(100% - 32px);max-width:420px;border-radius:16px;max-height:70vh}
+  .dlg-in{max-height:70vh}
 }
 </style>
 </head>
@@ -231,7 +231,6 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
       <button type="button" data-k="plave">플레이브 일정</button>
       <button type="button" data-k="fan">플리 일정</button>
     </div>
-    <button class="today-btn" id="todaybtn" type="button">오늘</button>
   </div>
 
   <section class="cal" aria-label="달력">
@@ -513,7 +512,6 @@ function step(dir){
 }
 document.getElementById("prev").addEventListener("click", function(){ step(-1); });
 document.getElementById("next").addEventListener("click", function(){ step(1); });
-document.getElementById("todaybtn").addEventListener("click", function(){ state.sel = todayKey; render(); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
 document.getElementById("viewseg").addEventListener("click", function(ev){

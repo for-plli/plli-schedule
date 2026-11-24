@@ -190,8 +190,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
   /* 팝업 */
-  dialog.daydlg{margin:auto 0 0 0;width:100%;max-width:100%;border-radius:18px 18px 0 0;max-height:86vh}
-  .dlg-in{max-height:86vh;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  dialog.daydlg{margin:auto;width:calc(100% - 32px);max-width:420px;border-radius:16px;max-height:70vh}
+  .dlg-in{max-height:70vh}
 }
 </style>
 </head>
@@ -231,7 +231,6 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
       <button type="button" data-k="plave">플레이브 일정</button>
       <button type="button" data-k="fan">플리 일정</button>
     </div>
-    <button class="today-btn" id="todaybtn" type="button">오늘</button>
   </div>
 
   <section class="cal" aria-label="달력">
@@ -276,7 +275,7 @@ function norm(e, src){
   };
 }
 /* 플리 일정(티켓팅·예약): 한 번만 있는 일정은 FAN_RAW 에, 매달 반복되는 일정은 FAN_MONTHLY 에 적습니다. */
-var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-741fbb4aa2","title":"[넥스트 크리에이티브 서울] 플레이브 데이","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"DDP 어울림광장 · 무료 · 무대 시간 미공지","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}]}];
+var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}]},{"id":"x-65b2cd1189","title":"플레이브 데이 @DDP","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"넥스트 크리에이티브 서울 · 무료","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}]}];
 var FAN_MONTHLY = [{"id":"m-5e8b5dd4","title":"십카페 예약","nth":3,"dow":4,"hour":16,"minute":0,"note":"","links":[]}];   /* ticketing.txt 의 '매월 N번째 요일 시각' 줄 */
 var REPEAT_FROM = "2026-11", REPEAT_UNTIL = "2029-05";
 function monthlyEvents(){
@@ -513,7 +512,6 @@ function step(dir){
 }
 document.getElementById("prev").addEventListener("click", function(){ step(-1); });
 document.getElementById("next").addEventListener("click", function(){ step(1); });
-document.getElementById("todaybtn").addEventListener("click", function(){ state.sel = todayKey; render(); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
 document.getElementById("viewseg").addEventListener("click", function(ev){
