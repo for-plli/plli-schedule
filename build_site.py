@@ -116,10 +116,11 @@ def parse_manual(path):
             try:
                 if not title:
                     raise ValueError("제목이 비어 있음")
-                if url and not url.startswith("https://"):
+                urls = url.split()  # 링크는 공백으로 여러 개 적을 수 있음
+                if any(not u.startswith("https://") for u in urls):
                     raise ValueError("링크는 https:// 로 시작해야 함")
                 tz = ZoneInfo(tzname or "Asia/Seoul")
-                links = [{"url": url}] if url else []
+                links = [{"url": u} for u in urls]
                 rm = RE_MONTHLY.match(when)
                 if rm:
                     nth, wd, hhmm = int(rm.group(1)), WD[rm.group(2)], rm.group(3)
