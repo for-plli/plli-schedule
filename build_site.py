@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -33,6 +34,10 @@ LAST_OK = "data/last_ok.txt"
 MONTHS_AHEAD = 2                                     # 이번 달 + 다음 2개월을 매번 읽음
 PREV_DONE = "data/prev_month_done.txt"               # 지난달은 맨 처음 한 번만 읽고 이 표시를 남김
 DUP_MINUTES = 30
+YT_HANDLE_URL = "https://www.youtube.com/@plave_official"   # 공식 유튜브 채널
+YT_ID_FILE = "data/youtube_channel_id.txt"                  # 채널 ID (처음 한 번 찾아서 보관)
+VIDEO_FILE = "data/videos.json"                             # 지금까지 모은 영상 (RSS는 최근 15개만 줘서 계속 쌓아 둠)
+VIDEO_EXCLUDE = "video_exclude.txt"                         # 달력에서 뺄 영상 제목 단어
 WD = {"월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6}
 RE_MONTHLY = re.compile(r"^매월\s+(\d)(?:번째|째)\s*([월화수목금토일])(?:요일)?\s+(\d{1,2}:\d{2})$")
 
@@ -152,6 +157,93 @@ def parse_manual(path):
 GENERIC = {"live", "day", "plave", "플레이브", "the", "of", "in"}
 
 
+# ------------------------------------------------------------ 공식 유튜브 새 영상
+def http_get(url, extra=None):
+    h = {"User-Agent": "Mozilla/5.0 (compatible; plli-calendar-site/1.0)", "Accept-Language": "ko,en;q=0.8",
+         "Cookie": "CONSENT=YES+1; SOCS=CAI"}
+    h.update(extra or {})
+    with urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=20) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def youtube_channel_id():
+    if os.path.exists(YT_ID_FILE):
+        cid = open(YT_ID_FILE, encoding="utf-8").read().strip()
+        if re.fullmatch(r"UC[0-9A-Za-z_-]{22}", cid):
+            return cid
+    page = http_get(YT_HANDLE_URL)
+    for pat in (r'rel="canonical" href="https://www\.youtube\.com/channel/(UC[0-9A-Za-z_-]{22})"',
+                r'feeds/videos\.xml\?channel_id=(UC[0-9A-Za-z_-]{22})',
+                r'"externalId":"(UC[0-9A-Za-z_-]{22})"'):
+        m = re.search(pat, page)
+        if m:
+            os.makedirs("data", exist_ok=True)
+            open(YT_ID_FILE, "w", encoding="utf-8").write(m.group(1) + "\n")
+            return m.group(1)
+    raise ValueError("채널 ID를 찾지 못함")
+
+
+def parse_feed(xml_text):
+    ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015"}
+    out = []
+    for en in ET.fromstring(xml_text).findall("a:entry", ns):
+        vid = (en.findtext("yt:videoId", "", ns) or "").strip()
+        title = (en.findtext("a:title", "", ns) or "").strip()
+        pub = (en.findtext("a:published", "", ns) or "").strip()
+        if not (vid and title and pub):
+            continue
+        t = datetime.fromisoformat(pub.replace("Z", "+00:00")).astimezone(timezone.utc)
+        out.append({"id": "yt-" + vid, "title": title, "utcStart": t.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "isAllDay": False, "links": [{"url": "https://www.youtube.com/watch?v=" + vid}]})
+    return out
+
+
+def refresh_videos(offline):
+    """새 영상을 읽어 data/videos.json 에 쌓기. 실패해도 사이트 만들기는 계속 (경고만)."""
+    saved = {}
+    if os.path.exists(VIDEO_FILE):
+        try:
+            saved = {e["id"]: e for e in json.load(open(VIDEO_FILE, encoding="utf-8"))}
+        except Exception:
+            saved = {}
+    if not offline:
+        try:
+            cid = youtube_channel_id()
+            try:   # 쇼츠를 뺀 영상 목록 (UULF + 채널 ID 에서 UC 뺀 것)
+                xml_text = http_get("https://www.youtube.com/feeds/videos.xml?playlist_id=UULF" + cid[2:])
+            except Exception:
+                xml_text = http_get("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid)
+            new = parse_feed(xml_text)
+            for e in new:
+                saved[e["id"]] = e
+            keep = sorted(saved.values(), key=lambda e: e["utcStart"], reverse=True)[:400]
+            os.makedirs("data", exist_ok=True)
+            json.dump(keep, open(VIDEO_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+            saved = {e["id"]: e for e in keep}
+            print(f"유튜브: 새로 읽은 영상 {len(new)}개 (누적 {len(saved)}개)")
+        except Exception as ex:
+            print(f"유튜브 영상은 읽지 못했어요 (보관본 사용): {ex}", file=sys.stderr)
+    return list(saved.values())
+
+
+def video_filter(videos):
+    """video_exclude.txt: 일반 줄 = 이 단어가 제목에 있으면 뺌, '!' 로 시작 = 이 단어가 있으면 빼지 않음"""
+    bad, keep = [], []
+    if os.path.exists(VIDEO_EXCLUDE):
+        for ln in open(VIDEO_EXCLUDE, encoding="utf-8"):
+            ln = ln.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            (keep if ln.startswith("!") else bad).append(ln.lstrip("!").strip().lower())
+    out = []
+    for e in videos:
+        t = e["title"].lower()
+        if any(b in t for b in bad) and not any(k in t for k in keep):
+            continue
+        out.append(e)
+    return out
+
+
 def tokens(s):
     return {w for w in re.findall(r"[0-9A-Za-z가-힣]+", s.lower())
             if len(w) >= 2 and not w.isdigit() and w not in GENERIC}
@@ -193,6 +285,7 @@ def main():
 
     ok = refresh_cache(a.offline)
     official, loaded = load_official()
+    videos = video_filter(refresh_videos(a.offline))
     plave_extra, extra_monthly = parse_manual("plave_extra.txt")
     fan_once, fan_monthly = parse_manual("ticketing.txt")
     if extra_monthly:
@@ -207,7 +300,7 @@ def main():
     html = open("template.html", encoding="utf-8").read()
     for key, val in {
         "__DATA__": dump(official), "__PLAVE_EXTRA__": dump(plave_extra), "__FAN__": dump(fan_once),
-        "__FAN_MONTHLY__": dump(fan_monthly), "__LOADED__": dump(loaded),
+        "__FAN_MONTHLY__": dump(fan_monthly), "__LOADED__": dump(loaded), "__VIDEOS__": dump(videos),
         "__REPEAT_FROM__": f"{y0}-{m0:02d}", "__REPEAT_UNTIL__": f"{y1}-{m1:02d}", "__UPDATED__": updated,
     }.items():
         assert key in html, f"템플릿에 {key} 가 없음"
@@ -215,7 +308,7 @@ def main():
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"공식 {len(official)}건, 플레이브(직접) {len(plave_extra)}건, 플리 {len(fan_once)}건 + 반복 {len(fan_monthly)}개 -> {a.out}")
+    print(f"공식 {len(official)}건, 플레이브(직접) {len(plave_extra)}건, 플리 {len(fan_once)}건 + 반복 {len(fan_monthly)}개, 영상 {len(videos)}건 -> {a.out}")
     if not a.offline and ok == 0:
         sys.exit("공식 사이트에서 한 달도 읽지 못했습니다. (보관본으로 만들었어요)")
 

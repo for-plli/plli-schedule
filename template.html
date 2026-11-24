@@ -13,6 +13,7 @@
   --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
   --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
   --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
+  --v:#8f84d6; --v-bg:#f0eefb; --v-fg:#4b4190; --v-bar:#c1b8ee;
   --n-bg:#eceef6; --n-fg:#2b2f45;
   --sun:#c8707a; --sat:#5da3de; --sun-bg:#fbebee;
   --font-body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
@@ -24,6 +25,7 @@
     --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
     --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
     --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+    --v:#b5acec; --v-bg:#27223f; --v-fg:#d9d3f7; --v-bar:#6d62ad;
     --n-bg:#22263a; --n-fg:#dfe2f2;
     --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
     color-scheme:dark;
@@ -33,6 +35,7 @@
   --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
   --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
   --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+    --v:#b5acec; --v-bg:#27223f; --v-fg:#d9d3f7; --v-bar:#6d62ad;
   --n-bg:#22263a; --n-fg:#dfe2f2;
   --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
   color-scheme:dark;
@@ -47,6 +50,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 
 .src-plave{--cb:var(--p-bg);--cf:var(--p-fg);--cbar:var(--p-bar)}
 .src-fan{--cb:var(--f-bg);--cf:var(--f-fg);--cbar:var(--f-bar)}
+.src-video{--cb:var(--v-bg);--cf:var(--v-fg);--cbar:var(--v-bar)}
 
 /* 선택한 날짜 */
 .sel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 18px}
@@ -78,6 +82,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .seg button[aria-pressed="true"]{font-weight:700;background:var(--n-bg);color:var(--n-fg)}
 .seg button[data-k="plave"][aria-pressed="true"]{background:var(--p-bg);color:var(--p-fg)}
 .seg button[data-k="fan"][aria-pressed="true"]{background:var(--f-bg);color:var(--f-fg)}
+.seg button[data-k="video"][aria-pressed="true"]{background:var(--v-bg);color:var(--v-fg)}
 
 .cal{display:flex;flex-direction:column;gap:10px}
 .bar{display:flex;align-items:center;gap:8px}
@@ -171,7 +176,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .row1{flex-wrap:nowrap;gap:6px}
   .sfx{display:none}
   .seg{border-radius:9px}
-  .seg button{padding:4px 9px;font-size:12px}
+  .seg button{padding:4px 7px;font-size:12px}
   .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
   .bar{gap:4px}
   .bar .title{font-size:13.5px;min-width:5.6em}
@@ -221,6 +226,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
       <button type="button" data-k="all">전체</button>
       <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
       <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
+      <button type="button" data-k="video">영상</button>
     </div>
     <div class="bar">
       <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
@@ -247,7 +253,7 @@ var DOW = ["일","월","화","수","목","금","토"];
 var DOWL = ["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
 var LOADED = __LOADED__;
 var UPDATED = "__UPDATED__";
-var SRC_NAME = {plave:"플레이브", fan:"플리"};
+var SRC_NAME = {plave:"플레이브", fan:"플리", video:"영상"};
 
 function pad(n){ return String(n).padStart(2,"0"); }
 function kst(ms){ return new Date(ms + 9*3600000); }
@@ -291,8 +297,11 @@ function monthlyEvents(){
 }
 /* 공식 사이트에 아직 없지만 플레이브 일정으로 보여줄 것(공연 등) */
 var PLAVE_EXTRA = __PLAVE_EXTRA__;
+/* 공식 유튜브 새 영상 (영상 탭을 눌렀을 때만 보여요) */
+var VIDEOS = __VIDEOS__;
 var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
-  .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}));
+  .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}))
+  .concat(VIDEOS.map(function(e){return norm(e,"video");}));
 ALL.sort(function(a,b){
   if(a.key !== b.key) return a.key < b.key ? -1 : 1;
   if(a.allDay !== b.allDay) return a.allDay ? -1 : 1;
@@ -308,7 +317,8 @@ function el(tag, cls, text){
   if(text != null) n.textContent = text;
   return n;
 }
-function visible(e){ return state.show === "all" || state.show === e.src; }
+function visible(e){ return state.show === "all" ? e.src !== "video" : state.show === e.src; }
+function officialShown(){ return state.show === "all" || state.show === "plave"; }
 function eventsOn(key){ return ALL.filter(function(e){ return e.key === key && visible(e); }); }
 function dowOf(key){ return parseKey(key).getUTCDay(); }
 function monthOf(key){ return key.slice(0,7); }
@@ -352,8 +362,10 @@ function fillDay(key, eyebrowId, headId, itemsId){
   if(!list.length){
     var li = el("li");
     var msg = key === todayKey ? "오늘은 일정이 없어요." : "이 날은 일정이 없어요.";
-    if(LOADED.indexOf(monthOf(key)) === -1 && state.show !== "fan"){
+    if(LOADED.indexOf(monthOf(key)) === -1 && officialShown()){
       msg = monthName(monthOf(key))+" 플레이브 공식 일정은 아직 불러오지 않았어요.";
+    } else if(state.show === "video"){
+      msg = key === todayKey ? "오늘은 올라온 영상이 없어요." : "이 날 올라온 영상이 없어요.";
     } else if(state.show === "fan" && !ALL.some(function(e){return e.src==="fan";})){
       msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
     }
@@ -411,7 +423,7 @@ function renderTitleAndNote(){
   document.getElementById("title").textContent = title;
   var missing = months.filter(function(m){ return LOADED.indexOf(m) === -1; });
   var note = document.getElementById("note");
-  if(missing.length && state.show !== "fan"){
+  if(missing.length && officialShown()){
     note.hidden = false;
     note.textContent = missing.map(monthName).join(", ")+" 플레이브 공식 일정은 아직 불러오지 않았어요."+(LOADED.length ? " 지금은 "+monthName(LOADED[0])+(LOADED.length>1 ? " ~ "+monthName(LOADED[LOADED.length-1]) : "")+" 공식 일정이 들어 있습니다." : "");
   } else { note.hidden = true; }

@@ -8,6 +8,7 @@ on:
     paths:                    # 아래 파일을 고치면 바로 갱신
       - "ticketing.txt"
       - "plave_extra.txt"
+      - "video_exclude.txt"
       - "template.html"
       - "build_site.py"
 
