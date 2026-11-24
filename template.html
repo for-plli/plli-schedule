@@ -120,6 +120,12 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .wev .wn{font-size:12.5px;overflow-wrap:anywhere}
 .wnone{color:var(--muted);font-size:12.5px;margin:0}
 
+/* 날짜 팝업 */
+dialog.daydlg{border:0;padding:0;background:var(--surface);color:var(--ink);border-radius:16px;width:min(520px,calc(100% - 24px));max-height:82vh;box-shadow:0 12px 40px rgba(20,23,43,.25);overflow:hidden}
+dialog.daydlg::backdrop{background:rgba(20,23,43,.38)}
+.dlg-in{padding:18px 18px 22px;overflow:auto;max-height:82vh;position:relative}
+.dlg-x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:16px;line-height:1;cursor:pointer}
+.dlg-in .seldate{padding-right:40px}
 footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px}
 
 @media (max-width:760px){
@@ -129,6 +135,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .wlist{flex:1}
 }
 @media (max-width:600px){
+  dialog.daydlg{margin:auto 0 0 0;width:100%;max-width:100%;border-radius:18px 18px 0 0;max-height:86vh}
+  .dlg-in{max-height:86vh;padding-bottom:max(22px,env(safe-area-inset-bottom))}
   .wrap{padding-top:14px}
   .day,.blank{min-height:84px;padding:3px 2px;gap:2px}
   .more{display:none}
@@ -154,6 +162,15 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
     <div class="seldate" id="seldate"></div>
     <ul class="items" id="items"></ul>
   </section>
+
+  <dialog class="daydlg" id="daydlg" aria-label="선택한 날짜의 일정">
+    <div class="dlg-in" id="dlgin">
+      <button type="button" class="dlg-x" id="dlgx" aria-label="닫기">✕</button>
+      <p class="eyebrow" id="d-eyebrow"></p>
+      <div class="seldate" id="d-seldate"></div>
+      <ul class="items" id="d-items"></ul>
+    </div>
+  </dialog>
 
   <div class="controls">
     <div class="seg" id="viewseg" role="group" aria-label="보기 방식">
@@ -261,24 +278,36 @@ function monthName(ym){ var p = ym.split("-").map(Number); return p[0]+"년 "+p[
 function selectKey(k){
   state.sel = k;
   render();
-  var s = document.querySelector(".sel");
-  try{
-    if(s && s.getBoundingClientRect().top < 0) s.scrollIntoView({block:"start"});
-  }catch(x){}
+  openDay();
+}
+
+function openDay(){
+  fillDay(state.sel, "d-eyebrow", "d-seldate", "d-items");
+  var d = document.getElementById("daydlg");
+  document.getElementById("dlgin").scrollTop = 0;
+  try{ if(!d.open){ if(d.showModal) d.showModal(); else d.setAttribute("open",""); } }
+  catch(x){ d.setAttribute("open",""); }
+}
+function closeDay(){
+  var d = document.getElementById("daydlg");
+  try{ if(d.close) d.close(); else d.removeAttribute("open"); }catch(x){ d.removeAttribute("open"); }
 }
 
 function renderSelected(){
-  var key = state.sel;
+  fillDay(todayKey, "eyebrow", "seldate", "items");
+}
+
+function fillDay(key, eyebrowId, headId, itemsId){
   var p = key.split("-").map(Number);
   var wd = dowOf(key);
-  document.getElementById("eyebrow").textContent = key === todayKey ? "오늘의 일정" : "선택한 날짜의 일정";
-  var head = document.getElementById("seldate");
+  document.getElementById(eyebrowId).textContent = key === todayKey ? "오늘의 일정" : "선택한 날짜의 일정";
+  var head = document.getElementById(headId);
   head.textContent = "";
   head.appendChild(el("span","big",p[1]+"월 "+p[2]+"일"));
   head.appendChild(el("span","dowl"+(wd===0?" sun":wd===6?" sat":""),DOWL[wd]));
   if(key === todayKey) head.appendChild(el("span","badge","오늘"));
 
-  var ul = document.getElementById("items");
+  var ul = document.getElementById(itemsId);
   ul.textContent = "";
   var list = eventsOn(key);
   if(!list.length){
@@ -441,6 +470,8 @@ function step(dir){
 document.getElementById("prev").addEventListener("click", function(){ step(-1); });
 document.getElementById("next").addEventListener("click", function(){ step(1); });
 document.getElementById("todaybtn").addEventListener("click", function(){ state.sel = todayKey; render(); });
+document.getElementById("dlgx").addEventListener("click", closeDay);
+document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
 document.getElementById("viewseg").addEventListener("click", function(ev){
   var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
   if(k){ state.view = k; render(); }
