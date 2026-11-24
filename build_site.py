@@ -232,15 +232,31 @@ def refresh_videos(offline):
 
 
 RE_TAIL_TAGS = re.compile(r"(?:\s+[#@]\S+)+\s*$")
+# 멤버별 상징 컬러 하트 (위버스 라이브 제목의 💙💜🩷❤🖤 순서와 같음: 예준·노아·밤비·은호·하민)
+MEMBER_HEART = [
+    ("💙", ("yejun", "예준")), ("💜", ("noah", "노아")), ("🩷", ("bamby", "밤비")),
+    ("❤️", ("eunho", "은호")), ("🖤", ("hamin", "하민")),
+]
+
+
+def member_hearts(title):
+    """제목의 #해시태그 에서 멤버 이름을 찾아 하트 이모지로. 5명 전부면 단체라서 표시하지 않음"""
+    tags = [x.lower() for x in re.findall(r"[#＃]([^\s#@]+)", title)]
+    out = [h for h, names in MEMBER_HEART if any(any(n in t for n in names) for t in tags)]
+    return "" if len(out) >= 5 else "".join(out)
 
 
 def video_view(videos):
-    """달력에 보일 제목 다듬기: 끝에 줄줄이 붙은 #해시태그/@멘션 은 떼고, 쇼츠는 앞에 '쇼츠 · ' 를 붙임"""
+    """달력에 보일 제목 다듬기: 끝에 줄줄이 붙은 #해시태그/@멘션 은 떼고, 해시태그의 멤버는 하트로,
+    쇼츠는 앞에 '[Shorts] ' 를 붙임"""
     out = []
     for e in videos:
         t = RE_TAIL_TAGS.sub("", e["title"]).strip() or e["title"]
+        hearts = member_hearts(e["title"])
+        if hearts:
+            t = hearts + " " + t
         if e.get("short"):
-            t = "쇼츠 · " + t
+            t = "[Shorts] " + t
         d = dict(e)
         d["title"] = t
         out.append(d)
