@@ -149,6 +149,7 @@ dialog.daydlg::backdrop{background:rgba(20,23,43,.38)}
 .daydlg .item .t.allday{font-size:13px;padding-top:2px}
 .daydlg .item .ti{font-size:13.5px}
 .daydlg .item .who{font-size:10.5px}
+.item.no-time,.daydlg .item.no-time{grid-template-columns:1fr}
 .daydlg .item .memo{font-size:12px}
 .daydlg .links a{font-size:11px;padding:1px 8px}
 footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px;text-align:center;align-items:center}
@@ -387,7 +388,8 @@ function fillDay(key, eyebrowId, headId, itemsId){
   }
   list.forEach(function(e){
     var li = el("li","item src-"+e.src);
-    li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
+    if(e.src === "video") li.className += " no-time";
+    else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
     var body = el("div");
     if(state.show === "all") body.appendChild(el("span","who",SRC_NAME[e.src]));
     body.appendChild(el("div","ti",e.title));
