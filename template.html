@@ -117,7 +117,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .ct-short{display:none}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
-.chip.is-live .ct-short{text-overflow:clip}
+.chip.is-live .ct-short{white-space:normal;overflow:visible;text-overflow:clip}
 .chip.strong,.chip.strong *{color:#fff !important}
 .item.gbox{--cb:var(--g-bg);--cf:var(--g-fg);--cbar:#6cc08f}
 .chip.gchip{background:var(--g-bg);color:var(--g-fg)}
@@ -125,8 +125,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .chip.strong .lv{background:transparent;padding:0;border-radius:0}
 .lv.cn{background:#2f5fc4;font-weight:800}
-.lv{display:inline-block;background:#26304d;color:#fff;border-radius:2px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
+.lv{display:inline-block;background:#26304d;color:#fff;border-radius:2px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle;position:relative;top:-.12em}
 .chip .em{font-size:.92em;line-height:1}
+.chip .tem{display:inline-block;width:1.1em;text-align:center;font-size:.72em;line-height:1;margin-left:2px;vertical-align:middle;position:relative;top:-.12em}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
@@ -420,6 +421,10 @@ function fillDay(key, eyebrowId, headId, itemsId){
   }
   list.forEach(function(e){
     var li = el("li","item src-"+e.src+((e.src==="plave" && (/\brelease\b|KEEP IT MANIC|CONCERT|콘서트/i.test(e.title))) ? " gbox" : ""));
+    if(e.src==="plave" && /'s\s+day/i.test(e.title)){   // 생일: 달력 칸과 같은 멤버 색
+      var mc = memberColor(e.title);
+      li.style.cssText = "--cb:"+mc+"26;--cbar:"+mc+";--cf:var(--ink)";
+    }
     if(e.src === "video") li.className += " no-time";
     else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
     var body = el("div");
@@ -487,7 +492,7 @@ function cellTitle(s, src){
     return hs ? hs : r;
   }
   if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: LIVE (일부 멤버만 나오면 하트도)
-    return "🎙️ LIVE";
+    return "🎙️ Youtube Live";
   }
   if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🎤 + 도시·회차만
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
@@ -541,15 +546,22 @@ function renderMonth(box){
         else if(/'s\s+day/i.test(e.title)){ var sc = memberColor(e.title); c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
-      var bday = "";   // 생일 관련 칸에는 이모지를 붙이지 않음 (날짜 옆 🎂 만)
+      var bday = (/birthday|b-?day|생일/i.test(e.title) && !/'s\s+day/i.test(e.title)) ? "🎂 " : "";   // 생일 관련 콘텐츠는 제목 앞에 🎂
+      var cat = "";   // 종류 이모지(🎤 콘서트·📺 방송·💿 릴리즈·🎂 생일)는 시간 옆에 작게
+      if(e.src === "plave" && !isShort){
+        var cm = cellTitle(e.title, "plave").match(/^(🎤|📺|💿|🎙️) /);
+        if(cm) cat = cm[1];
+        if(e.allDay && /'s\s+day/i.test(e.title)) cat = "🎂";
+      }
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
         var tlabel = e.time;
         if(e.allDay && e.src === "plave"){   // 종일 대신 의미 있는 말: 릴리즈·생일 (그 밖의 종일 일정은 글자 없이 제목만)
           tlabel = /\brelease\b/i.test(e.title) ? "릴리즈" : (/'s\s+day/i.test(e.title) ? "생일" : "");
         }
-        if(tlabel){
+        if(tlabel || cat){
           var bt = el("b",null,tlabel);
           bt.className = "tm";
+          if(cat){ var te = el("span","em tem",cat); bt.appendChild(te); }
           c.appendChild(bt);
         }
       }
@@ -573,11 +585,13 @@ function renderMonth(box){
           var bm = e.title.match(/happy\s+(.+?)['’]s\s+day/i);
           full = "🎂 " + (bm ? bm[1] : full);
         }
+        if(cat && full.indexOf(cat + " ") === 0) full = full.slice(cat.length + 1);   // 이모지는 시간 옆으로 옮겼으니 제목에서는 뺌
+        if(cat === "🎤") full = full + " Concert";   // 콘서트: 지역 뒤에 Concert
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
         var lv = false;   // LIVE 는 이제 일반 칸 (🎙️ 이모지만 앞에)
-        if(e.src === "plave" && full === "🎙️ LIVE") c.className += " is-live";
-        var cn = e.src === "plave" && full.indexOf("🎤 ") === 0;   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        if(cat === "🎙️") c.className += " is-live";
+        var cn = cat === "🎤";   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
           if(cn){
@@ -591,9 +605,8 @@ function renderMonth(box){
         }
         if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
         if(cn) c.className += " gchip";   // 콘서트: 초록 박스
-        if(e.allDay) bday = "";
-        put("ct-full", lv || cn ? full : bday+full);
-        put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
+        put("ct-full", lv ? full : bday+full);
+        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
       }
       b.appendChild(c);
     });
