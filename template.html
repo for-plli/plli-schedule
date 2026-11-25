@@ -10,7 +10,7 @@
 <style>
 /* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
 :root{
-  --bd-bg:#fff4c9; --rel-bg:#dff4e6;
+  --bd-bg:#fffaf0; --rel-bg:#f3fbf6; --bd-line:#f0b400; --rel-line:#2fa866;
   --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
   --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
   --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
@@ -23,7 +23,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bd-bg:#3a3319; --rel-bg:#183427;
+    --bd-bg:#221f14; --rel-bg:#14231c; --bd-line:#c99700; --rel-line:#2a8f58;
     --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
     --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
     --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -34,7 +34,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --bd-bg:#3a3319; --rel-bg:#183427;
+  --bd-bg:#221f14; --rel-bg:#14231c; --bd-line:#c99700; --rel-line:#2a8f58;
   --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
   --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
   --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -104,7 +104,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
-.day.bd{background:var(--bd-bg)} .day.rel{background:var(--rel-bg)}
+.day.bd{box-shadow:inset 0 0 0 2px var(--bd-line);background:var(--bd-bg)} .day.rel{box-shadow:inset 0 0 0 2px var(--rel-line);background:var(--rel-bg)}
 .numrow{display:flex;align-items:center;gap:3px}
 .mk{font-size:11px;line-height:1}
 .day:focus,.day:focus-visible{outline:none}
@@ -520,7 +520,6 @@ function renderMonth(box){
     else if(isRel) b.className += " rel";
     var nr = el("span","numrow");
     nr.appendChild(el("span","num",String(d)));
-    if(isBd || isRel) nr.appendChild(el("span","mk",isBd ? "🎂" : "💿"));
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
@@ -550,7 +549,7 @@ function renderMonth(box){
         function put(cls, text){
           var sp = el("span",cls,"");
           if(cn){
-            sp.appendChild(el("span","lv cn","CON"));
+            sp.appendChild(el("span","lv cn","C"));
             sp.appendChild(document.createTextNode(" " + text.slice(2).trim()));
           } else if(lv){
             sp.appendChild(rich(el("span","lv"),"LIVE"));
