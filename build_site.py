@@ -309,6 +309,18 @@ def load_extra_videos(offline):
             continue
         parts = [p.strip() for p in ln.split("|")]
         vid = yt_id(parts[0])
+        if not vid and re.match(r"https?://", parts[0]) and len(parts) > 2 and parts[1] and parts[2]:
+            # 유튜브가 아닌 링크(X 등): 제목과 날짜를 직접 적은 경우 그대로 넣기
+            try:
+                fmt = "%Y-%m-%d %H:%M" if ":" in parts[2] else "%Y-%m-%d"
+                d = datetime.strptime(parts[2], fmt).replace(tzinfo=KST).astimezone(timezone.utc)
+            except ValueError:
+                print(f"video_extra.txt: 날짜 형식은 2026-11-24 18:00 처럼 적어 주세요: {parts[2]}", file=sys.stderr)
+                continue
+            out.append({"id": "ext-" + hashlib.md5(parts[0].encode()).hexdigest()[:10], "title": parts[1],
+                        "utcStart": d.strftime("%Y-%m-%dT%H:%M:%SZ"), "isAllDay": False,
+                        "links": [{"url": parts[0]}], "manual": True})
+            continue
         if not vid:
             print(f"video_extra.txt: 링크를 알아볼 수 없어 건너뜀: {ln[:60]}", file=sys.stderr)
             continue
