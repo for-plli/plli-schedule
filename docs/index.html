@@ -112,6 +112,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .ct-short{display:none}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
+.chip.is-live .ct-short{text-overflow:clip}
+.lv{background:#26304d;color:#fff;border-radius:3px;padding:0 3px;white-space:nowrap}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
@@ -455,8 +457,8 @@ function cellTitle(s, src){
   if(/weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브: 멤버 하트만 (하트가 없으면 제목 그대로)
     return hs ? hs : r;
   }
-  if(/\bLIVE\b|라이브/i.test(r)){   // 유튜브 라이브: ⚡ (일부 멤버만 나오면 하트도)
-    return "⚡" + (n && n < 5 ? " " + hs : "");
+  if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: ⚡ LIVE (일부 멤버만 나오면 하트도)
+    return "⚡ LIVE" + (n && n < 5 ? " " + hs : "");
   }
   if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🎤 + 도시·회차만
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
@@ -516,9 +518,19 @@ function renderMonth(box){
         var full = cellTitle(e.title, e.src);
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
-        if(full.indexOf("⚡") === 0) c.className += " is-live";   // 유튜브 라이브는 굵게
-        c.appendChild(el("span","ct-full",bday+full));
-        c.appendChild(el("span","ct-short",bday+pre+stripBracket(rest)));
+        var lv = full.indexOf("⚡ LIVE") === 0;   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        function put(cls, text){
+          var sp = el("span",cls,"");
+          if(lv){
+            sp.appendChild(el("span","lv","⚡ LIVE"));
+            var tl = text.slice(6).trim();
+            if(tl) sp.appendChild(document.createTextNode(" "+tl));
+          } else sp.textContent = text;
+          c.appendChild(sp);
+        }
+        if(lv) c.className += " is-live";
+        put("ct-full", lv ? full : bday+full);
+        put("ct-short", lv ? full : bday+pre+stripBracket(rest));
       }
       b.appendChild(c);
     });
