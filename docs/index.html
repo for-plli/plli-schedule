@@ -85,9 +85,10 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .rows .row{display:flex;gap:6px;flex-wrap:wrap}
 .rows a,.rows button{font:inherit;font-size:13.5px;font-weight:700;text-align:center;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:9px 12px;cursor:pointer;flex:1}
 .rows a.go{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.subinfo{margin:0 0 10px;font-size:14px;line-height:1.55}
+.must{margin:0;word-break:keep-all;background:var(--p-bg);color:var(--p-fg);border-radius:2px;padding:9px 11px;font-size:13.5px;line-height:1.55}
 .subq{margin:16px 0 0;font-size:14.5px;font-weight:700}
 .subt{margin:0 0 10px;font-size:16px;font-weight:700;padding-right:32px}
-.subinfo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.5}
 
 /* 컨트롤 */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
@@ -270,12 +271,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
     <div class="dlg-in">
       <button type="button" class="dlg-x" id="subx" aria-label="닫기">✕</button>
       <p class="subt">플리 일정 알림 받기</p>
-      <ul class="subinfo">
-        <li>티켓팅·예약 같은 플리 일정과 플레이브 릴리즈 일정이 담긴 캘린더예요.</li>
-        <li>일정이 있는 날 아침 9시에 오늘 일정을 알려주고, 시작 10분 전에 한 번 더 알려줘요.</li>
-        <li>한 번 구독해 두면 일정이 새로 생기거나 바뀔 때 몇 시간 안에 자동으로 반영돼요.</li>
-        <li>아이폰·맥 캘린더는 알림이 그대로 와요. 구글 캘린더는 앱 설정에서 알림을 따로 켜야 할 수 있어요.</li>
-      </ul>
+      <p class="subinfo">티켓팅·예약 등 중요한 일정을 알려줘요. 아침 9시와 시작 10분 전에 알림이 와요.</p>
+      <p class="must"><b>아이폰</b> 구독 후 설정 → 캘린더 → 캘린더 계정 → 구독한 캘린더에서 <b>'알림 제거'를 꺼야</b> 알림이 와요.<br><b>구글</b> 구독 후 캘린더 설정에서 <b>'알림'을 직접 추가</b>해야 하고, 10분 전 알림만 가능해요.</p>
       <p class="subq">알림을 받을까요?</p>
       <div class="rows" id="subrows"></div>
     </div>
@@ -339,7 +336,7 @@ function norm(e, src){
   };
 }
 /* 플리 일정(티켓팅·예약): 한 번만 있는 일정은 FAN_RAW 에, 매달 반복되는 일정은 FAN_MONTHLY 에 적습니다. */
-var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-65b2cd1189","title":"플레이브 데이 @DDP","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"넥스트 크리에이티브 서울 · 무료","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}],"quiet":false},{"id":"x-1bd9b6b594","title":"[테스트] 알림 확인","utcStart":"2026-11-25T06:00:00.000Z","isAllDay":false,"note":"구독 알림 테스트용 임시 일정","links":[],"quiet":false}];
+var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-65b2cd1189","title":"플레이브 데이 @DDP","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"넥스트 크리에이티브 서울 · 무료","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}],"quiet":false}];
 var FAN_MONTHLY = [{"id":"m-5e8b5dd4","title":"십카페 예약","nth":3,"dow":4,"hour":16,"minute":0,"note":"","links":[],"quiet":false}];   /* ticketing.txt 의 '매월 N번째 요일 시각' 줄 */
 var REPEAT_FROM = "2026-11", REPEAT_UNTIL = "2029-05";
 function monthlyEvents(){

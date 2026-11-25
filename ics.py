@@ -15,7 +15,7 @@ BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]   # 자바스크립트 요일
 
 
 def esc(text):
-    return (str(text).replace("\\", "\\\\").replace(";", "\;").replace(",", "\\,")
+    return (str(text).replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
             .replace("\r\n", "\\n").replace("\n", "\\n"))
 
 
