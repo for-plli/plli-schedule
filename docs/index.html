@@ -55,9 +55,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 /* 선택한 날짜 */
 .sel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 18px}
 .sel .eyebrow{font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 4px}
-.seldate{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.seldate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .seldate .big{font-family:var(--font-num);font-weight:700;font-size:25px;line-height:1.2}
-.seldate .dowl{font-size:13.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border:1px solid var(--line);border-radius:999px;padding:1px 11px}
+.seldate .dowl{font-size:13.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border:1px solid var(--line);border-radius:999px;padding:1px 11px 2px;line-height:1.4}
 .seldate .dowl.sun{background:var(--sun-bg);color:var(--sun);border-color:var(--sun)}
 .seldate .dowl.sat{background:var(--p-bg);color:var(--p-fg);border-color:var(--p-bar)}
 .badge{font-size:12px;font-weight:700;background:var(--ink);color:var(--surface);border:1px solid var(--ink);border-radius:999px;padding:1px 10px}
@@ -75,9 +75,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 
 /* 컨트롤 */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-.lhs{display:flex;align-items:center;gap:6px}
-.vidbtn{border:1px solid var(--v-bar);background:var(--surface);color:var(--v-fg);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;cursor:pointer}
-.vidbtn[aria-pressed="true"]{background:var(--v-bg);font-weight:700}
+.lhs{display:flex;align-items:center;gap:12px}
+.vidbtn{border:1px solid var(--v-bar);background:var(--v-bg);color:var(--v-fg);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.vidbtn[aria-pressed="true"]{background:var(--v);border-color:var(--v);color:var(--surface)}
 .row1,.row2{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:transparent;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
@@ -109,7 +109,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
 .more2{display:none}
 .ct-short{display:none}
-.sh{display:none}
+.sh{display:inline-block;margin-right:4px}
+.ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
 
 /* 주간 */
@@ -148,7 +149,7 @@ dialog.daydlg::backdrop{background:rgba(20,23,43,.38)}
 .daydlg .item .who{font-size:10.5px}
 .daydlg .item .memo{font-size:12px}
 .daydlg .links a{font-size:11px;padding:1px 8px}
-footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px}
+footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px;text-align:center;align-items:center}
 
 @media (max-width:760px){
   .week{grid-template-columns:1fr}
@@ -181,7 +182,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .seg{border-radius:9px}
   .seg button{padding:4px 8px;font-size:12px}
   .vidbtn{padding:4px 9px;font-size:12px}
-  .lhs{gap:4px}
+  .lhs{gap:9px}
   .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
   .bar{gap:4px}
   .bar .title{font-size:13.5px;min-width:5.6em}
@@ -198,8 +199,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .chip:nth-of-type(n+4){display:none}
   .chip b{display:block;font-size:9.5px;margin:0}
   .ct-full{display:none}
-  .sh{display:block}
-  .chip.is-short .tm{display:none}
+  .sh{display:block;margin-right:0}
   .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
@@ -250,7 +250,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   </section>
 
   <footer>
-    <span>비공식 팬 제작 캘린더입니다. 플레이브 일정은 plave.global 공식 스케줄이 출처이며, 정확한 내용은 공식 채널에서 다시 확인해 주세요.</span>
+    <span>비공식 팬 제작 캘린더입니다.</span>
     <span id="updated"></span>
   </footer>
 </div>
@@ -362,7 +362,6 @@ function fillDay(key, eyebrowId, headId, itemsId){
   head.textContent = "";
   head.appendChild(el("span","big",p[1]+"월 "+p[2]+"일"));
   head.appendChild(el("span","dowl"+(wd===0?" sun":wd===6?" sat":""),DOWL[wd]));
-  if(key === todayKey) head.appendChild(el("span","badge","오늘"));
 
   var ul = document.getElementById(itemsId);
   ul.textContent = "";
@@ -463,13 +462,20 @@ function renderMonth(box){
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
       var isShort = e.title.indexOf("[Shorts] ") === 0;
-      var bt = el("b",null,e.time);
-      bt.className = "tm";
-      c.appendChild(bt);
-      if(isShort){ c.className += " is-short"; c.appendChild(el("b","sh","[Shorts]")); }
-      c.appendChild(el("span","ct-full",e.title));
-      var base = isShort ? e.title.slice(9) : e.title;
-      c.appendChild(el("span","ct-short",base.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || base));
+      if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
+        var bt = el("b",null,e.time);
+        bt.className = "tm";
+        c.appendChild(bt);
+      }
+      if(isShort){
+        c.className += " is-short";
+        c.appendChild(el("b","sh","[Shorts]"));
+        var hm = e.title.slice(9).match(/^((?:💙|💜|💗|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
+        if(hm) c.appendChild(el("span","ct-hearts",hm[1]));
+      } else {
+        c.appendChild(el("span","ct-full",e.title));
+        c.appendChild(el("span","ct-short",e.title.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || e.title));
+      }
       b.appendChild(c);
     });
     if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
