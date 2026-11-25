@@ -436,6 +436,8 @@ def video_view(videos):
         if e.get("short"):
             t = "[Shorts] " + t
         d = dict(e)
+        if d.get("channel"):   # 채널 이름은 짧게 ('서울시 · Seoul' -> '서울시')
+            d["channel"] = re.split(r"\s*[·|/]\s*", d["channel"])[0].strip() or d["channel"]
         d["title"] = t
         out.append(d)
     return out

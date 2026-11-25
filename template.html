@@ -447,19 +447,26 @@ function renderTitleAndNote(){
 /* 달력 칸에 보일 제목: 맨 앞의 PLAVE(플레이브) 는 뺌 (팝업에는 제목 전체가 나와요) */
 function cellTitle(s, src){
   var r = s.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || s;
-  if(src === "plave" && /weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브는 뒤의 멤버 하트를 맨 앞으로
-    var m = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/);
-    if(m && m[1]) r = m[2] + " " + m[1];
+  if(src !== "plave") return r;
+  var HEART = "(?:💙|💜|🩷|💗|❤️|❤|🖤)+";
+  var hm = r.match(new RegExp("^(.*?)\\s*(" + HEART + ")\\s*$"));
+  var body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
+  var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
+  if(/weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브: 멤버 하트만 (하트가 없으면 제목 그대로)
+    return hs ? hs : r;
   }
-  if(src === "plave" && /\bLIVE\b|라이브/i.test(r) && !/weverse|위버스/i.test(r)){
-    var hm = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/), body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
-    var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
-    r = "🔴 " + (n && n < 5 ? hs + " " : "") + body;
-  } else if(src === "plave" && !/weverse|위버스/i.test(r)){
-    if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)) r = "🎤 " + r;
-    else if(/RELEASE|\bM\/V\b|\bMV\b/i.test(r)) r = "💿 " + r;
-    else if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) r = "📺 " + r;
+  if(/\bLIVE\b|라이브/i.test(r)){   // 유튜브 라이브: ⚡ (일부 멤버만 나오면 하트도)
+    return "⚡" + (n && n < 5 ? " " + hs : "");
   }
+  if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🎤 + 도시·회차만
+    var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
+    return "🎤 " + (c || r);
+  }
+  if(/RELEASE|\bM\/V\b|\bMV\b/i.test(r)){   // 발매: 💿 + 이름만
+    var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").replace(/\s*\bM\/V\b/i, "").trim();
+    return "💿 " + (t || r);
+  }
+  if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return "📺 " + r;
   return r;
 }
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
@@ -509,7 +516,7 @@ function renderMonth(box){
         var full = cellTitle(e.title, e.src);
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
-        if(full.indexOf("🔴") === 0) c.className += " is-live";   // 유튜브 라이브는 굵게
+        if(full.indexOf("⚡") === 0) c.className += " is-live";   // 유튜브 라이브는 굵게
         c.appendChild(el("span","ct-full",bday+full));
         c.appendChild(el("span","ct-short",bday+pre+stripBracket(rest)));
       }
