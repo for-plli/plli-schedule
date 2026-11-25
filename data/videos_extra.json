@@ -54,5 +54,61 @@
 "manual": true,
 "dateGuessed": true,
 "channel": "서울시 · Seoul"
+},
+{
+"id": "yt-Ik95Xejn4Sg",
+"title": "우리가 돌아왔다!🛸 플레이브 금의환향🎊 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+"utcStart": "2026-11-25T01:35:51Z",
+"isAllDay": false,
+"links": [
+{
+"url": "https://www.youtube.com/watch?v=Ik95Xejn4Sg"
+}
+],
+"manual": true,
+"dateGuessed": true,
+"channel": ""
+},
+{
+"id": "yt-Cxba7UaCi4U",
+"title": "플레이브의 자랑!🫳 🌱아기오빠 하민이🌼 생일 라이브 🖤 | #플레이브 PLAVE | PLAVE HAMIN Birthday Live Full Ver.",
+"utcStart": "2026-11-25T01:35:52Z",
+"isAllDay": false,
+"links": [
+{
+"url": "https://www.youtube.com/watch?v=Cxba7UaCi4U"
+}
+],
+"manual": true,
+"dateGuessed": true,
+"channel": ""
+},
+{
+"id": "yt-znWMx57DL20",
+"title": "HYPERDRIVE Start Race!🏁 플레이브의 챌린지는 지금부터!🏎 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+"utcStart": "2026-11-25T01:35:53Z",
+"isAllDay": false,
+"links": [
+{
+"url": "https://www.youtube.com/watch?v=znWMx57DL20"
+}
+],
+"manual": true,
+"dateGuessed": true,
+"channel": ""
+},
+{
+"id": "yt-akz0LgKV1Bw",
+"title": "지금부터 Star Trace!🌠 플레이브 미니 5집🏎️ 컴백 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | HYPERDRIVE COMEBACK Live Full Ver.",
+"utcStart": "2026-11-25T01:35:54Z",
+"isAllDay": false,
+"links": [
+{
+"url": "https://www.youtube.com/watch?v=akz0LgKV1Bw"
+}
+],
+"manual": true,
+"dateGuessed": true,
+"channel": ""
 }
 ]
