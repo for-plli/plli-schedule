@@ -5,3 +5,4 @@ https://youtu.be/CJYON-25yoI | | 2026-11-24 15:40
 https://youtu.be/NrAoNK4c1-E | | 2026-11-21
 # 유튜브가 아닌 링크(X 등)는 제목과 날짜를 모두 직접 적어요:  링크 | 제목 | 2026-11-23
 https://youtu.be/Ch80iONgHz0 | | 2026-11-23
+https://youtu.be/VrCGZ2OWg8g | | 2026-11-20
