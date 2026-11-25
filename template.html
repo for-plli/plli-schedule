@@ -105,7 +105,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
 .numrow{display:flex;align-items:center;justify-content:space-between;gap:2px;height:26px}
-.mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%}
+.mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%;margin-right:8px}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
@@ -209,7 +209,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .day,.blank{min-height:78px;padding:3px 2px;gap:2px}
   .num{font-size:12.5px;width:22px;height:22px}
   .numrow{height:22px}
-  .mk{font-size:9px}
+  .mk{font-size:9px;margin-right:4px}
   .more{display:none}
   .more2{display:block;font-size:9px;color:var(--muted);padding-left:2px;line-height:1.2}
   .chip{font-size:8.5px;line-height:1.2;padding:1px 2px 1px 3px;border-left-width:2px;white-space:normal}
@@ -527,7 +527,12 @@ function renderMonth(box){
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
     if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 얇은 테두리 (생일이 우선)
       var bc = isBd ? memberColor(bdEv.title) : "var(--ink)";
-      b.style.boxShadow = "inset 0 0 0 1px " + bc;
+      var sh = ["0 0 0 1px " + bc];   // 바깥쪽 1px 는 달력 테두리 밖에서 잘리므로 가장자리 칸은 안쪽으로
+      if(wd === 0) sh.push("inset 1px 0 0 " + bc);
+      if(wd === 6) sh.push("inset -1px 0 0 " + bc);
+      if(Math.floor((lead + d - 1) / 7) === Math.floor((lead + days - 1) / 7)) sh.push("inset 0 -1px 0 " + bc);
+      b.style.boxShadow = sh.join(",");   // 칸 선 위에 딱 맞게 (안쪽이 아니라 바깥쪽 1px)
+      b.style.position = "relative"; b.style.zIndex = "1";
     }
     var nr = el("span","numrow");
     nr.appendChild(el("span","num",String(d)));
