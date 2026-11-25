@@ -10,7 +10,8 @@
 }
 ],
 "manual": true,
-"dateGuessed": true
+"dateGuessed": true,
+"channel": "서울디자인재단"
 },
 {
 "id": "yt-NrAoNK4c1-E",
@@ -23,7 +24,8 @@
 }
 ],
 "manual": true,
-"dateGuessed": true
+"dateGuessed": true,
+"channel": "유니세프"
 },
 {
 "id": "yt-Ch80iONgHz0",
@@ -36,7 +38,8 @@
 }
 ],
 "manual": true,
-"dateGuessed": true
+"dateGuessed": true,
+"channel": "서울시 · Seoul"
 },
 {
 "id": "yt-VrCGZ2OWg8g",
@@ -49,6 +52,7 @@
 }
 ],
 "manual": true,
-"dateGuessed": true
+"dateGuessed": true,
+"channel": "서울시 · Seoul"
 }
 ]
