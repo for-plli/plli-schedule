@@ -37,6 +37,8 @@ DUP_MINUTES = 30
 YT_HANDLE_URL = "https://www.youtube.com/@plave_official"   # 공식 유튜브 채널
 YT_ID_FILE = "data/youtube_channel_id.txt"                  # 채널 ID (처음 한 번 찾아서 보관)
 VIDEO_FILE = "data/videos.json"                             # 지금까지 모은 영상 (RSS는 최근 15개만 줘서 계속 쌓아 둠)
+VIDEO_EXTRA = "video_extra.txt"                             # 직접 추가한 영상 링크 (한 줄에 하나)
+VIDEO_EXTRA_CACHE = "data/videos_extra.json"                # 링크에서 읽어 온 제목/날짜 보관
 VIDEO_EXCLUDE = "video_exclude.txt"                         # 달력에서 뺄 영상 제목 단어
 WD = {"월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6}
 RE_MONTHLY = re.compile(r"^매월\s+(\d)(?:번째|째)\s*([월화수목금토일])(?:요일)?\s+(\d{1,2}:\d{2})$")
@@ -231,6 +233,95 @@ def refresh_videos(offline):
     return list(saved.values())
 
 
+def yt_id(url):
+    m = re.search(r"(?:youtu\.be/|[?&]v=|/shorts/|/live/|/embed/)([0-9A-Za-z_-]{11})", url)
+    return m.group(1) if m else None
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
+def yt_is_short(vid):
+    """youtube.com/shorts/ID 가 그대로 열리면(200) 쇼츠, 다른 곳으로 넘겨지면 일반 영상"""
+    op = urllib.request.build_opener(_NoRedirect)
+    try:
+        r = op.open(urllib.request.Request("https://www.youtube.com/shorts/" + vid,
+                    headers={"User-Agent": "Mozilla/5.0", "Cookie": "CONSENT=YES+1; SOCS=CAI"}), timeout=20)
+        return r.status == 200
+    except Exception:
+        return False
+
+
+def lookup_video(vid, manual_title=""):
+    """링크 하나의 제목과 올린 시각을 유튜브에서 읽기"""
+    import html as _h
+    page = http_get("https://www.youtube.com/watch?v=" + vid)
+    title = manual_title
+    if not title:
+        m = re.search(r'<meta property="og:title" content="([^"]+)"', page) or re.search(r"<title>(.*?)(?: - YouTube)?</title>", page, re.S)
+        title = _h.unescape(m.group(1)).strip() if m else ""
+    when = None
+    for pat in (r'itemprop="datePublished" content="([^"]+)"', r'"publishDate":"([^"]+)"', r'"uploadDate":"([^"]+)"'):
+        m = re.search(pat, page)
+        if m:
+            try:
+                raw = m.group(1)
+                d = datetime.fromisoformat(raw.replace("Z", "+00:00")) if "T" in raw else datetime.fromisoformat(raw + "T00:00:00+09:00")
+                when = d.astimezone(timezone.utc)
+                break
+            except Exception:
+                pass
+    if not title:
+        raise ValueError("제목을 찾지 못함")
+    return title, when
+
+
+def load_extra_videos(offline):
+    """video_extra.txt 의 링크를 영상 목록에 넣기. 한 줄: 링크 [| 제목(생략하면 유튜브에서 읽음)]"""
+    if not os.path.exists(VIDEO_EXTRA):
+        return []
+    cache = {}
+    if os.path.exists(VIDEO_EXTRA_CACHE):
+        try:
+            cache = {e["id"]: e for e in json.load(open(VIDEO_EXTRA_CACHE, encoding="utf-8"))}
+        except Exception:
+            cache = {}
+    out, changed = [], False
+    for ln in open(VIDEO_EXTRA, encoding="utf-8"):
+        ln = ln.strip()
+        if not ln or ln.startswith("#"):
+            continue
+        parts = [p.strip() for p in ln.split("|")]
+        vid = yt_id(parts[0])
+        if not vid:
+            print(f"video_extra.txt: 링크를 알아볼 수 없어 건너뜀: {ln[:60]}", file=sys.stderr)
+            continue
+        key = "yt-" + vid
+        ent = cache.get(key)
+        if not ent and not offline:
+            try:
+                title, when = lookup_video(vid, parts[1] if len(parts) > 1 else "")
+                ent = {"id": key, "title": title,
+                       "utcStart": (when or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                       "isAllDay": False, "links": [{"url": "https://www.youtube.com/watch?v=" + vid}],
+                       "manual": True, "dateGuessed": when is None}
+                if yt_is_short(vid):
+                    ent["short"] = True
+                cache[key] = ent
+                changed = True
+                print(f"영상 추가: {title[:40]} ({ent['utcStart']})")
+            except Exception as ex:
+                print(f"영상 정보를 읽지 못함 ({vid}): {ex}", file=sys.stderr)
+        if ent:
+            out.append(ent)
+    if changed:
+        os.makedirs("data", exist_ok=True)
+        json.dump(list(cache.values()), open(VIDEO_EXTRA_CACHE, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+    return out
+
+
 RE_TAIL_TAGS = re.compile(r"(?:\s+[#@]\S+)+\s*$")
 RE_SUB = re.compile(r"\(\s*SUB\s*\)\s*", re.I)
 # 멤버별 상징 컬러 하트 (위버스 라이브 제목의 💙💜🩷❤🖤 순서와 같음: 예준·노아·밤비·은호·하민)
@@ -277,7 +368,7 @@ def video_filter(videos):
     out = []
     for e in videos:
         t = e["title"].lower()
-        if any(b in t for b in bad) and not any(k in t for k in keep):
+        if not e.get("manual") and any(b in t for b in bad) and not any(k in t for k in keep):
             continue
         out.append(e)
     return out
@@ -324,7 +415,10 @@ def main():
 
     ok = refresh_cache(a.offline)
     official, loaded = load_official()
-    videos = video_view(video_filter(refresh_videos(a.offline)))
+    videos = refresh_videos(a.offline)
+    seen = {e['id'] for e in videos}
+    videos += [e for e in load_extra_videos(a.offline) if e['id'] not in seen]
+    videos = video_view(video_filter(videos))
     plave_extra, extra_monthly = parse_manual("plave_extra.txt")
     fan_once, fan_monthly = parse_manual("ticketing.txt")
     if extra_monthly:

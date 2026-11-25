@@ -9,6 +9,7 @@ on:
       - "ticketing.txt"
       - "plave_extra.txt"
       - "video_exclude.txt"
+      - "video_extra.txt"
       - "template.html"
       - "build_site.py"
 

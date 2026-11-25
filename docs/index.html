@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>바쁘다 바빠 플리사회 🤍</title>
+<title>⏱️ 바쁘다 바빠 플리사회 🏃🏻‍♀️</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
@@ -216,7 +216,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
 </head>
 <body>
 <div class="wrap">
-  <h1>바쁘다 바빠 플리사회 🤍</h1>
+  <h1>⏱️ 바쁘다 바빠 플리사회 🏃🏻‍♀️</h1>
 
   <section class="sel" aria-live="polite" aria-label="선택한 날짜의 일정">
     <p class="eyebrow" id="eyebrow"></p>
@@ -442,9 +442,13 @@ function renderTitleAndNote(){
 }
 
 /* 달력 칸에 보일 제목: 맨 앞의 PLAVE(플레이브) 는 뺌 (팝업에는 제목 전체가 나와요) */
-function cellTitle(s){
-  var r = s.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "");
-  return r || s;
+function cellTitle(s, src){
+  var r = s.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || s;
+  if(src === "plave" && /weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브는 뒤의 멤버 하트를 맨 앞으로
+    var m = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/);
+    if(m && m[1]) r = m[2] + " " + m[1];
+  }
+  return r;
 }
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
 function renderMonth(box){
@@ -490,7 +494,7 @@ function renderMonth(box){
           c.appendChild(el("span","ct-short",bday+stripBracket(sfull)));
         }
       } else {
-        var full = cellTitle(e.title);
+        var full = cellTitle(e.title, e.src);
         c.appendChild(el("span","ct-full",bday+full));
         c.appendChild(el("span","ct-short",bday+stripBracket(full)));
       }
