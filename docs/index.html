@@ -10,6 +10,7 @@
 <style>
 /* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
 :root{
+  --bd-bg:#fff4c9; --rel-bg:#dff4e6;
   --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
   --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
   --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
@@ -22,6 +23,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
+    --bd-bg:#3a3319; --rel-bg:#183427;
     --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
     --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
     --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -32,6 +34,7 @@
   }
 }
 :root[data-theme="dark"]{
+  --bd-bg:#3a3319; --rel-bg:#183427;
   --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
   --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
   --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -101,6 +104,9 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
+.day.bd{background:var(--bd-bg)} .day.rel{background:var(--rel-bg)}
+.numrow{display:flex;align-items:center;gap:3px}
+.mk{font-size:11px;line-height:1}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
@@ -113,6 +119,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
+.lv.cn{background:#e8590c;padding:2px 3px;font-size:.8em;letter-spacing:-.2px}
 .lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
 .chip .em{font-size:.92em;line-height:1}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
@@ -507,7 +514,14 @@ function renderMonth(box){
     b.type = "button";
     b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
     b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
-    b.appendChild(el("span","num",String(d)));
+    var isBd = list.some(function(e){ return e.src==="plave" && /'s\s+day|\bb-?day\b/i.test(e.title) && !/gift/i.test(e.title); });
+    var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
+    if(isBd) b.className += " bd";
+    else if(isRel) b.className += " rel";
+    var nr = el("span","numrow");
+    nr.appendChild(el("span","num",String(d)));
+    if(isBd || isRel) nr.appendChild(el("span","mk",isBd ? "🎂" : "💿"));
+    b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
       var isShort = e.title.indexOf("[Shorts] ") === 0;
@@ -531,10 +545,14 @@ function renderMonth(box){
         var full = cellTitle(e.title, e.src);
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
-        var lv = e.src === "plave" && full === "LIVE";   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        var lv = e.src === "plave" && full === "LIVE";
+        var cn = e.src === "plave" && full.indexOf("🎤 ") === 0;   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
-          if(lv){
+          if(cn){
+            sp.appendChild(el("span","lv cn","CON"));
+            sp.appendChild(document.createTextNode(" " + text.slice(2).trim()));
+          } else if(lv){
             sp.appendChild(rich(el("span","lv"),"LIVE"));
             var tl = text.slice("LIVE".length).trim();
             if(tl){ sp.appendChild(document.createTextNode(" ")); rich(sp, tl); }
@@ -542,8 +560,8 @@ function renderMonth(box){
           c.appendChild(sp);
         }
         if(lv) c.className += " is-live";
-        put("ct-full", lv ? full : bday+full);
-        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
+        put("ct-full", lv || cn ? full : bday+full);
+        put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
       }
       b.appendChild(c);
     });
