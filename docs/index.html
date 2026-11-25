@@ -10,7 +10,7 @@
 <style>
 /* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
 :root{
-  --bd-bg:#fffaf0; --rel-bg:#f3fbf6; --bd-line:#f0b400; --rel-line:#2fa866;
+  --g-bg:#d9f1e1; --g-fg:#1d6b3f;
   --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
   --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
   --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
@@ -23,7 +23,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bd-bg:#221f14; --rel-bg:#14231c; --bd-line:#c99700; --rel-line:#2a8f58;
+    --g-bg:#16352a; --g-fg:#8fd6ab;
     --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
     --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
     --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -34,7 +34,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --bd-bg:#221f14; --rel-bg:#14231c; --bd-line:#c99700; --rel-line:#2a8f58;
+  --g-bg:#16352a; --g-fg:#8fd6ab;
   --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
   --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
   --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
@@ -119,13 +119,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
 .chip.strong,.chip.strong *{color:#fff !important}
-.day.relday{background:#4a90cf}
-.day.relday .num{color:#fff} .day.relday.today .num{background:#fff;color:#4a90cf}
-.day.relday .more,.day.relday .more2{color:#fff}
-.day.relday .chip:not(.relchip){background:rgba(255,255,255,.18)}
-.day.relday .chip,.day.relday .chip *{color:#fff !important}
-.chip.relchip{background:transparent;padding:1px 0}
-.chip.relchip,.chip.relchip *{font-weight:800}
+.chip.gchip{background:var(--g-bg);color:var(--g-fg)}
+.chip.gchip *{color:var(--g-fg)}
 .chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .chip.strong .lv{background:transparent;padding:0;border-radius:0}
 .lv.cn{background:#2f5fc4;font-weight:800}
@@ -537,12 +532,12 @@ function renderMonth(box){
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
     var nr = el("span","numrow");
     nr.appendChild(el("span","num",String(d)));
-    if(isRel && !isBd) b.className += " relday";   // 릴리즈 날: 날짜 칸 전체를 블루로
+    if(isBd) nr.appendChild(el("span","mk","🎂"));   // 생일: 날짜 옆 이모지
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
       if(e.src === "plave"){   // 릴리즈·생일은 (종일이든 시간이 있든) 진한 색 칸에 흰 글씨
-        if(/\brelease\b/i.test(e.title)) c.className += " relchip";   // 릴리즈: 날짜 칸 전체가 블루라 칸 자체는 투명
+        if(/\brelease\b/i.test(e.title)) c.className += " gchip";   // 릴리즈: 초록 박스
         else if(/'s\s+day/i.test(e.title)){ var sc = memberColor(e.title); c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
@@ -564,7 +559,7 @@ function renderMonth(box){
         }
       } else {
         var full = cellTitle(e.title, e.src);
-        if(e.allDay && e.src === "plave" && EMO_LEAD){   // 종일 일정은 이모지 없이
+        if(e.allDay && e.src === "plave" && EMO_LEAD && !/release/i.test(e.title)){   // 종일 일정은 이모지 없이
           var nf = full.replace(EMO_LEAD, "");
           if(nf) full = nf;
         }
@@ -585,7 +580,7 @@ function renderMonth(box){
           c.appendChild(sp);
         }
         if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
-        if(cn){ c.className += " strong"; c.style.background = "#4a90cf"; }
+        if(cn) c.className += " gchip";   // 콘서트: 초록 박스
         if(e.allDay) bday = "";
         put("ct-full", lv || cn ? full : bday+full);
         put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
