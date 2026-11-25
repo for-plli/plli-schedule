@@ -113,7 +113,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
-.lv{background:#26304d;color:#fff;border-radius:3px;padding:0 3px;white-space:nowrap}
+.lv{background:#26304d;color:#fff;border-radius:3px;padding:0 2px;white-space:nowrap;font-size:.92em}
+.chip .em{font-size:.78em;line-height:1}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
@@ -334,6 +335,18 @@ function el(tag, cls, text){
   if(text != null) n.textContent = text;
   return n;
 }
+/* 글자 속 이모지는 글씨보다 작게 (칸에서만 사용) */
+var EMO_RE = null;
+try{ EMO_RE = new RegExp("(\\p{Extended_Pictographic}\\uFE0F?(?:\\u200D\\p{Extended_Pictographic}\\uFE0F?)*)", "u"); }catch(err){}
+function rich(node, text){
+  if(!EMO_RE){ node.appendChild(document.createTextNode(text)); return node; }
+  text.split(EMO_RE).forEach(function(p, i){
+    if(!p) return;
+    if(i % 2){ var m = document.createElement("span"); m.className = "em"; m.textContent = p; node.appendChild(m); }
+    else node.appendChild(document.createTextNode(p));
+  });
+  return node;
+}
 function visible(e){ return state.show === "all" ? e.src !== "video" : state.show === e.src; }
 function officialShown(){ return state.show === "all" || state.show === "plave"; }
 function eventsOn(key){ return ALL.filter(function(e){ return e.key === key && visible(e); }); }
@@ -508,11 +521,11 @@ function renderMonth(box){
         c.className += " is-short";
         c.appendChild(el("span","sh","[Shorts]"));
         var hm = e.title.slice(9).match(/^((?:💙|💜|🩷|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
-        if(hm){ c.appendChild(el("span","ct-hearts",bday+hm[1])); }
+        if(hm){ c.appendChild(rich(el("span","ct-hearts"),bday+hm[1])); }
         else {   // 하트가 없는 쇼츠는 제목을 이어서 보여줌
           var sfull = cellTitle(e.title.slice(9));
-          c.appendChild(el("span","ct-full",bday+sfull));
-          c.appendChild(el("span","ct-short",bday+stripBracket(sfull)));
+          c.appendChild(rich(el("span","ct-full"),bday+sfull));
+          c.appendChild(rich(el("span","ct-short"),bday+stripBracket(sfull)));
         }
       } else {
         var full = cellTitle(e.title, e.src);
@@ -522,10 +535,10 @@ function renderMonth(box){
         function put(cls, text){
           var sp = el("span",cls,"");
           if(lv){
-            sp.appendChild(el("span","lv","⚡ LIVE"));
+            sp.appendChild(rich(el("span","lv"),"⚡ LIVE"));
             var tl = text.slice(6).trim();
-            if(tl) sp.appendChild(document.createTextNode(" "+tl));
-          } else sp.textContent = text;
+            if(tl){ sp.appendChild(document.createTextNode(" ")); rich(sp, tl); }
+          } else rich(sp, text);
           c.appendChild(sp);
         }
         if(lv) c.className += " is-live";
