@@ -533,7 +533,6 @@ function renderMonth(box){
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
     var nr = el("span","numrow");
     nr.appendChild(el("span","num",String(d)));
-    if(isBd) nr.appendChild(el("span","mk","🎂"));   // 생일: 날짜 옆 이모지
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
@@ -544,9 +543,15 @@ function renderMonth(box){
       var isShort = e.title.indexOf("[Shorts] ") === 0;
       var bday = "";   // 생일 관련 칸에는 이모지를 붙이지 않음 (날짜 옆 🎂 만)
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
-        var bt = el("b",null,e.time);
-        bt.className = "tm";
-        c.appendChild(bt);
+        var tlabel = e.time;
+        if(e.allDay && e.src === "plave"){   // 종일 대신 의미 있는 말: 릴리즈·생일 (그 밖의 종일 일정은 글자 없이 제목만)
+          tlabel = /\brelease\b/i.test(e.title) ? "릴리즈" : (/'s\s+day/i.test(e.title) ? "생일" : "");
+        }
+        if(tlabel){
+          var bt = el("b",null,tlabel);
+          bt.className = "tm";
+          c.appendChild(bt);
+        }
       }
       if(isShort){
         c.className += " is-short";
@@ -560,9 +565,13 @@ function renderMonth(box){
         }
       } else {
         var full = cellTitle(e.title, e.src);
-        if(e.allDay && e.src === "plave" && EMO_LEAD && !/release/i.test(e.title)){   // 종일 일정은 이모지 없이
+        if(e.allDay && e.src === "plave" && EMO_LEAD && !/release|'s\s+day/i.test(e.title)){   // 종일 일정은 이모지 없이
           var nf = full.replace(EMO_LEAD, "");
           if(nf) full = nf;
+        }
+        if(e.allDay && e.src === "plave" && /'s\s+day/i.test(e.title)){   // 생일: 🎂 + 멤버 이름
+          var bm = e.title.match(/happy\s+(.+?)['’]s\s+day/i);
+          full = "🎂 " + (bm ? bm[1] : full);
         }
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
