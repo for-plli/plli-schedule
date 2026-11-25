@@ -2,11 +2,14 @@
 
   docs/schedule.ics  플리 일정(티켓팅·예약, 매달 반복 포함) - 당일 아침 9시 안내 + 시작 10분 전 알림용
 """
+import re
 from datetime import datetime, timedelta, timezone
 
 STAMP = "20260101T000000Z"        # 고정값: 내용이 같으면 파일도 똑같이 나오게 함
 DEFAULT_MINUTES = 60              # 끝나는 시각이 없을 때 기본 길이
 ALARM_FAN = 10                    # 플리 일정(시간 있는 것) 알림: 10분 전
+# 알림을 줄 플레이브 일정의 제목 규칙 (공식·직접 입력 일정 중 제목이 맞는 것). 콘서트도 받으려면 |KEEP IT MANIC|CONCERT|콘서트 를 덧붙여요.
+PLAVE_ALARM_RE = re.compile(r"\bRELEASE\b", re.I)
 MORNING_HOUR = 9                  # 일정이 있는 날 아침 알림 시각(한국 시간)
 BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]   # 자바스크립트 요일(일=0) 순서
 
@@ -125,14 +128,18 @@ def calendar_text(name, desc, event_lines):
 
 
 def write_all(outdir, official, plave_extra, fan_once, fan_monthly, first_day, until_day):
-    """플리 일정(티켓팅·예약)만 담은 알림용 캘린더(schedule.ics). 플레이브 일정은 사이트에서 봅니다."""
+    """알림용 캘린더(schedule.ics): 플리 일정(티켓팅·예약) + 알림을 줄 플레이브 일정(릴리즈 등)."""
     rows = [(e["utcStart"], e["id"], event(e, ALARM_FAN, "플리")) for e in fan_once]
+    since = f"{first_day:%Y-%m-%d}T00:00:00"
+    for e in official + plave_extra:   # 알림을 줄 플레이브 일정 (지난 일정은 빼요)
+        if PLAVE_ALARM_RE.search(e["title"]) and e["utcStart"] >= since:
+            rows.append((e["utcStart"], e["id"], event(e, ALARM_FAN, "플레이브")))
     lines = []
     for _, _, ev in sorted(rows, key=lambda r: (r[0], r[1])):
         lines += ev
     for r in fan_monthly:
         lines += monthly_event(r, first_day, until_day)
-    text = calendar_text("플리 일정", "플리 티켓팅·예약 일정 알림 (비공식 팬 제작 캘린더)", lines)
+    text = calendar_text("플리 일정", "플리 티켓팅·예약 일정과 플레이브 릴리즈 알림 (비공식 팬 제작 캘린더)", lines)
     with open(f"{outdir}/schedule.ics", "w", encoding="utf-8", newline="") as f:
         f.write(text)
     return text.count("BEGIN:VEVENT")
