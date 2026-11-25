@@ -110,7 +110,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
 .more2{display:none}
 .ct-short{display:none}
-.sh{display:inline-block;margin-right:4px}
+.sh{display:inline-block;margin-right:4px;font-weight:400}
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
 
@@ -202,7 +202,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .chip:nth-of-type(n+4){display:none}
   .chip b{display:block;font-size:9.5px;margin:0}
   .ct-full{display:none}
-  .sh{display:block;margin-right:0}
+  .sh{display:block;margin-right:0;font-size:9.5px}
   .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .note{font-size:12px;padding:6px 10px}
   footer{font-size:11px}
@@ -439,6 +439,12 @@ function renderTitleAndNote(){
   } else { note.hidden = true; }
 }
 
+/* 달력 칸에 보일 제목: 맨 앞의 PLAVE(플레이브) 는 뺌 (팝업에는 제목 전체가 나와요) */
+function cellTitle(s){
+  var r = s.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "");
+  return r || s;
+}
+function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
 function renderMonth(box){
   var ym = monthOf(state.sel);
   var p = ym.split("-").map(Number);
@@ -465,6 +471,7 @@ function renderMonth(box){
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
       var isShort = e.title.indexOf("[Shorts] ") === 0;
+      var bday = /birthday/i.test(e.title) ? "🎂 " : "";   // 생일 관련 제목은 🎂 로 시작
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
         var bt = el("b",null,e.time);
         bt.className = "tm";
@@ -472,17 +479,18 @@ function renderMonth(box){
       }
       if(isShort){
         c.className += " is-short";
-        c.appendChild(el("b","sh","[Shorts]"));
+        c.appendChild(el("span","sh","[Shorts]"));
         var hm = e.title.slice(9).match(/^((?:💙|💜|💗|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
-        if(hm){ c.appendChild(el("span","ct-hearts",hm[1])); }
+        if(hm){ c.appendChild(el("span","ct-hearts",bday+hm[1])); }
         else {   // 하트가 없는 쇼츠는 제목을 이어서 보여줌
-          var sbase = e.title.slice(9);
-          c.appendChild(el("span","ct-full",sbase));
-          c.appendChild(el("span","ct-short",sbase.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || sbase));
+          var sfull = cellTitle(e.title.slice(9));
+          c.appendChild(el("span","ct-full",bday+sfull));
+          c.appendChild(el("span","ct-short",bday+stripBracket(sfull)));
         }
       } else {
-        c.appendChild(el("span","ct-full",e.title));
-        c.appendChild(el("span","ct-short",e.title.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || e.title));
+        var full = cellTitle(e.title);
+        c.appendChild(el("span","ct-full",bday+full));
+        c.appendChild(el("span","ct-short",bday+stripBracket(full)));
       }
       b.appendChild(c);
     });
