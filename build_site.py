@@ -293,7 +293,7 @@ def lookup_video(vid, manual_title=""):
 
 
 def load_extra_videos(offline):
-    """video_extra.txt 의 링크를 영상 목록에 넣기. 한 줄: 링크 [| 제목(생략하면 유튜브에서 읽음)]"""
+    """video_extra.txt 의 링크를 영상 목록에 넣기. 한 줄: 링크 [| 제목(생략하면 유튜브에서 읽음)] [| 올린 날짜 2026-11-24 18:00]"""
     if not os.path.exists(VIDEO_EXTRA):
         return []
     cache = {}
@@ -328,6 +328,13 @@ def load_extra_videos(offline):
                 print(f"영상 추가: {title[:40]} ({ent['utcStart']})")
             except Exception as ex:
                 print(f"영상 정보를 읽지 못함 ({vid}): {ex}", file=sys.stderr)
+        if ent and len(parts) > 2 and parts[2]:   # 세 번째 칸에 날짜(시간)를 적으면 그 날짜로 (한국 시간)
+            try:
+                fmt = "%Y-%m-%d %H:%M" if ":" in parts[2] else "%Y-%m-%d"
+                d = datetime.strptime(parts[2], fmt).replace(tzinfo=KST).astimezone(timezone.utc)
+                ent = dict(ent, utcStart=d.strftime("%Y-%m-%dT%H:%M:%SZ"), dateGuessed=False)
+            except ValueError:
+                print(f"video_extra.txt: 날짜 형식은 2026-11-24 18:00 처럼 적어 주세요: {parts[2]}", file=sys.stderr)
         if ent:
             out.append(ent)
     if changed:
