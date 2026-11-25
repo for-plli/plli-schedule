@@ -399,6 +399,8 @@ def load_extra_videos(offline):
                 ent = dict(ent, utcStart=d.strftime("%Y-%m-%dT%H:%M:%SZ"), dateGuessed=False)
             except ValueError:
                 print(f"video_extra.txt: 날짜 형식은 2026-11-24 18:00 처럼 적어 주세요: {parts[2]}", file=sys.stderr)
+        if ent and "/live/" in parts[0]:   # youtube.com/live/ 링크는 라이브 다시보기로 [LIVE] 표시
+            ent = dict(ent, live=True)
         if ent:
             out.append(ent)
     if changed:
