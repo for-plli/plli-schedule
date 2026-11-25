@@ -330,7 +330,21 @@ function monthlyEvents(){
 var PLAVE_EXTRA = __PLAVE_EXTRA__;
 /* 공식 유튜브 새 영상 (영상 탭을 눌렀을 때만 보여요) */
 var VIDEOS = __VIDEOS__;
-var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
+/* 시간이 정해진 릴리즈: 10월처럼 종일 릴리즈 칸을 먼저 두고, 그 아래 시간 일정을 따로 둡니다 */
+function splitRelease(list){
+  var out = [];
+  list.forEach(function(e){
+    if(!e.isAllDay && /\bRELEASE\b/i.test(e.title)){
+      var k = kst(Date.parse(e.utcStart));
+      out.push({id:e.id+"-day", title:e.title, utcStart:new Date(Date.UTC(k.getUTCFullYear(),k.getUTCMonth(),k.getUTCDate())).toISOString(), isAllDay:true, links:e.links||[]});
+      var c = {}; for(var key in e) c[key] = e[key];
+      c.title = e.title.replace(/\s*\bRELEASE\b\s*/i," 발매").replace(/\s+$/,"");
+      out.push(c);
+    } else out.push(e);
+  });
+  return out;
+}
+var ALL = splitRelease(RAW.concat(PLAVE_EXTRA)).map(function(e){return norm(e,"plave");})
   .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}))
   .concat(VIDEOS.map(function(e){return norm(e,"video");}));
 ALL.sort(function(a,b){
@@ -490,7 +504,7 @@ function cellTitle(s, src){
     return hs ? hs : r;
   }
   if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: LIVE (일부 멤버만 나오면 하트도)
-    return "🎙️ LIVE";
+    return "LIVE";
   }
   if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🔥 + 도시·회차만
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
@@ -498,7 +512,7 @@ function cellTitle(s, src){
   }
   if(/\bRELEASE\b/i.test(r)){   // 릴리즈만 💿 + 이름 (M/V 등 다른 영상 일정에는 안 붙임)
     var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").trim();
-    return "🚨 " + (t || r);
+    return t || r;
   }
   if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return r;   // 방송: 방송국 이름만
   return r;
@@ -547,10 +561,11 @@ function renderMonth(box){
       var bday = (/birthday|b-?day|생일/i.test(e.title) && !/'s\s+day/i.test(e.title)) ? "🎂 " : "";   // 생일 관련 콘텐츠는 제목 앞에 🎂
       var cat = "";   // 종류 이모지(🔥 콘서트·📺 방송·🚨 릴리즈·🎂 생일)는 시간 옆에 작게
       if(e.src === "plave" && !isShort){
-        var cm = cellTitle(e.title, "plave").match(/^(🔥|📺|🚨|🎙️) /);
+        var cm = cellTitle(e.title, "plave").match(/^(🔥|📺) /);
         if(cm) cat = cm[1];
         if(e.allDay && /'s\s+day/i.test(e.title)) cat = "🎂";
       }
+      var isYL = (e.src === "plave" && !isShort && cellTitle(e.title, "plave") === "LIVE");   // 유튜브 라이브: 이모지 없이 초록 박스
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
         var tlabel = e.time;
         if(e.allDay && e.src === "plave"){   // 종일 대신 의미 있는 말: 릴리즈·생일 (그 밖의 종일 일정은 글자 없이 제목만)
@@ -588,7 +603,7 @@ function renderMonth(box){
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
         var lv = false;   // LIVE 는 이제 일반 칸 (🎙️ 이모지만 앞에)
-        if(cat === "🎙️") c.className += " is-live";
+        if(isYL) c.className += " is-live gchip";
         var cn = cat === "🔥";   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
