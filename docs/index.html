@@ -471,7 +471,7 @@ function cellTitle(s, src){
     return hs ? hs : r;
   }
   if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: ⚡ LIVE (일부 멤버만 나오면 하트도)
-    return "⚡ LIVE" + (n && n < 5 ? " " + hs : "");
+    return "⚡ LIVE";
   }
   if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🎤 + 도시·회차만
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
