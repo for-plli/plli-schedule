@@ -104,9 +104,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
-.day.bd{box-shadow:inset 0 0 0 2px var(--bd-line);background:var(--bd-bg)} .day.rel{box-shadow:inset 0 0 0 2px var(--rel-line);background:var(--rel-bg)}
-.numrow{display:flex;align-items:center;gap:3px}
-.mk{font-size:11px;line-height:1}
+.numrow{display:flex;align-items:center;gap:2px;height:26px}
+.mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
@@ -119,7 +118,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
-.lv.cn{background:#e8590c;padding:2px 3px;font-size:.8em;letter-spacing:-.2px}
+.lv.cn{background:#e8590c;width:1.7em;height:1.7em;padding:0;line-height:1;display:inline-flex;align-items:center;justify-content:center;font-weight:800;border-radius:4px}
 .lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
 .chip .em{font-size:.92em;line-height:1}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
@@ -209,6 +208,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .dow{font-size:11px;padding:5px 0}
   .day,.blank{min-height:78px;padding:3px 2px;gap:2px}
   .num{font-size:12.5px;width:22px;height:22px}
+  .numrow{height:22px}
+  .mk{font-size:9px}
   .more{display:none}
   .more2{display:block;font-size:9px;color:var(--muted);padding-left:2px;line-height:1.2}
   .chip{font-size:8.5px;line-height:1.2;padding:1px 2px 1px 3px;border-left-width:2px;white-space:normal}
@@ -345,6 +346,8 @@ function el(tag, cls, text){
 /* 글자 속 이모지는 글씨보다 작게 (칸에서만 사용) */
 var EMO_RE = null;
 try{ EMO_RE = new RegExp("(\\p{Extended_Pictographic}\\uFE0F?(?:\\u200D\\p{Extended_Pictographic}\\uFE0F?)*)", "u"); }catch(err){}
+var EMO_LEAD = null;
+try{ EMO_LEAD = new RegExp("^(?:\\p{Extended_Pictographic}\\uFE0F?\\s*)+", "u"); }catch(err){}
 function rich(node, text){
   if(!EMO_RE){ node.appendChild(document.createTextNode(text)); return node; }
   text.split(EMO_RE).forEach(function(p, i){
@@ -492,6 +495,11 @@ function cellTitle(s, src){
   return r;
 }
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
+var MEMBER_COLOR = [[/yejun|예준/i,"#3b82f6"],[/noah|노아/i,"#8b5cf6"],[/bamby|밤비/i,"#ec6fa5"],[/eunho|은호/i,"#e5484d"],[/hamin|하민/i,"#2fa866"]];
+function memberColor(t){
+  for(var i=0;i<MEMBER_COLOR.length;i++) if(MEMBER_COLOR[i][0].test(t)) return MEMBER_COLOR[i][1];
+  return "#d9a400";
+}
 function renderMonth(box){
   var ym = monthOf(state.sel);
   var p = ym.split("-").map(Number);
@@ -514,12 +522,16 @@ function renderMonth(box){
     b.type = "button";
     b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
     b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
-    var isBd = list.some(function(e){ return e.src==="plave" && /'s\s+day|\bb-?day\b/i.test(e.title) && !/gift/i.test(e.title); });
+    var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day|\bb-?day\b/i.test(e.title) && !/gift/i.test(e.title); })[0];
+    var isBd = !!bdEv;
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
-    if(isBd) b.className += " bd";
-    else if(isRel) b.className += " rel";
+    if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 얇은 테두리 (생일이 우선)
+      var bc = isBd ? memberColor(bdEv.title) : "var(--ink)";
+      b.style.boxShadow = "inset 0 0 0 1px " + bc;
+    }
     var nr = el("span","numrow");
     nr.appendChild(el("span","num",String(d)));
+    if(isBd || isRel) nr.appendChild(el("span","mk",(isBd ? "🎂" : "") + (isRel ? "💿" : "")));
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
@@ -542,6 +554,10 @@ function renderMonth(box){
         }
       } else {
         var full = cellTitle(e.title, e.src);
+        if(e.allDay && e.src === "plave" && EMO_LEAD){   // 종일 일정은 이모지 없이
+          var nf = full.replace(EMO_LEAD, "");
+          if(nf) full = nf;
+        }
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
         var lv = e.src === "plave" && full === "LIVE";
@@ -559,6 +575,7 @@ function renderMonth(box){
           c.appendChild(sp);
         }
         if(lv) c.className += " is-live";
+        if(e.allDay) bday = "";
         put("ct-full", lv || cn ? full : bday+full);
         put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
       }
