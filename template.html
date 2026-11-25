@@ -104,7 +104,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
 .blank{background:var(--bg)}
 .day{cursor:pointer}
-.numrow{display:flex;align-items:center;gap:2px;height:26px}
+.numrow{display:flex;align-items:center;justify-content:space-between;gap:2px;height:26px}
 .mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
@@ -118,7 +118,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
-.lv.cn{background:#e8590c;width:1.7em;height:1.7em;padding:0;line-height:1;display:inline-flex;align-items:center;justify-content:center;font-weight:800;border-radius:4px}
+.lv.cn{background:#e8590c;font-weight:800}
 .lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
 .chip .em{font-size:.92em;line-height:1}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
@@ -522,7 +522,7 @@ function renderMonth(box){
     b.type = "button";
     b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
     b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
-    var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day|\bb-?day\b/i.test(e.title) && !/gift/i.test(e.title); })[0];
+    var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day/i.test(e.title); })[0];   // 실제 생일날(Happy ○○'s Day)만
     var isBd = !!bdEv;
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
     if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 얇은 테두리 (생일이 우선)
@@ -565,7 +565,7 @@ function renderMonth(box){
         function put(cls, text){
           var sp = el("span",cls,"");
           if(cn){
-            sp.appendChild(el("span","lv cn","C"));
+            sp.appendChild(el("span","lv cn","CON"));
             sp.appendChild(document.createTextNode(" " + text.slice(2).trim()));
           } else if(lv){
             sp.appendChild(rich(el("span","lv"),"LIVE"));
