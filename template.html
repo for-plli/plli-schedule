@@ -281,7 +281,7 @@ function norm(e, src){
   var allDay = !!e.isAllDay;
   var d = allDay ? new Date(ms) : kst(ms);
   return {
-    id:e.id, title:e.title, ms:ms, allDay:allDay, key:keyOf(d), src:src,
+    id:e.id, title:String(e.title).replace(/💗/g,"🩷"), ms:ms, allDay:allDay, key:keyOf(d), src:src,
     time: allDay ? "종일" : pad(d.getUTCHours())+":"+pad(d.getUTCMinutes()),
     note: e.note || "",
     links:(e.links||[]).map(function(l){return l.url;}).filter(function(u){return typeof u==="string" && u.indexOf("https://")===0;})
@@ -480,7 +480,7 @@ function renderMonth(box){
       if(isShort){
         c.className += " is-short";
         c.appendChild(el("span","sh","[Shorts]"));
-        var hm = e.title.slice(9).match(/^((?:💙|💜|💗|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
+        var hm = e.title.slice(9).match(/^((?:💙|💜|🩷|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
         if(hm){ c.appendChild(el("span","ct-hearts",bday+hm[1])); }
         else {   // 하트가 없는 쇼츠는 제목을 이어서 보여줌
           var sfull = cellTitle(e.title.slice(9));
