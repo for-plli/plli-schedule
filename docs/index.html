@@ -109,7 +109,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
-.day.today .num{background:var(--ink);color:var(--surface)}
+.day.today .num{box-shadow:inset 0 0 0 2px var(--ink);color:var(--ink)}   /* 오늘: 외곽선 원 */
 .chip{font-size:11.5px;line-height:1.3;padding:2px 5px;border-radius:4px;border-left:3px solid var(--cbar);background:var(--cb);color:var(--cf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .chip b{font-family:var(--font-num);font-weight:700;font-size:12px;margin-right:4px}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
@@ -525,12 +525,15 @@ function renderMonth(box){
     var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day/i.test(e.title); })[0];   // 실제 생일날(Happy ○○'s Day)만
     var isBd = !!bdEv;
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
-    if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 띠 (생일이 우선)
+    var numBg = "";
+    if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 원 (생일이 우선)
       var bc = isBd ? memberColor(bdEv.title) : "var(--ink)";
-      b.style.boxShadow = "inset 0 4px 0 " + bc;   // 칸 맨 위 굵은 띠
+      numBg = bc;   // 날짜 숫자 뒤에 색 원
     }
     var nr = el("span","numrow");
-    nr.appendChild(el("span","num",String(d)));
+    var numEl = el("span","num",String(d));
+    if(numBg){ numEl.style.background = numBg; numEl.style.color = "#fff"; }
+    nr.appendChild(numEl);
     if(isBd || isRel) nr.appendChild(el("span","mk",(isBd ? "🎂" : "") + (isRel ? "💿" : "")));
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
