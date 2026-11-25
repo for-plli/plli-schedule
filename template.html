@@ -113,8 +113,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
-.lv{background:#26304d;color:#fff;border-radius:3px;padding:0 2px;white-space:nowrap;font-size:.92em}
-.chip .em{font-size:.78em;line-height:1}
+.lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
+.chip .em{font-size:.88em;line-height:1}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
@@ -470,8 +470,8 @@ function cellTitle(s, src){
   if(/weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브: 멤버 하트만 (하트가 없으면 제목 그대로)
     return hs ? hs : r;
   }
-  if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: ⚡ LIVE (일부 멤버만 나오면 하트도)
-    return "⚡ LIVE";
+  if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: 🔴 LIVE (일부 멤버만 나오면 하트도)
+    return "🔴 LIVE";
   }
   if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🎤 + 도시·회차만
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
@@ -531,12 +531,12 @@ function renderMonth(box){
         var full = cellTitle(e.title, e.src);
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
-        var lv = full.indexOf("⚡ LIVE") === 0;   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        var lv = full.indexOf("🔴 LIVE") === 0;   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
           if(lv){
-            sp.appendChild(rich(el("span","lv"),"⚡ LIVE"));
-            var tl = text.slice(6).trim();
+            sp.appendChild(rich(el("span","lv"),"🔴 LIVE"));
+            var tl = text.slice("🔴 LIVE".length).trim();
             if(tl){ sp.appendChild(document.createTextNode(" ")); rich(sp, tl); }
           } else rich(sp, text);
           c.appendChild(sp);
