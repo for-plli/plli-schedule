@@ -266,17 +266,17 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
     </div>
   </dialog>
 
-  <dialog class="daydlg" id="subdlg" aria-label="캘린더 구독 안내">
+  <dialog class="daydlg" id="subdlg" aria-label="플리 일정 알림 안내">
     <div class="dlg-in">
       <button type="button" class="dlg-x" id="subx" aria-label="닫기">✕</button>
-      <p class="subt">캘린더 구독 안내</p>
+      <p class="subt">플리 일정 알림 받기</p>
       <ul class="subinfo">
-        <li>플레이브 일정과 플리 일정이 한 캘린더로 들어가요.</li>
-        <li>한 번 구독해 두면 일정이 바뀔 때 몇 시간 안에 자동으로 반영돼요.</li>
-        <li>플리 일정(티켓팅·예약)은 시작 10분 전에 알림이 가요. 플레이브 일정은 알림 없이 들어가요.</li>
+        <li>티켓팅·예약 같은 플리 일정만 담긴 캘린더예요.</li>
+        <li>일정이 있는 날 아침 9시에 오늘 일정을 알려주고, 시작 10분 전에 한 번 더 알려줘요.</li>
+        <li>한 번 구독해 두면 일정이 새로 생기거나 바뀔 때 몇 시간 안에 자동으로 반영돼요.</li>
         <li>아이폰·맥 캘린더는 알림이 그대로 와요. 구글 캘린더는 앱 설정에서 알림을 따로 켜야 할 수 있어요.</li>
       </ul>
-      <p class="subq">내 캘린더에 구독할까요?</p>
+      <p class="subq">알림을 받을까요?</p>
       <div class="rows" id="subrows"></div>
     </div>
   </dialog>
@@ -305,7 +305,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   <footer>
     <span>비공식 팬 제작 캘린더입니다.</span>
     <span id="updated"></span>
-    <button type="button" class="subbtn" id="subopen">📅 내 캘린더에 구독하기</button>
+    <button type="button" class="subbtn" id="subopen">🔔 플리 일정 알림 받기</button>
   </footer>
 </div>
 
@@ -757,7 +757,7 @@ document.getElementById("showseg").addEventListener("click", function(ev){
   if(k){ state.show = k; render(); }
 });
 document.getElementById("updated").textContent = "공식 일정 마지막 확인: " + UPDATED + " (한국 시간)";
-/* 캘린더 구독 링크: 이 페이지와 같은 주소에 있는 schedule.ics (플레이브 + 플리) */
+/* 알림용 캘린더 구독 링크: 이 페이지와 같은 주소에 있는 schedule.ics (플리 일정) */
 (function(){
   var box = document.getElementById("subrows");
   if(!box) return;
