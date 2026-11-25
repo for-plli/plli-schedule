@@ -454,6 +454,10 @@ function cellTitle(s, src){
     var hm = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/), body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
     var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
     r = "▶️ " + (n && n < 5 ? hs + " " : "") + body;
+  } else if(src === "plave" && !/weverse|위버스/i.test(r)){
+    if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)) r = "🎤 " + r;
+    else if(/RELEASE|\bM\/V\b|\bMV\b/i.test(r)) r = "💿 " + r;
+    else if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) r = "📺 " + r;
   }
   return r;
 }
