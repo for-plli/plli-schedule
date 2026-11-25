@@ -75,6 +75,19 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .links a{font-size:12.5px;color:var(--cf);text-decoration:none;background:var(--surface);border:1px solid var(--cbar);border-radius:2px;padding:2px 10px}
 .links a:hover{text-decoration:underline}
 .empty{color:var(--muted);font-size:14.5px;margin:0}
+.next{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:14.5px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.next .nl{color:var(--muted);font-size:12.5px;font-weight:700}
+.next .nd{font-family:var(--font-num);font-weight:700}
+.next .nt{color:var(--ink)}
+.next .dd{margin-left:auto;font-family:var(--font-num);font-weight:700;font-size:13px;color:var(--p-fg);background:var(--p-bg);border-radius:2px;padding:1px 6px}
+.subbtn{margin-top:6px;font:inherit;font-size:12.5px;color:var(--muted);background:none;border:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 8px}
+.rows{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.rows .row{display:flex;gap:6px;flex-wrap:wrap}
+.rows a,.rows button{font:inherit;font-size:13.5px;font-weight:700;text-align:center;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:9px 12px;cursor:pointer;flex:1}
+.rows a.go{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.subq{margin:16px 0 0;font-size:14.5px;font-weight:700}
+.subt{margin:0 0 10px;font-size:16px;font-weight:700;padding-right:32px}
+.subinfo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.5}
 
 /* 컨트롤 */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
@@ -253,6 +266,21 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
     </div>
   </dialog>
 
+  <dialog class="daydlg" id="subdlg" aria-label="캘린더 구독 안내">
+    <div class="dlg-in">
+      <button type="button" class="dlg-x" id="subx" aria-label="닫기">✕</button>
+      <p class="subt">캘린더 구독 안내</p>
+      <ul class="subinfo">
+        <li>플레이브 일정과 플리 일정이 한 캘린더로 들어가요.</li>
+        <li>한 번 구독해 두면 일정이 바뀔 때 몇 시간 안에 자동으로 반영돼요.</li>
+        <li>플리 일정(티켓팅·예약)은 시작 10분 전에 알림이 가요. 플레이브 일정은 알림 없이 들어가요.</li>
+        <li>아이폰·맥 캘린더는 알림이 그대로 와요. 구글 캘린더는 앱 설정에서 알림을 따로 켜야 할 수 있어요.</li>
+      </ul>
+      <p class="subq">내 캘린더에 구독할까요?</p>
+      <div class="rows" id="subrows"></div>
+    </div>
+  </dialog>
+
   <div class="row1">
     <div class="lhs">
       <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
@@ -277,6 +305,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   <footer>
     <span>비공식 팬 제작 캘린더입니다.</span>
     <span id="updated"></span>
+    <button type="button" class="subbtn" id="subopen">📅 내 캘린더에 구독하기</button>
   </footer>
 </div>
 
@@ -407,6 +436,29 @@ function renderSelected(){
   fillDay(todayKey, "eyebrow", "seldate", "items");
 }
 
+/* 오늘 일정이 없을 때 보여줄 '다음 일정' (영상 제외, 지금 고른 필터를 따름) */
+function nextLine(key){
+  var n = null;
+  for(var i=0;i<ALL.length;i++){ if(ALL[i].key > key && visible(ALL[i])){ n = ALL[i]; break; } }
+  if(!n) return null;
+  var t = n.title.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || n.title;
+  if(n.src === "plave"){
+    var c = cellTitle(n.title, "plave");
+    if(/^[💙💜🩷💗❤️❤🖤\s]+$/.test(c)){ t = n.title; }                    // 위버스 라이브: 하트만이면 제목 그대로
+    else if(/KEEP IT MANIC|CONCERT|콘서트/i.test(t)){ t = c.replace(/^\S+\s/, "").replace(/\s*Concert$/i, "") + " Concert"; }
+    else if(n.allDay && /\bRELEASE\b/i.test(n.title)){ t = "릴리즈 " + c; }
+    else if(n.allDay && /'s\s+day/i.test(n.title)){ t = "생일 " + (n.title.match(/happy\s+(.+?)['’]s\s+day/i) || [0, c])[1]; }
+  }
+  var a = parseKey(key), b = parseKey(n.key);
+  var days = Math.round((b - a) / 86400000);
+  var p = n.key.split("-").map(Number), wd = dowOf(n.key);
+  var line = el("p","next");
+  line.appendChild(el("span","nl","다음 일정"));
+  line.appendChild(el("span","nd",p[1]+"/"+p[2]+"("+DOWL[wd].charAt(0)+")"+(n.allDay ? "" : " "+n.time)));
+  line.appendChild(el("span","nt",t));
+  line.appendChild(el("span","dd","D-"+days));
+  return line;
+}
 function fillDay(key, eyebrowId, headId, itemsId){
   var p = key.split("-").map(Number);
   var wd = dowOf(key);
@@ -430,6 +482,10 @@ function fillDay(key, eyebrowId, headId, itemsId){
       msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
     }
     li.appendChild(el("p","empty",msg));
+    if(key === todayKey && state.show !== "video" && /^오늘은 일정이 없어요/.test(msg)){
+      var nx = nextLine(key);
+      if(nx) li.appendChild(nx);
+    }
     ul.appendChild(li);
     return;
   }
@@ -687,6 +743,13 @@ function step(dir){
 document.getElementById("prev").addEventListener("click", function(){ step(-1); });
 document.getElementById("next").addEventListener("click", function(){ step(1); });
 document.getElementById("dlgx").addEventListener("click", closeDay);
+(function(){
+  var d = document.getElementById("subdlg");
+  function close(){ try{ if(d.close) d.close(); else d.removeAttribute("open"); }catch(x){ d.removeAttribute("open"); } }
+  document.getElementById("subx").addEventListener("click", close);
+  document.getElementById("subopen").addEventListener("click", function(){ try{ if(d.showModal) d.showModal(); else d.setAttribute("open",""); }catch(x){ d.setAttribute("open",""); } });
+  d.addEventListener("click", function(ev){ if(ev.target === this) close(); });
+})();
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
 document.getElementById("vidbtn").addEventListener("click", function(){ state.show = state.show === "video" ? "all" : "video"; render(); });
 document.getElementById("showseg").addEventListener("click", function(ev){
@@ -694,6 +757,26 @@ document.getElementById("showseg").addEventListener("click", function(ev){
   if(k){ state.show = k; render(); }
 });
 document.getElementById("updated").textContent = "공식 일정 마지막 확인: " + UPDATED + " (한국 시간)";
+/* 캘린더 구독 링크: 이 페이지와 같은 주소에 있는 schedule.ics (플레이브 + 플리) */
+(function(){
+  var box = document.getElementById("subrows");
+  if(!box) return;
+  var base = location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/, "");
+  [["","schedule.ics"]].forEach(function(it){
+    var url = base + it[1], web = url.replace(/^https?:/, "webcal:");
+    var row = el("div","row");
+        var a1 = el("a","go","아이폰·맥"); a1.href = web; row.appendChild(a1);
+    var a2 = el("a",null,"구글 캘린더"); a2.href = "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(web); a2.target = "_blank"; a2.rel = "noopener"; row.appendChild(a2);
+    var bt = el("button",null,"주소 복사"); bt.type = "button";
+    bt.onclick = function(){
+      var done = function(){ bt.textContent = "복사됨 ✓"; setTimeout(function(){ bt.textContent = "주소 복사"; }, 1500); };
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done, function(){ window.prompt("주소를 복사하세요", url); }); }
+      else { window.prompt("주소를 복사하세요", url); }
+    };
+    row.appendChild(bt);
+    box.appendChild(row);
+  });
+})();
 render();
 </script>
 </body>

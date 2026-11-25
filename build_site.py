@@ -23,6 +23,7 @@ import re
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
+import ics
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -536,6 +537,10 @@ def main():
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as f:
         f.write(html)
+    first_day = date(y0, m0, 1)
+    until_day = date(y1, m1, calendar.monthrange(y1, m1)[1])
+    cnt = ics.write_all(os.path.dirname(a.out) or ".", official, plave_extra, fan_once, fan_monthly, first_day, until_day)
+    print(f"캘린더 구독 파일: {cnt}건 -> schedule.ics")
     print(f"공식 {len(official)}건, 플레이브(직접) {len(plave_extra)}건, 플리 {len(fan_once)}건 + 반복 {len(fan_monthly)}개, 영상 {len(videos)}건 -> {a.out}")
     if not a.offline and ok == 0:
         sys.exit("공식 사이트에서 한 달도 읽지 못했습니다. (보관본으로 만들었어요)")
