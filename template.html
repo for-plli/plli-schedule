@@ -109,7 +109,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .day:focus,.day:focus-visible{outline:none}
 .num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
-.day.today .num{box-shadow:inset 0 0 0 2px var(--ink);color:var(--ink)}   /* 오늘: 외곽선 원 */
+.day.today .num{background:var(--ink);color:var(--surface)}
 .chip{font-size:11.5px;line-height:1.3;padding:2px 5px;border-radius:4px;border-left:3px solid var(--cbar);background:var(--cb);color:var(--cf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .chip b{font-family:var(--font-num);font-weight:700;font-size:12px;margin-right:4px}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
@@ -118,6 +118,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
+.chip.strong,.chip.strong *{color:#fff !important}
+.chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .lv.cn{background:#2f5fc4;font-weight:800}
 .lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
 .chip .em{font-size:.92em;line-height:1}
@@ -525,19 +527,16 @@ function renderMonth(box){
     var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day/i.test(e.title); })[0];   // 실제 생일날(Happy ○○'s Day)만
     var isBd = !!bdEv;
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
-    var numBg = "";
-    if(isBd || isRel){   // 생일은 멤버 색, 릴리즈는 검정 원 (생일이 우선)
-      var bc = isBd ? memberColor(bdEv.title) : "var(--ink)";
-      numBg = bc;   // 날짜 숫자 뒤에 색 원
-    }
     var nr = el("span","numrow");
-    var numEl = el("span","num",String(d));
-    if(numBg){ numEl.style.background = numBg; numEl.style.color = "#fff"; }
-    nr.appendChild(numEl);
+    nr.appendChild(el("span","num",String(d)));
     if(isBd || isRel) nr.appendChild(el("span","mk",(isBd ? "🎂" : "") + (isRel ? "💿" : "")));
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
+      if(e.allDay && e.src === "plave"){   // 종일 릴리즈·생일은 진한 색 칸에 흰 글씨
+        var sc = /'s\s+day/i.test(e.title) ? memberColor(e.title) : (/\brelease\b/i.test(e.title) ? "#14172b" : "");
+        if(sc){ c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
+      }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
       var bday = /birthday/i.test(e.title) ? "🎂 " : "";   // 생일 관련 제목은 🎂 로 시작
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
