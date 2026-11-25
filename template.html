@@ -450,6 +450,11 @@ function cellTitle(s, src){
     var m = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/);
     if(m && m[1]) r = m[2] + " " + m[1];
   }
+  if(src === "plave" && /\bLIVE\b|라이브/i.test(r) && !/weverse|위버스/i.test(r)){
+    var hm = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/), body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
+    var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
+    r = "▶️ " + (n && n < 5 ? hs + " " : "") + body;
+  }
   return r;
 }
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
