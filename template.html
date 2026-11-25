@@ -120,6 +120,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .chip.is-live .ct-short{text-overflow:clip}
 .chip.strong,.chip.strong *{color:#fff !important}
 .chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.chip.strong .lv{background:transparent;padding:0;border-radius:0}
 .lv.cn{background:#2f5fc4;font-weight:800}
 .lv{display:inline-block;background:#26304d;color:#fff;border-radius:4px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle}
 .chip .em{font-size:.92em;line-height:1}
@@ -576,7 +577,8 @@ function renderMonth(box){
           } else rich(sp, text);
           c.appendChild(sp);
         }
-        if(lv) c.className += " is-live";
+        if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
+        if(cn){ c.className += " strong"; c.style.background = "#2f5fc4"; }
         if(e.allDay) bday = "";
         put("ct-full", lv || cn ? full : bday+full);
         put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
