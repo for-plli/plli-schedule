@@ -260,8 +260,21 @@ def lookup_video(vid, manual_title=""):
     page = http_get("https://www.youtube.com/watch?v=" + vid)
     title = manual_title
     if not title:
-        m = re.search(r'<meta property="og:title" content="([^"]+)"', page) or re.search(r"<title>(.*?)(?: - YouTube)?</title>", page, re.S)
-        title = _h.unescape(m.group(1)).strip() if m else ""
+        for pat in (r'<meta property="og:title" content="([^"]+)"', r'<meta name="title" content="([^"]+)"',
+                    r'"videoDetails":\{[^}]*?"title":"((?:[^"\\]|\\.)*)"', r"<title>(.*?)(?: - YouTube)?</title>"):
+            m = re.search(pat, page, re.S)
+            if m and m.group(1).strip() and m.group(1).strip().lower() != "youtube":
+                try:
+                    title = _h.unescape(json.loads('"' + m.group(1) + '"') if "\\" in m.group(1) else m.group(1)).strip()
+                except Exception:
+                    title = _h.unescape(m.group(1)).strip()
+                break
+    if not title:   # 공식 oEmbed 로 제목만이라도
+        try:
+            o = json.loads(http_get("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + vid))
+            title = (o.get("title") or "").strip()
+        except Exception:
+            pass
     when = None
     for pat in (r'itemprop="datePublished" content="([^"]+)"', r'"publishDate":"([^"]+)"', r'"uploadDate":"([^"]+)"'):
         m = re.search(pat, page)
@@ -274,7 +287,8 @@ def lookup_video(vid, manual_title=""):
             except Exception:
                 pass
     if not title:
-        raise ValueError("제목을 찾지 못함")
+        t = re.search(r"<title>(.*?)</title>", page, re.S)
+        raise ValueError(f"제목을 찾지 못함 (페이지 {len(page)}자, title={t.group(1)[:60] if t else None!r}, 재생불가={('LOGIN_REQUIRED' in page) or ('UNPLAYABLE' in page)})")
     return title, when
 
 
