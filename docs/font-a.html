@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>⏱️ 바쁘다 바빠 플리사회 🏃🏻‍♀️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
+:root{
+  --g-bg:#d9f1e1; --g-fg:#1d6b3f;
+  --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
+  --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
+  --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
+  --v:#8f84d6; --v-bg:#f0eefb; --v-fg:#4b4190; --v-bar:#c1b8ee;
+  --n-bg:#eceef6; --n-fg:#2b2f45;
+  --sun:#c8707a; --sat:#5da3de; --sun-bg:#fbebee;
+  --font-body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-num:"Outfit","Noto Sans KR",-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --g-bg:#16352a; --g-fg:#8fd6ab;
+    --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
+    --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
+    --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+    --v:#b5acec; --v-bg:#27223f; --v-fg:#d9d3f7; --v-bar:#6d62ad;
+    --n-bg:#22263a; --n-fg:#dfe2f2;
+    --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --g-bg:#16352a; --g-fg:#8fd6ab;
+  --bg:#0d0f19; --surface:#161927; --ink:#eceefa; --muted:#9ba1bc; --line:#282c40;
+  --p:#8cc1ee; --p-ink:#0d0f19; --p-bg:#1a3149; --p-fg:#c6e3fa; --p-bar:#4f88b8;
+  --f:#dc94b3; --f-ink:#0d0f19; --f-bg:#2f2029; --f-fg:#f0c8d8; --f-bar:#94586f;
+    --v:#b5acec; --v-bg:#27223f; --v-fg:#d9d3f7; --v-bar:#6d62ad;
+  --n-bg:#22263a; --n-fg:#dfe2f2;
+  --sun:#e79aa3; --sat:#8fc4ef; --sun-bg:#36212a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 16px 56px;display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+
+.src-plave{--cb:var(--p-bg);--cf:var(--p-fg);--cbar:var(--p-bar)}
+.src-fan{--cb:var(--f-bg);--cf:var(--f-fg);--cbar:var(--f-bar)}
+.src-video{--cb:var(--v-bg);--cf:var(--v-fg);--cbar:var(--v-bar)}
+
+/* 선택한 날짜 */
+.sel{background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:16px 18px 18px}
+.sel .eyebrow{font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 4px}
+.seldate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.seldate .big{font-family:var(--font-num);font-weight:700;font-size:25px;line-height:1.2}
+.seldate .dowl{font-size:13.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border:1px solid var(--line);border-radius:2px;padding:1px 11px 2px;line-height:1.4}
+.seldate .dowl.sun{background:var(--sun-bg);color:var(--sun);border-color:var(--sun)}
+.seldate .dowl.sat{background:var(--p-bg);color:var(--p-fg);border-color:var(--p-bar)}
+.badge{font-size:12px;font-weight:700;background:var(--ink);color:var(--surface);border:1px solid var(--ink);border-radius:2px;padding:1px 10px}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:10px 12px 10px 14px;background:var(--cb);border-left:5px solid var(--cbar);border-radius:2px}
+.item .t{font-family:var(--font-num);font-weight:700;font-size:32px;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--cf)}
+.item .t.allday{font-family:var(--font-body);font-size:20px;padding-top:6px}
+.item .ti{font-weight:500;font-size:16px;overflow-wrap:anywhere}
+.item .who{display:inline-block;font-size:11px;font-weight:700;color:var(--cf);border:1px solid var(--cbar);border-radius:2px;padding:0 7px;margin-bottom:3px}
+.memo{font-size:13px;color:var(--cf);opacity:.85;margin-top:2px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.links a{font-size:12.5px;color:var(--cf);text-decoration:none;background:var(--surface);border:1px solid var(--cbar);border-radius:2px;padding:2px 10px}
+.links a:hover{text-decoration:underline}
+.empty{color:var(--muted);font-size:14.5px;margin:0}
+.next{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:14.5px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.next .nl{color:var(--muted);font-size:12.5px;font-weight:700}
+.next .nd{font-family:var(--font-num);font-weight:700}
+.next .nt{color:var(--ink)}
+.next .dd{margin-left:auto;font-family:var(--font-num);font-weight:700;font-size:13px;color:var(--p-fg);background:var(--p-bg);border-radius:2px;padding:1px 6px}
+
+/* 컨트롤 */
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.lhs{display:flex;align-items:center;gap:12px}
+.vidbtn{border:1px solid var(--v-bar);background:var(--v-bg);color:var(--v-fg);border-radius:2px;padding:7px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.vidbtn[aria-pressed="true"]{background:var(--v);border-color:var(--v);color:var(--surface)}
+.row1,.row2{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{font-weight:700;background:var(--n-bg);color:var(--n-fg)}
+.seg button[data-k="plave"][aria-pressed="true"]{background:var(--p-bg);color:var(--p-fg)}
+.seg button[data-k="fan"][aria-pressed="true"]{background:var(--f-bg);color:var(--f-fg)}
+
+.cal{display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;align-items:center;gap:8px}
+.bar .title{font-family:var(--font-num);font-size:21px;font-weight:700;min-width:7.5em;text-align:center}
+.nav{width:36px;height:36px;border-radius:2px;border:1px solid var(--line);background:var(--surface);cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
+.nav .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.today-btn{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:2px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.note{margin:0;font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:2px;padding:8px 12px}
+
+/* 월간 */
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.dow{background:var(--surface);text-align:center;font-size:12px;font-weight:700;padding:6px 0;color:var(--muted)}
+.dow.sun{color:var(--sun)} .dow.sat{color:var(--sat)}
+.day,.blank{background:var(--surface);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;border:0;text-align:left;min-width:0}
+.blank{background:var(--bg)}
+.day{cursor:pointer}
+.numrow{display:flex;align-items:center;justify-content:space-between;gap:2px;height:26px}
+.mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%;margin-right:8px}
+.day:focus,.day:focus-visible{outline:none}
+.num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
+.day.today .num{background:var(--ink);color:var(--surface)}
+.num .nn{display:block;line-height:1}
+@supports (text-box:trim-both cap alphabetic){.num .nn{text-box:trim-both cap alphabetic}}
+.chip{font-size:11.5px;line-height:1.3;padding:3px 5px;border-radius:2px;background:var(--cb);color:var(--cf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.chip b{font-family:var(--font-num);font-weight:700;font-size:12px;margin-right:4px}
+.more{font-size:11px;color:var(--muted);padding-left:2px}
+.more2{display:none}
+.ct-short{display:none}
+.sh{display:inline-block;margin-right:4px;font-weight:700}
+.chip.strong,.chip.strong *{color:#fff !important}
+.item.gbox{--cb:var(--g-bg);--cf:var(--g-fg);--cbar:#6cc08f}
+.chip.gchip{background:var(--g-bg);color:var(--g-fg)}
+.chip.gchip *{color:var(--g-fg)}
+.chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.chip.strong .lv{background:transparent;padding:0;border-radius:0}
+.lv.cn{background:#2f5fc4;font-weight:800}
+.lv{display:inline-block;background:#26304d;color:#fff;border-radius:2px;padding:2px 5px;line-height:1.35;white-space:nowrap;font-size:.92em;vertical-align:middle;position:relative;top:-.12em}
+.chip .em{font-size:.92em;line-height:1}
+.chip .tem{display:inline-block;width:1.1em;text-align:center;font-size:.72em;line-height:1;margin-left:2px;vertical-align:middle;position:relative;top:-.12em}
+.src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
+.ct-hearts{white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
+
+/* 주간 */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wcol{background:var(--surface);border:1px solid var(--line);border-radius:2px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.wcol.selected{box-shadow:0 0 0 2px var(--p-bar)}
+.wh{border:0;background:transparent;cursor:pointer;text-align:left;padding:8px 10px;display:flex;align-items:baseline;gap:6px;border-bottom:1px solid var(--line)}
+.wh .d{font-family:var(--font-num);font-weight:700;font-size:24px;line-height:1.1}
+.wh .w{font-size:13px;font-weight:700}
+.wh.sun .d,.wh.sun .w{color:var(--sun)} .wh.sat .d,.wh.sat .w{color:var(--sat)}
+.wcol.today .wh{background:var(--p-bg);color:var(--p-fg)}
+.wcol.today .wh .d,.wcol.today .wh .w{color:var(--p-fg)}
+.wlist{display:flex;flex-direction:column;gap:6px;padding:8px;min-height:60px}
+.wev{background:var(--cb);color:var(--cf);border-left:4px solid var(--cbar);border-radius:2px;padding:5px 7px;min-width:0}
+.wev .wt{font-family:var(--font-num);font-weight:700;font-size:17px;line-height:1.15;font-variant-numeric:tabular-nums}
+.wev .wt.allday{font-family:var(--font-body);font-size:13px}
+.wev .wn{font-size:12.5px;overflow-wrap:anywhere}
+.wnone{color:var(--muted);font-size:12.5px;margin:0}
+
+/* 날짜 팝업 */
+dialog.daydlg{border:0;padding:0;background:var(--surface);color:var(--ink);border-radius:2px;width:min(520px,calc(100% - 24px));max-height:82vh;box-shadow:0 12px 40px rgba(20,23,43,.25);overflow:hidden}
+dialog.daydlg::backdrop{background:rgba(20,23,43,.38)}
+.dlg-in{padding:16px 16px 20px;overflow:auto;max-height:82vh;position:relative}
+.dlg-x{position:absolute;top:8px;right:10px;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:6px 8px;cursor:pointer}
+.dlg-x:focus,.dlg-x:focus-visible,dialog.daydlg:focus,dialog.daydlg:focus-visible,.dlg-in:focus{outline:none}
+.dlg-in .seldate{padding-right:36px;margin-bottom:8px}
+.daydlg .seldate{margin-bottom:10px;gap:6px}
+.daydlg .seldate .big{font-size:17px}
+.daydlg .seldate .dowl{font-size:12px;padding:0 9px}
+.daydlg .eyebrow{display:none}
+.daydlg .items{gap:8px}
+.daydlg .item{grid-template-columns:58px 1fr;gap:8px;padding:7px 10px 7px 10px;border-left-width:4px}
+.daydlg .item .t{font-size:16px;line-height:1.35}
+.daydlg .item .t.allday{font-size:13px;padding-top:2px}
+.daydlg .item .ti{font-size:13.5px}
+.daydlg .item .who{font-size:10.5px}
+.item.no-time,.daydlg .item.no-time{grid-template-columns:1fr}
+.daydlg .item .memo{font-size:12px}
+.daydlg .links a{font-size:11px;padding:1px 8px}
+footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:2px;text-align:center;align-items:center}
+
+@media (max-width:760px){
+  .week{grid-template-columns:1fr}
+  .wcol{flex-direction:row}
+  .wh{flex-direction:column;align-items:flex-start;gap:0;width:64px;flex:0 0 64px;border-bottom:0;border-right:1px solid var(--line)}
+  .wlist{flex:1}
+}
+@media (max-width:600px){
+  body{font-size:13.5px}
+  .wrap{padding:10px 12px 36px;gap:10px}
+  h1{font-size:15px}
+  /* 오늘 패널 */
+  .sel{padding:10px 12px 12px;border-radius:2px}
+  .sel .eyebrow{font-size:11px;margin-bottom:2px}
+  .seldate{margin-bottom:8px;gap:6px}
+  .seldate .big{font-size:17px}
+  .seldate .dowl,.badge{font-size:11px;padding:0 8px}
+  .seldate .dowl{position:relative;top:-1px}
+  .items{gap:6px}
+  .item{grid-template-columns:62px 1fr;gap:8px;padding:6px 8px 6px 10px;border-left-width:4px}
+  .item .t{font-size:19px;line-height:1.3}
+  .item .t.allday{font-size:13px;padding-top:2px}
+  .item .ti{font-size:13.5px}
+  .item .who{font-size:10px;padding:0 6px}
+  .memo{font-size:12px}
+  .links a{font-size:11px;padding:1px 8px}
+  .empty{font-size:13px}
+  /* 컨트롤 */
+  .row1{flex-wrap:nowrap;gap:6px}
+  .sfx{display:none}
+  .seg{border-radius:2px}
+  .seg button{padding:4px 8px;font-size:12px}
+  .vidbtn{padding:4px 9px;font-size:12px}
+  .lhs{gap:9px}
+  .nav{width:26px;height:26px;border-radius:2px}
+  .nav .chev{width:13px;height:13px}
+  .bar{gap:4px}
+  .bar .title{font-size:13.5px;min-width:5.6em}
+  .today-btn{padding:4px 11px;font-size:12px}
+  .cal{gap:8px}
+  /* 월간 달력 */
+  .grid{border-radius:2px}
+  .dow{font-size:11px;padding:5px 0}
+  .day,.blank{min-height:78px;padding:3px 2px;gap:2px}
+  .num{font-size:12.5px;width:22px;height:22px}
+  .numrow{height:22px}
+  .mk{font-size:9px;margin-right:4px}
+  .more{display:none}
+  .more2{display:block;font-size:9px;color:var(--muted);padding-left:2px;line-height:1.2}
+  .chip{font-size:8.5px;line-height:1.25;padding:2.5px 3px;white-space:normal}
+  .chip:nth-of-type(n+4){display:none}
+  .chip b{display:block;font-size:9.5px;margin:0}
+  .ct-full{display:none}
+  .sh{display:block;margin-right:0;font-size:inherit;line-height:1.2}
+  .ct-hearts{display:block;font-size:8px;line-height:1.2}
+  .ct-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .note{font-size:12px;padding:6px 10px}
+  footer{font-size:11px}
+  /* 팝업 */
+  dialog.daydlg{margin:auto;width:calc(100% - 32px);max-width:420px;border-radius:2px;max-height:70vh}
+  .dlg-in{max-height:70vh}
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>:root{--font-body:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;--font-num:"Pretendard",-apple-system,sans-serif}
+body{font-family:var(--font-body)}
+.num,.item .t,.chip b,.seldate .big,.bar .title,.wh .d,.wev .wt,.next .nd,.next .dd{font-weight:600;font-variant-numeric:tabular-nums}</style>
+<div id="ftlabel" style="position:fixed;right:6px;bottom:6px;z-index:99;background:#111;color:#fff;font:12px sans-serif;padding:3px 8px;border-radius:2px;opacity:.85">A · 프리텐다드(숫자 포함)</div>
+</head>
+<body>
+<div class="wrap">
+  <h1>⏱️ 바쁘다 바빠 플리사회 🏃🏻‍♀️</h1>
+
+  <section class="sel" aria-live="polite" aria-label="선택한 날짜의 일정">
+    <p class="eyebrow" id="eyebrow"></p>
+    <div class="seldate" id="seldate"></div>
+    <ul class="items" id="items"></ul>
+  </section>
+
+  <dialog class="daydlg" id="daydlg" aria-label="선택한 날짜의 일정">
+    <div class="dlg-in" id="dlgin">
+      <button type="button" class="dlg-x" id="dlgx" aria-label="닫기">✕</button>
+      <p class="eyebrow" id="d-eyebrow"></p>
+      <div class="seldate" id="d-seldate"></div>
+      <ul class="items" id="d-items"></ul>
+    </div>
+  </dialog>
+
+  <div class="row1">
+    <div class="lhs">
+      <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
+        <button type="button" data-k="all">전체</button>
+        <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
+        <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
+      </div>
+      <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false">영상</button>
+    </div>
+    <div class="bar">
+      <button class="nav" id="prev" type="button" aria-label="이전"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="title" id="title" aria-live="polite"></div>
+      <button class="nav" id="next" type="button" aria-label="다음"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <section class="cal" aria-label="달력">
+    <p class="note" id="note" hidden></p>
+    <div id="cal"></div>
+  </section>
+
+  <footer>
+    <span>비공식 팬 제작 캘린더입니다.</span>
+    <span id="updated"></span>
+  </footer>
+</div>
+
+<script>
+var RAW = [{"id":"64319454-bc92-427e-a19d-f51bd06e7110","title":"[BIRTHDAY GIFT] NOT CUTE ANYMORE (원곡 : 아일릿 (ILLIT)) Covered by YEJUN","utcStart":"2026-09-30T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/zi5M68Inemc?si=bw9pBmaA513-oYEc"}]},{"id":"7ba630f2-8133-465d-a93a-2373efcf892e","title":"[KEEP IT MANIC] in Kaohsiung","utcStart":"2026-10-03T10:00:00.000Z","isAllDay":false,"links":[]},{"id":"b8c9cc83-0e39-4c0c-a3f6-74eed8611b24","title":"WEVERSE LIVE 💜","utcStart":"2026-10-04T12:21:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-242062029?hl=ko"}]},{"id":"6ac03270-84e1-4eda-a399-e806935fe8c6","title":"WEVERSE LIVE 🩷❤️","utcStart":"2026-10-06T09:24:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-242207435?hl=ko"}]},{"id":"d12ed4b7-0e28-4331-b444-0785dbd68d2f","title":"WEVERSE LIVE 🩷","utcStart":"2026-10-08T13:24:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-180830011?hl=ko"}]},{"id":"1bcf6298-5e2c-468d-8e8f-de9f5465a6b3","title":"[KEEP IT MANIC] in Bangkok","utcStart":"2026-10-10T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"07453b18-34a8-4ba7-8208-6548c2a9475c","title":"‘HYPERDRIVE’ DIGITAL RELEASE","utcStart":"2026-10-12T00:00:00.000Z","isAllDay":true,"links":[]},{"id":"5c394b96-16a9-473e-b216-ddf3febb64ae","title":"'Star Trace' M/V","utcStart":"2026-10-12T09:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/TBmE7m0yEwY?si=eHky_7OubK3OwuJJ"}]},{"id":"0fb6df75-ffae-4961-95d0-4cf09c757de5","title":"COMEBACK LIVE 💙💜🩷❤️🖤","utcStart":"2026-10-12T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"61f5f518-0200-49e7-a59d-cf530aad89e9","title":"‘HYPERDRIVE’ ALBUM RELEASE","utcStart":"2026-10-13T00:00:00.000Z","isAllDay":true,"links":[]},{"id":"0a8fddd3-c8fc-4239-b131-09fd7d686742","title":"'Star Trace' Fanchants Guide","utcStart":"2026-10-13T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/2UZ4MLjFDG0?si=xGfJcTOOo9Twf9na"}]},{"id":"489eb70e-295f-4773-8cd2-ab63b19b42b6","title":"MBC 아이돌 라디오 핫차트 💙💜🩷❤️🖤","utcStart":"2026-10-13T13:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/live/BhWC3BV1VIM?si=hN1nesE09-E6PQ7m"}]},{"id":"d4b7c711-dec7-4f2b-84e1-796aa7badbb5","title":"Mnet M COUNTDOWN💙💜🩷❤️🖤","utcStart":"2026-10-15T09:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=deCRAn1NTuo&t=2s"},{"url":"https://www.youtube.com/watch?v=iwPyIRmk1-s"},{"url":"https://www.youtube.com/watch?v=_JkW0EuRBVQ"},{"url":"https://www.youtube.com/watch?v=FWJtX_yjKnE"},{"url":"https://www.youtube.com/watch?v=ou1xXh5j_Lw"},{"url":"https://www.youtube.com/watch?v=jJNQPqYI7VM"},{"url":"https://youtu.be/hxYPZpPZJ7o?si=-CLEwZSIAKHnCH1b"}]},{"id":"08c4d8ed-21fd-49f4-9ccc-3938ad17b139","title":"KBS Cool FM 한해의 키스 더 라디오 💙💜🩷❤️🖤","utcStart":"2026-10-15T13:00:00.000Z","isAllDay":false,"links":[]},{"id":"3032bc22-0e8e-47fb-8f97-13da0e6889c0","title":"[KEEP IT MANIC] in Singapore","utcStart":"2026-10-17T07:00:00.000Z","isAllDay":false,"links":[]},{"id":"78af06f4-fa79-49c2-be31-2068501480a8","title":"WEVERSE LIVE 🖤","utcStart":"2026-10-17T12:01:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181046367?hl=ko"}]},{"id":"b35c085d-4d24-449e-be21-c58c667862e8","title":"WEVERSE LIVE 🩷","utcStart":"2026-10-17T13:06:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-242769703?hl=ko"}]},{"id":"e2d1d99c-43ce-425d-a903-ed15c8818427","title":"WEVERSE LIVE ❤️","utcStart":"2026-10-18T11:41:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181072046?hl=ko"}]},{"id":"2c18301c-18c5-4fec-815e-9a27d6053054","title":"PLAVE LIVE 💙💜🩷❤️🖤","utcStart":"2026-10-19T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"35520a5d-7a84-4af0-88b0-2dbc840c9962","title":"WEVERSE LIVE 💙","utcStart":"2026-10-21T07:29:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-242915122"}]},{"id":"8324dd91-083c-4f37-a3dc-839d8e32d4ef","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙💜🩷❤️🖤","utcStart":"2026-10-21T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"3da669d5-b1bb-4818-8776-aace9c894f0d","title":"'The Answer Is Yes' Special Video","utcStart":"2026-10-22T09:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/ll-Uefui-SI?si=n4J_a3CV_HK49eF2"}]},{"id":"f5b1cdee-071f-43c3-a751-5686db993874","title":"WEVERSE LIVE 🩷","utcStart":"2026-10-22T14:32:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181148162?hl=ko"}]},{"id":"8f2766cd-3262-43fd-8a84-4fd0424d0c71","title":"WEVERSE LIVE 💙🖤","utcStart":"2026-10-23T16:03:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181167292?hl=ko"},{"url":"https://weverse.io/plave/live/4-243011200?hl=ko"}]},{"id":"3a27837d-84ad-4d75-9cfc-7a610ba85233","title":"WEVERSE LIVE 🩷❤️","utcStart":"2026-10-24T08:28:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243038466?hl=ko"}]},{"id":"18c13348-fe1e-47c3-8b9f-f887abbb7fd0","title":"WEVERSE LIVE 💜","utcStart":"2026-10-24T14:32:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243050005?hl=ko"}]},{"id":"5b99384f-225f-427e-9a73-cfe262810181","title":"[KEEP IT MANIC] in Taipei","utcStart":"2026-10-25T03:00:00.000Z","isAllDay":false,"links":[]},{"id":"fdb349c9-2ba0-4905-9086-8a9fef9ec874","title":"[KEEP IT MANIC] in Taipei","utcStart":"2026-10-25T10:30:00.000Z","isAllDay":false,"links":[]},{"id":"d4c7f158-9410-473d-8e3c-db57f7b972d5","title":"WEVERSE LIVE 💙💜🩷❤️🖤","utcStart":"2026-10-27T10:40:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-243131664?hl=ko"}]},{"id":"ac6cc35a-8ba3-45db-ac56-53df24af21b8","title":"WEVERSE LIVE ❤️","utcStart":"2026-10-28T12:25:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181244924?hl=ko"}]},{"id":"001de8b4-279a-40d8-b761-42b25b28e4a8","title":"WEVERSE LIVE 💜","utcStart":"2026-10-28T15:20:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243179786?hl=ko"}]},{"id":"e7426269-f289-4108-b75b-205ab780a0e2","title":"WEVERSE LIVE 🩷","utcStart":"2026-10-29T08:42:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/0-181242908?hl=ko"}]},{"id":"1e94c874-b8d5-458c-86d1-2b09ca3e3f99","title":"'Star Trace' Dance Practice","utcStart":"2026-10-30T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/_BL8tzJQDco"}]},{"id":"8b1a1d4b-a091-4405-ab82-64928529c1a9","title":"[KEEP IT MANIC] in Macao","utcStart":"2026-10-31T10:00:00.000Z","isAllDay":false,"links":[]},{"id":"07b6301f-6a61-4b44-8da5-67c4bd1f4b84","title":"[PLAVE BIRTHDAY GIFT] HAMIN's Playlist 🎶🖤","utcStart":"2026-11-01T01:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/RGCbjiYXEbA"}]},{"id":"1e9bc1ee-1d29-4df8-a2a6-61562d0b0659","title":"WEVERSE LIVE 💙","utcStart":"2026-11-01T03:54:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243302579?hl=ko"}]},{"id":"375d6c6b-56fc-4ff8-996d-e272afc42149","title":"[KEEP IT MANIC] in Macao","utcStart":"2026-11-01T08:00:00.000Z","isAllDay":false,"links":[]},{"id":"16fb7d39-913b-46f2-b883-c8e1ef5c9a94","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-01T14:15:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243318837?hl=ko"}]},{"id":"536074e4-bf3e-4630-8110-5be6c90881c9","title":"WEVERSE LIVE 💜","utcStart":"2026-11-02T03:26:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181334450?hl=ko"}]},{"id":"ANNIV-2026-11-01","title":"Happy HAMIN's Day","utcStart":"2026-11-01T00:00:00.000Z","isAllDay":true,"links":[]},{"id":"e0dd469c-5cf6-44a3-8e7f-e235c82af1ff","title":"HAMIN B-DAY LIVE 🖤","utcStart":"2026-11-05T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"091d8ee2-d5db-45a2-a8af-df26d318a63e","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙","utcStart":"2026-11-06T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=zvmhyUU5t1Q"}]},{"id":"f8ebcb40-483c-453d-8a4e-fb2c4eb3093b","title":"[BIRTHDAY GIFT] 0+0 (원곡 : 한로로) Covered by HAMIN & BAMBY","utcStart":"2026-11-07T04:00:00.000Z","isAllDay":false,"links":[{"url":"https://youtu.be/7IZ79kGHCGM"}]},{"id":"e3b8513e-e93b-43e9-82a8-3462c0e793c8","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙🩷","utcStart":"2026-11-07T11:00:00.000Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=I4xwNaYeflI"}]},{"id":"fb0f8c2b-b41a-41a7-b117-71c260dea461","title":"WEVERSE LIVE 💜","utcStart":"2026-11-07T16:35:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-243515910?hl=ko"}]},{"id":"4cf12eef-2ea8-4c1d-a49d-b8512722fae7","title":"MBC FM4U 김이나의 별이 빛나는 밤에 💙","utcStart":"2026-11-08T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"7d4f4a67-d460-4159-bc25-a8f2be60d074","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-08T13:17:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/4-243590296"}]},{"id":"b6e70f18-44a0-40e9-9e2a-461e9ff5cd7b","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-08T13:54:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243598980"}]},{"id":"d3bf7c83-e6af-42d3-a23d-4aceaa399c80","title":"WEVERSE LIVE 💙💜🖤","utcStart":"2026-11-09T10:23:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181478911?hl=ko"}]},{"id":"d2a11ec6-0604-41dc-965c-5c2007e1fbc2","title":"WEVERSE LIVE 🩷","utcStart":"2026-11-09T13:48:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/2-181479305?hl=ko"}]},{"id":"4168e1ed-1d26-481f-9928-6de4291c3827","title":"WEVERSE LIVE 💜","utcStart":"2026-11-13T11:25:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/1-181544638"}]},{"id":"79c97667-6478-4f61-9faf-c479e92c0760","title":"[KEEP IT MANIC] in U.S.","utcStart":"2026-11-15T03:00:00.000Z","isAllDay":false,"links":[]},{"id":"93968f72-fa67-446b-a85e-32855003b97a","title":"2026 멜론 뮤직 어워드 💙💜🩷❤️🖤","utcStart":"2026-11-15T09:00:00.000Z","isAllDay":false,"links":[]},{"id":"6f52767e-2f38-4f05-be88-2fd5c236122e","title":"WEVERSE LIVE 🖤","utcStart":"2026-11-17T09:18:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/0-181610009?hl=ko"}]},{"id":"62b32614-ad2b-46d5-bb9c-ac6234f2e7b5","title":"PLAVE LIVE 💙💜🩷❤️🖤","utcStart":"2026-11-17T11:00:00.000Z","isAllDay":false,"links":[]},{"id":"fa4d6008-b658-473e-a8f6-c8e0ee46aa23","title":"WEVERSE LIVE ❤️","utcStart":"2026-11-17T15:34:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-243945249?hl=ko"},{"url":"https://weverse.io/plave/live/3-243945475?hl=ko"}]},{"id":"a1ba1f3f-ca19-4b2a-af67-7ed372c2e52e","title":"2026 더아동페스타 💙💜🩷❤️🖤","utcStart":"2026-11-20T04:50:00.000Z","isAllDay":false,"links":[]},{"id":"b4e0246f-374c-4ee9-ba6d-dc9b9dbf5541","title":"WEVERSE LIVE 💜","utcStart":"2026-11-20T09:48:00.000Z","isAllDay":false,"links":[{"url":"https://weverse.io/plave/live/3-244028084?hl=ko"}]},{"id":"9b0e3d7f-06ba-4b27-8e5d-960489f8d054","title":"‘Lowkey’ RELEASE","utcStart":"2026-11-30T03:00:00.000Z","isAllDay":false,"links":[]},{"id":"bbe05ce3-47d6-4db8-bbe4-d72314cd4814","title":"[KEEP IT MANIC] Encore","utcStart":"2027-01-22T10:00:00.000Z","isAllDay":false,"links":[]},{"id":"aab6f858-7de8-4a0e-9bf6-202639aa587a","title":"[KEEP IT MANIC] Encore","utcStart":"2027-01-23T09:00:00.000Z","isAllDay":false,"links":[]},{"id":"d36887f1-5047-4900-8cf5-9ab848d831c3","title":"[KEEP IT MANIC] Encore","utcStart":"2027-01-24T08:00:00.000Z","isAllDay":false,"links":[]}];
+var DOW = ["일","월","화","수","목","금","토"];
+var DOWL = ["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
+var LOADED = ["2026-10","2026-11","2026-12","2027-01"];
+var UPDATED = "2026-11-25 15:20";
+var SRC_NAME = {plave:"플레이브", fan:"플리", video:"영상"};
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function kst(ms){ return new Date(ms + 9*3600000); }
+function keyOf(d){ return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate()); }
+function parseKey(k){ var p = k.split("-").map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+function addDays(k,n){ var d = parseKey(k); d.setUTCDate(d.getUTCDate()+n); return keyOf(d); }
+function hostLabel(u){
+  if(u.indexOf("youtu")>-1) return "YouTube";
+  if(u.indexOf("weverse")>-1) return "Weverse";
+  return "링크";
+}
+function norm(e, src){
+  var ms = Date.parse(e.utcStart);
+  var allDay = !!e.isAllDay;
+  var d = allDay ? new Date(ms) : kst(ms);
+  return {
+    id:e.id, title:(e.channel && String(e.title).indexOf("[Shorts] ") !== 0 ? "["+e.channel+"] " : "")+String(e.title).replace(/💗/g,"🩷"), ch:(e.channel||""), ms:ms, allDay:allDay, key:keyOf(d), src:src,
+    time: allDay ? "종일" : pad(d.getUTCHours())+":"+pad(d.getUTCMinutes()),
+    note: e.note || "",
+    links:(e.links||[]).map(function(l){return l.url;}).filter(function(u){return typeof u==="string" && u.indexOf("https://")===0;})
+  };
+}
+/* 플리 일정(티켓팅·예약): 한 번만 있는 일정은 FAN_RAW 에, 매달 반복되는 일정은 FAN_MONTHLY 에 적습니다. */
+var FAN_RAW = [{"id":"x-cda2fa33a5","title":"[앙코르] 팬클럽 선예매 인증 시작","utcStart":"2026-11-23T05:00:00.000Z","isAllDay":false,"note":"인증 ~12/1 23:59 · NOL · 회차당 1인 1매","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-7f423068a9","title":"[앙코르] 팬클럽 선예매","utcStart":"2026-12-01T11:00:00.000Z","isAllDay":false,"note":"20:00~23:59 · NOL · 인증 필요","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-4be615a453","title":"[앙코르] 팬클럽 선예매 인증 마감","utcStart":"2026-12-01T14:59:00.000Z","isAllDay":false,"note":"이 시간 전에 인증 완료","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-6accd27be6","title":"[앙코르] 일반예매","utcStart":"2026-12-04T11:00:00.000Z","isAllDay":false,"note":"NOL · 1인 2매 · VIP 198,000 / 일반 154,000원","links":[{"url":"https://weverse.io/plave/notice/41168?hl=ko"}],"quiet":false},{"id":"x-65b2cd1189","title":"플레이브 데이 @DDP","utcStart":"2026-12-12T08:30:00.000Z","isAllDay":false,"note":"넥스트 크리에이티브 서울 · 무료","links":[{"url":"https://ddp.or.kr/index.html?menuno=239"},{"url":"https://www.youtube.com/watch?v=ZSmWvj1TLWM"}],"quiet":false},{"id":"x-4a9455cd83","title":"[테스트] 알림 확인","utcStart":"2026-11-25T06:40:00.000Z","isAllDay":false,"note":"구독 알림 테스트용 임시 일정","links":[],"quiet":false}];
+var FAN_MONTHLY = [{"id":"m-5e8b5dd4","title":"십카페 예약","nth":3,"dow":4,"hour":16,"minute":0,"note":"","links":[],"quiet":false}];   /* ticketing.txt 의 '매월 N번째 요일 시각' 줄 */
+var REPEAT_FROM = "2026-11", REPEAT_UNTIL = "2029-05";
+function monthlyEvents(){
+  var out = [];
+  var a = REPEAT_FROM.split("-").map(Number), b = REPEAT_UNTIL.split("-").map(Number);
+  for(var y=a[0], m=a[1]; y*12+m <= b[0]*12+b[1]; m++){
+    if(m === 13){ y++; m = 1; }
+    FAN_MONTHLY.forEach(function(r){
+      var first = new Date(Date.UTC(y,m-1,1)).getUTCDay();
+      var day = 1 + (r.dow - first + 7) % 7 + 7*(r.nth-1);
+      if(day > new Date(Date.UTC(y,m,0)).getUTCDate()) return;
+      var ms = Date.UTC(y,m-1,day,r.hour-9,r.minute);
+      out.push({id:"fan-"+r.id+"-"+y+"-"+pad(m), title:r.title, utcStart:new Date(ms).toISOString(), isAllDay:false, note:r.note||"", links:r.links||[]});
+    });
+  }
+  return out;
+}
+/* 공식 사이트에 아직 없지만 플레이브 일정으로 보여줄 것(공연 등) */
+var PLAVE_EXTRA = [{"id":"x-8861e8f51e","title":"재정비 기간 시작 (다음 앨범 작업·휴식)","utcStart":"2026-11-23T00:00:00.000Z","isAllDay":true,"note":"~12/13 · 콘텐츠·보이는 개인 라이브는 진행","links":[],"quiet":false},{"id":"x-2c9398bfa6","title":"활동 재개 (PLAVE LIVE 및 콘텐츠)","utcStart":"2026-12-14T00:00:00.000Z","isAllDay":true,"note":"","links":[],"quiet":false},{"id":"x-e094a7df61","title":"WEVERSE LIVE ❤️","utcStart":"2026-11-25T00:56:00.000Z","isAllDay":false,"note":"","links":[{"url":"https://weverse.io/plave/live/2-181771871?hl=ko"}],"quiet":false}];
+/* 공식 유튜브 새 영상 (영상 탭을 눌렀을 때만 보여요) */
+var VIDEOS = [{"id":"yt-9q_T5JHv0po","title":"[BEHIND] [KEEP IT MANIC] 🌌 월드 투어 비하인드","utcStart":"2026-11-24T10:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=9q_T5JHv0po"}]},{"id":"yt-eBsEiim6Mmk","title":"[Shorts] 💜❤️ I keep 멍밍 Awoo🐾","utcStart":"2026-11-20T10:00:28Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=eBsEiim6Mmk"}],"short":true},{"id":"yt-_4hTRavHp6U","title":"2026 PLAVE World Tour [KEEP IT MANIC] in Incheon Highlight","utcStart":"2026-11-19T03:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_4hTRavHp6U"}]},{"id":"yt-6db8dE4TH6Q","title":"[Shorts] [KEEP IT MANIC] IN U.S. Behind 🎇","utcStart":"2026-11-18T10:00:07Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=6db8dE4TH6Q"}],"short":true},{"id":"yt-cexr-M8u-R0","title":"[Shorts] 💜 🤫 #꾼 with","utcStart":"2026-11-16T09:00:30Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=cexr-M8u-R0"}],"short":true},{"id":"yt-VVhClSexZxY","title":"[Shorts] 🖤 하민이가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:30:17Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=VVhClSexZxY"}],"short":true},{"id":"yt-t_i3jfsfHQo","title":"[Shorts] ❤️ 은호가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:15:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=t_i3jfsfHQo"}],"short":true},{"id":"yt-3c3SL0rIYHo","title":"[Shorts] 💙 예준이가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-13T09:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=3c3SL0rIYHo"}],"short":true},{"id":"yt-TN7ygxI9oDY","title":"[Shorts] 💙💜❤️ U.S. ARE YOU READY? 🔥","utcStart":"2026-11-13T04:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=TN7ygxI9oDY"}],"short":true},{"id":"yt-GRI1bSapfc8","title":"[Shorts] 🩷 밤비가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-12T09:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GRI1bSapfc8"}],"short":true},{"id":"yt-Lsm1HWCU0LM","title":"[Shorts] 💜 노아가 잡아먹을지도 몰라요 🤫","utcStart":"2026-11-12T09:00:19Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Lsm1HWCU0LM"}],"short":true},{"id":"yt-GhoOWFs-XZg","title":"[Shorts] 🩷🖤 U.S. ARE YOU READY? 🔥","utcStart":"2026-11-12T04:00:05Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GhoOWFs-XZg"}],"short":true},{"id":"yt--MXLE7j4v-s","title":"[Shorts] [BEHIND] 플레이브의 어이력(?) 대결","utcStart":"2026-11-10T10:15:27Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-MXLE7j4v-s"}],"short":true},{"id":"yt-dI8fA5I7dvw","title":"[BEHIND] 'Star Trace' M/V (Performance Ver.) 비하인드","utcStart":"2026-11-10T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=dI8fA5I7dvw"}]},{"id":"yt-gH2eDJzaOSE","title":"[Shorts] 🩷🖤 Neon and beyond 💫","utcStart":"2026-11-09T12:00:39Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=gH2eDJzaOSE"}],"short":true},{"id":"yt-YXCYFujG2iU","title":"PLAVE 'Star Trace' M/V (Performance Ver.)","utcStart":"2026-11-08T10:00:02Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=YXCYFujG2iU"}]},{"id":"yt-QGkF7Rtkg3s","title":"[Shorts] PLAVE 'Star Trace' M/V (Performance Ver.)","utcStart":"2026-11-08T10:00:01Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=QGkF7Rtkg3s"}],"short":true},{"id":"yt-7IZ79kGHCGM","title":"[PLAVE BIRTHDAY GIFT] 하민 & 밤비 '0+0' (원곡 : 한로로)","utcStart":"2026-11-07T04:00:09Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=7IZ79kGHCGM"}]},{"id":"yt--GCDMkoTvI4","title":"[Shorts] 🖤 하민이 오빠가 체포하겠어!🐈‍⬛🚨","utcStart":"2026-11-06T09:01:34Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=-GCDMkoTvI4"}],"short":true},{"id":"yt-AB9KM61SIG0","title":"[Shorts] 💙 #StarTrace 🏎️ with","utcStart":"2026-11-05T09:01:18Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=AB9KM61SIG0"}],"short":true},{"id":"yt-RGCbjiYXEbA","title":"[PLAVE BIRTHDAY GIFT] HAMIN's Playlist 🎶🖤","utcStart":"2026-11-01T01:00:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=RGCbjiYXEbA"}]},{"id":"yt-_BL8tzJQDco","title":"PLAVE(플레이브) 'Star Trace' Dance Practice","utcStart":"2026-10-30T11:00:29Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=_BL8tzJQDco"}]},{"id":"yt-ll-Uefui-SI","title":"PLAVE 'The Answer Is Yes' Special Video","utcStart":"2026-10-22T09:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=ll-Uefui-SI"}]},{"id":"yt-fsu8L3jCLvA","title":"[하이라이트] 'Star Trace' PERFORMANCE LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-20T11:00:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=fsu8L3jCLvA"}]},{"id":"yt-2UZ4MLjFDG0","title":"PLAVE(플레이브) 'Star Trace' 응원법 가이드 (Fanchants Guide)","utcStart":"2026-10-13T11:00:24Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=2UZ4MLjFDG0"}]},{"id":"yt-jWA9S5I3dO4","title":"[하이라이트] 'HYPERDRIVE' COMEBACK 전곡 LIVE🎤｜PLAVE Highlight Clip","utcStart":"2026-10-13T11:00:04Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=jWA9S5I3dO4"}]},{"id":"yt-GBRzoOeHV9c","title":"PLAVE 'Rewind' Official Audio","utcStart":"2026-10-12T09:15:58Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=GBRzoOeHV9c"}]},{"id":"yt-vXeI6GkYgk4","title":"PLAVE 'The Answer Is Yes' Official Audio","utcStart":"2026-10-12T09:15:40Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=vXeI6GkYgk4"}]},{"id":"yt-E7CSVaczMJU","title":"PLAVE '푸른 하늘에 단비' Official Audio","utcStart":"2026-10-12T09:15:25Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=E7CSVaczMJU"}]},{"id":"yt-iYMYQSJ4_Iw","title":"PLAVE '꾼' Official Audio","utcStart":"2026-10-12T09:15:06Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=iYMYQSJ4_Iw"}]},{"id":"yt-CJYON-25yoI","title":"플레이브(PLAVE)가 전하는 깜짝 소식?👀 이번 겨울, DDP를 주목해야 하는 이유!","utcStart":"2026-11-24T06:40:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=CJYON-25yoI"}],"manual":true,"dateGuessed":false,"channel":"서울디자인재단"},{"id":"yt-NrAoNK4c1-E","title":"디지털 세상 속 아이들의 마음을 지키는 방법 🤍💙 | 플레이브(PLAVE) 기조연설 @ 유니세프 2026 더아동페스타","utcStart":"2026-11-20T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=NrAoNK4c1-E"}],"manual":true,"dateGuessed":false,"channel":"유니세프"},{"id":"yt-Ch80iONgHz0","title":"[4K Drone✈]단풍 소리가 작다… 라우럴! 🍁 | 인왕산,남산,낙산, 명륜당 BGM♬ PLAVE(@plave_official ) 'Rewind'  | 전지적서울시점9","utcStart":"2026-11-22T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Ch80iONgHz0"}],"manual":true,"dateGuessed":false,"channel":"서울시"},{"id":"yt-VrCGZ2OWg8g","title":"[이벤트] 플레이브와 함께 보는 키크니 웹툰 💙 오늘도, 나를 지키는 중","utcStart":"2026-11-19T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=VrCGZ2OWg8g"}],"manual":true,"dateGuessed":false,"channel":"서울시"},{"id":"yt-Ik95Xejn4Sg","title":"[LIVE] 우리가 돌아왔다!🛸 플레이브 금의환향🎊 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.","utcStart":"2026-11-16T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Ik95Xejn4Sg"}],"manual":true,"dateGuessed":false,"channel":"","live":true},{"id":"yt-Cxba7UaCi4U","title":"[LIVE] 플레이브의 자랑!🫳 🌱아기오빠 하민이🌼 생일 라이브 🖤 | #플레이브 PLAVE | PLAVE HAMIN Birthday Live Full Ver.","utcStart":"2026-11-04T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=Cxba7UaCi4U"}],"manual":true,"dateGuessed":false,"channel":"","live":true},{"id":"yt-znWMx57DL20","title":"[LIVE] HYPERDRIVE Start Race!🏁 플레이브의 챌린지는 지금부터!🏎 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.","utcStart":"2026-11-18T15:00:00Z","isAllDay":false,"links":[{"url":"https://www.youtube.com/watch?v=znWMx57DL20"}],"manual":true,"dateGuessed":false,"channel":"","live":true}];
+/* 시간이 정해진 릴리즈: 10월처럼 종일 릴리즈 칸을 먼저 두고, 그 아래 시간 일정을 따로 둡니다 */
+function splitRelease(list){
+  var out = [];
+  list.forEach(function(e){
+    if(!e.isAllDay && /\bRELEASE\b/i.test(e.title)){
+      var k = kst(Date.parse(e.utcStart));
+      out.push({id:e.id+"-day", title:e.title, utcStart:new Date(Date.UTC(k.getUTCFullYear(),k.getUTCMonth(),k.getUTCDate())).toISOString(), isAllDay:true, links:e.links||[]});
+      var c = {}; for(var key in e) c[key] = e[key];
+      c.title = e.title.replace(/\s*\bRELEASE\b\s*/i," 발매").replace(/\s+$/,"");
+      out.push(c);
+    } else out.push(e);
+  });
+  return out;
+}
+var ALL = splitRelease(RAW.concat(PLAVE_EXTRA)).map(function(e){return norm(e,"plave");})
+  .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}))
+  .concat(VIDEOS.map(function(e){return norm(e,"video");}));
+ALL.sort(function(a,b){
+  if(a.key !== b.key) return a.key < b.key ? -1 : 1;
+  if(a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+  return a.ms - b.ms;
+});
+
+var todayKey = keyOf(kst(Date.now()));
+var state = { sel: todayKey, view: "month", show: "all" };
+
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(text != null) n.textContent = text;
+  return n;
+}
+/* 글자 속 이모지는 글씨보다 작게 (칸에서만 사용) */
+var EMO_RE = null;
+try{ EMO_RE = new RegExp("(\\p{Extended_Pictographic}\\uFE0F?(?:\\u200D\\p{Extended_Pictographic}\\uFE0F?)*)", "u"); }catch(err){}
+var EMO_LEAD = null;
+try{ EMO_LEAD = new RegExp("^(?:\\p{Extended_Pictographic}\\uFE0F?\\s*)+", "u"); }catch(err){}
+function rich(node, text){
+  if(!EMO_RE){ node.appendChild(document.createTextNode(text)); return node; }
+  text.split(EMO_RE).forEach(function(p, i){
+    if(!p) return;
+    if(i % 2){ var m = document.createElement("span"); m.className = "em"; m.textContent = p; node.appendChild(m); }
+    else node.appendChild(document.createTextNode(p));
+  });
+  return node;
+}
+function visible(e){ return state.show === "all" ? e.src !== "video" : state.show === e.src; }
+function officialShown(){ return state.show === "all" || state.show === "plave"; }
+function eventsOn(key){ return ALL.filter(function(e){ return e.key === key && visible(e); }); }
+function dowOf(key){ return parseKey(key).getUTCDay(); }
+function monthOf(key){ return key.slice(0,7); }
+function monthName(ym){ var p = ym.split("-").map(Number); return p[0]+"년 "+p[1]+"월"; }
+
+function selectKey(k){
+  state.sel = k;
+  render();
+  openDay();
+}
+
+function openDay(){
+  fillDay(state.sel, "d-eyebrow", "d-seldate", "d-items");
+  var d = document.getElementById("daydlg");
+  document.getElementById("dlgin").scrollTop = 0;
+  try{ if(!d.open){ if(d.showModal) d.showModal(); else d.setAttribute("open",""); } }
+  catch(x){ d.setAttribute("open",""); }
+}
+function closeDay(){
+  var d = document.getElementById("daydlg");
+  try{ if(d.close) d.close(); else d.removeAttribute("open"); }catch(x){ d.removeAttribute("open"); }
+}
+
+function renderSelected(){
+  fillDay(todayKey, "eyebrow", "seldate", "items");
+}
+
+/* 오늘 일정이 없을 때 보여줄 '다음 일정' (영상 제외, 지금 고른 필터를 따름) */
+function nextLine(key){
+  var n = null;
+  for(var i=0;i<ALL.length;i++){ if(ALL[i].key > key && visible(ALL[i])){ n = ALL[i]; break; } }
+  if(!n) return null;
+  var t = n.title.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || n.title;
+  if(n.src === "plave"){
+    var c = cellTitle(n.title, "plave");
+    if(/^[💙💜🩷💗❤️❤🖤\s]+$/.test(c)){ t = n.title; }                    // 위버스 라이브: 하트만이면 제목 그대로
+    else if(/KEEP IT MANIC|CONCERT|콘서트/i.test(t)){ t = c.replace(/^\S+\s/, "").replace(/\s*Concert$/i, "") + " Concert"; }
+    else if(n.allDay && /\bRELEASE\b/i.test(n.title)){ t = "릴리즈 " + c; }
+    else if(n.allDay && /'s\s+day/i.test(n.title)){ t = "생일 " + (n.title.match(/happy\s+(.+?)['’]s\s+day/i) || [0, c])[1]; }
+  }
+  var a = parseKey(key), b = parseKey(n.key);
+  var days = Math.round((b - a) / 86400000);
+  var p = n.key.split("-").map(Number), wd = dowOf(n.key);
+  var line = el("p","next");
+  line.appendChild(el("span","nl","다음 일정"));
+  line.appendChild(el("span","nd",p[1]+"/"+p[2]+"("+DOWL[wd].charAt(0)+")"+(n.allDay ? "" : " "+n.time)));
+  line.appendChild(el("span","nt",t));
+  line.appendChild(el("span","dd","D-"+days));
+  return line;
+}
+function fillDay(key, eyebrowId, headId, itemsId){
+  var p = key.split("-").map(Number);
+  var wd = dowOf(key);
+  document.getElementById(eyebrowId).textContent = key === todayKey ? "오늘의 일정" : "선택한 날짜의 일정";
+  var head = document.getElementById(headId);
+  head.textContent = "";
+  head.appendChild(el("span","big",p[1]+"월 "+p[2]+"일"));
+  head.appendChild(el("span","dowl"+(wd===0?" sun":wd===6?" sat":""),DOWL[wd]));
+
+  var ul = document.getElementById(itemsId);
+  ul.textContent = "";
+  var list = eventsOn(key);
+  if(!list.length){
+    var li = el("li");
+    var msg = key === todayKey ? "오늘은 일정이 없어요." : "이 날은 일정이 없어요.";
+    if(LOADED.indexOf(monthOf(key)) === -1 && officialShown()){
+      msg = monthName(monthOf(key))+" 플레이브 공식 일정은 아직 불러오지 않았어요.";
+    } else if(state.show === "video"){
+      msg = key === todayKey ? "오늘은 올라온 영상이 없어요." : "이 날 올라온 영상이 없어요.";
+    } else if(state.show === "fan" && !ALL.some(function(e){return e.src==="fan";})){
+      msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
+    }
+    li.appendChild(el("p","empty",msg));
+    if(key === todayKey && state.show !== "video" && /^오늘은 일정이 없어요/.test(msg)){
+      var nx = nextLine(key);
+      if(nx) li.appendChild(nx);
+    }
+    ul.appendChild(li);
+    return;
+  }
+  list.forEach(function(e){
+    var li = el("li","item src-"+e.src+((e.src==="plave" && (/\brelease\b|KEEP IT MANIC|CONCERT|콘서트/i.test(e.title))) ? " gbox" : ""));
+    if(e.src==="plave" && /'s\s+day/i.test(e.title)){   // 생일: 달력 칸과 같은 멤버 색
+      var mc = memberColor(e.title);
+      li.style.cssText = "--cb:"+mc+"26;--cbar:"+mc+";--cf:var(--ink)";
+    }
+    if(e.src === "video") li.className += " no-time";
+    else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
+    var body = el("div");
+    if(state.show === "all") body.appendChild(el("span","who",SRC_NAME[e.src]));
+    body.appendChild(el("div","ti",e.title));
+    if(e.note) body.appendChild(el("div","memo",e.note));
+    if(e.links.length){
+      var ls = el("div","links");
+      e.links.forEach(function(u,i){
+        var a = el("a",null,hostLabel(u)+(e.links.length>1 ? " "+(i+1) : "")+" 열기");
+        a.href = u; a.target = "_blank"; a.rel = "noopener noreferrer";
+        ls.appendChild(a);
+      });
+      body.appendChild(ls);
+    }
+    li.appendChild(body);
+    ul.appendChild(li);
+  });
+}
+
+function setPressed(boxId, key){
+  var bs = document.getElementById(boxId).querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){
+    bs[i].setAttribute("aria-pressed", bs[i].getAttribute("data-k") === key ? "true" : "false");
+  }
+}
+
+function weekKeys(){
+  var start = addDays(state.sel, -dowOf(state.sel));
+  var out = [];
+  for(var i=0;i<7;i++) out.push(addDays(start,i));
+  return out;
+}
+
+function renderTitleAndNote(){
+  var months = [];
+  var title;
+  if(state.view === "month"){
+    months = [monthOf(state.sel)];
+    title = monthName(months[0]);
+  } else {
+    var wk = weekKeys();
+    wk.forEach(function(k){ if(months.indexOf(monthOf(k)) === -1) months.push(monthOf(k)); });
+    var a = wk[0].split("-").map(Number), b = wk[6].split("-").map(Number);
+    title = a[0]+"년 "+a[1]+"월 "+a[2]+"일 – "+(a[1]===b[1] ? "" : b[1]+"월 ")+b[2]+"일";
+  }
+  document.getElementById("title").textContent = title;
+  var missing = months.filter(function(m){ return LOADED.indexOf(m) === -1; });
+  var note = document.getElementById("note");
+  if(missing.length && officialShown()){
+    note.hidden = false;
+    note.textContent = missing.map(monthName).join(", ")+" 플레이브 공식 일정은 아직 불러오지 않았어요."+(LOADED.length ? " 지금은 "+monthName(LOADED[0])+(LOADED.length>1 ? " ~ "+monthName(LOADED[LOADED.length-1]) : "")+" 공식 일정이 들어 있습니다." : "");
+  } else { note.hidden = true; }
+}
+
+/* 달력 칸에 보일 제목: 맨 앞의 PLAVE(플레이브) 는 뺌 (팝업에는 제목 전체가 나와요) */
+function cellTitle(s, src){
+  var r = s.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || s;
+  if(src !== "plave") return r;
+  var HEART = "(?:💙|💜|🩷|💗|❤️|❤|🖤)+";
+  var hm = r.match(new RegExp("^(.*?)\\s*(" + HEART + ")\\s*$"));
+  var body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
+  var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
+  if(/weverse\s*live|위버스\s*(?:live|라이브)/i.test(r)){   // 위버스 라이브: 멤버 하트만 (하트가 없으면 제목 그대로)
+    return hs ? hs : r;
+  }
+  if(/^(?:[\w'’\-]+\s+){0,2}(?:LIVE|라이브)$/i.test(body.trim())){   // 유튜브 라이브: LIVE (일부 멤버만 나오면 하트도)
+    return "LIVE";
+  }
+  if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)){   // 콘서트: 🔥 + 도시·회차만
+    var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
+    return "🔥 " + (c || r);
+  }
+  if(/\bRELEASE\b/i.test(r)){   // 릴리즈만 💿 + 이름 (M/V 등 다른 영상 일정에는 안 붙임)
+    var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").trim();
+    return t || r;
+  }
+  if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return r;   // 방송: 방송국 이름만
+  return r;
+}
+function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
+var MEMBER_COLOR = [[/yejun|예준/i,"#3b82f6"],[/noah|노아/i,"#8b5cf6"],[/bamby|밤비/i,"#ec6fa5"],[/eunho|은호/i,"#e5484d"],[/hamin|하민/i,"#2fa866"]];
+function memberColor(t){
+  for(var i=0;i<MEMBER_COLOR.length;i++) if(MEMBER_COLOR[i][0].test(t)) return MEMBER_COLOR[i][1];
+  return "#d9a400";
+}
+function renderMonth(box){
+  var ym = monthOf(state.sel);
+  var p = ym.split("-").map(Number);
+  var y = p[0], m = p[1];
+  var byDay = {};
+  ALL.forEach(function(e){
+    if(monthOf(e.key) !== ym || !visible(e)) return;
+    (byDay[e.key] = byDay[e.key] || []).push(e);
+  });
+  var grid = el("div","grid");
+  DOW.forEach(function(d,i){ grid.appendChild(el("div","dow"+(i===0?" sun":i===6?" sat":""),d)); });
+  var lead = new Date(Date.UTC(y,m-1,1)).getUTCDay();
+  var days = new Date(Date.UTC(y,m,0)).getUTCDate();
+  for(var i=0;i<lead;i++) grid.appendChild(el("div","blank"));
+  for(var d=1; d<=days; d++){
+    var key = y+"-"+pad(m)+"-"+pad(d);
+    var wd = (lead + d - 1) % 7;
+    var list = byDay[key] || [];
+    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":""));
+    b.type = "button";
+    b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
+    b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
+    var bdEv = list.filter(function(e){ return e.src==="plave" && /'s\s+day/i.test(e.title); })[0];   // 실제 생일날(Happy ○○'s Day)만
+    var isBd = !!bdEv;
+    var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
+    var nr = el("span","numrow");
+    var ns = el("span","num"); ns.appendChild(el("span","nn",String(d))); nr.appendChild(ns);
+    b.appendChild(nr);
+    list.slice(0,3).forEach(function(e){
+      var c = el("span","chip src-"+e.src);
+      if(e.src === "plave"){   // 릴리즈·생일은 (종일이든 시간이 있든) 진한 색 칸에 흰 글씨
+        if(/\brelease\b/i.test(e.title)) c.className += " gchip";   // 릴리즈: 초록 박스
+        else if(/'s\s+day/i.test(e.title)){ var sc = memberColor(e.title); c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
+      }
+      var isShort = e.title.indexOf("[Shorts] ") === 0;
+      var bday = (/birthday|b-?day|생일/i.test(e.title) && !/'s\s+day/i.test(e.title)) ? "🎂 " : "";   // 생일 관련 콘텐츠는 제목 앞에 🎂
+      var cat = "";   // 종류 이모지(🔥 콘서트·📺 방송·🚨 릴리즈·🎂 생일)는 시간 옆에 작게
+      if(e.src === "plave" && !isShort){
+        var cm = cellTitle(e.title, "plave").match(/^(🔥|📺) /);
+        if(cm) cat = cm[1];
+        if(e.allDay && /'s\s+day/i.test(e.title)) cat = "🎂";
+      }
+      var isYL = (e.src === "plave" && !isShort && cellTitle(e.title, "plave") === "LIVE");   // 유튜브 라이브: 이모지 없이 초록 박스
+      if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
+        var tlabel = e.time;
+        if(e.allDay && e.src === "plave"){   // 종일 대신 의미 있는 말: 릴리즈·생일 (그 밖의 종일 일정은 글자 없이 제목만)
+          tlabel = /\brelease\b/i.test(e.title) ? "릴리즈" : (/'s\s+day/i.test(e.title) ? "생일" : "");
+        }
+        if(tlabel || cat){
+          var bt = el("b",null,tlabel);
+          bt.className = "tm";
+          if(cat){ var te = el("span","em tem",cat); bt.appendChild(te); }
+          c.appendChild(bt);
+        }
+      }
+      if(isShort){
+        c.className += " is-short";
+        c.appendChild(el("span","sh","[Shorts]"));
+        var hm = e.title.slice(9).match(/^((?:💙|💜|🩷|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
+        if(hm){ c.appendChild(rich(el("span","ct-hearts"),bday+hm[1])); }
+        else {   // 하트가 없는 쇼츠는 제목을 이어서 보여줌
+          var sfull = cellTitle(e.title.slice(9));
+          c.appendChild(rich(el("span","ct-full"),bday+sfull));
+          c.appendChild(rich(el("span","ct-short"),bday+stripBracket(sfull)));
+        }
+      } else {
+        var full = cellTitle(e.title, e.src);
+        if(e.allDay && e.src === "plave" && EMO_LEAD && !/release|'s\s+day/i.test(e.title)){   // 종일 일정은 이모지 없이
+          var nf = full.replace(EMO_LEAD, "");
+          if(nf) full = nf;
+        }
+        if(e.allDay && e.src === "plave" && /'s\s+day/i.test(e.title)){   // 생일: 🎂 + 멤버 이름
+          var bm = e.title.match(/happy\s+(.+?)['’]s\s+day/i);
+          full = "🎂 " + (bm ? bm[1] : full);
+        }
+        if(cat && full.indexOf(cat + " ") === 0) full = full.slice(cat.length + 1);   // 이모지는 시간 옆으로 옮겼으니 제목에서는 뺌
+        if(cat === "🔥") full = full + " Concert";   // 콘서트: 지역 뒤에 Concert
+        var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
+        var rest = pre ? full.slice(pre.length) : full;
+        var lv = false;   // LIVE 는 이제 일반 칸 (🎙️ 이모지만 앞에)
+        if(isYL) c.className += " is-live gchip";
+        var cn = cat === "🔥";   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        function put(cls, text){
+          var sp = el("span",cls,"");
+          if(cn){
+            rich(sp, text);   // 콘서트: 🔥 도시·회차
+          } else if(lv){
+            sp.appendChild(rich(el("span","lv"),"LIVE"));
+            var tl = text.slice("LIVE".length).trim();
+            if(tl){ sp.appendChild(document.createTextNode(" ")); rich(sp, tl); }
+          } else rich(sp, text);
+          c.appendChild(sp);
+        }
+        if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
+        if(cn) c.className += " gchip";   // 콘서트: 초록 박스
+        put("ct-full", lv ? full : bday+full);
+        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
+      }
+      b.appendChild(c);
+    });
+    if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
+    if(list.length > 2) b.appendChild(el("span","more2","+"+(list.length-2)));
+    (function(k){ b.addEventListener("click", function(){ selectKey(k); }); })(key);
+    grid.appendChild(b);
+  }
+  var tail = (7 - (lead + days) % 7) % 7;
+  for(var j=0;j<tail;j++) grid.appendChild(el("div","blank"));
+  box.appendChild(grid);
+}
+
+function renderWeek(box){
+  var wrap = el("div","week");
+  weekKeys().forEach(function(key){
+    var wd = dowOf(key);
+    var p = key.split("-").map(Number);
+    var col = el("div","wcol"+(key===todayKey?" today":"")+(key===state.sel?" selected":""));
+    var h = el("button","wh"+(wd===0?" sun":wd===6?" sat":""));
+    h.type = "button";
+    h.setAttribute("aria-label", p[1]+"월 "+p[2]+"일 "+DOWL[wd]+" 선택");
+    h.appendChild(el("span","d",String(p[2])));
+    h.appendChild(el("span","w",DOW[wd]));
+    h.addEventListener("click", function(){ selectKey(key); });
+    col.appendChild(h);
+    var list = el("div","wlist");
+    var evs = eventsOn(key);
+    if(!evs.length) list.appendChild(el("p","wnone","일정 없음"));
+    evs.forEach(function(e){
+      var w = el("div","wev src-"+e.src);
+      w.appendChild(el("div","wt"+(e.allDay?" allday":""),e.time));
+      w.appendChild(el("div","wn",e.title));
+      list.appendChild(w);
+    });
+    col.appendChild(list);
+    wrap.appendChild(col);
+  });
+  box.appendChild(wrap);
+}
+
+function render(){
+  setPressed("showseg", state.show);
+  document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
+  renderSelected();
+  renderTitleAndNote();
+  var box = document.getElementById("cal");
+  box.textContent = "";
+  if(state.view === "month") renderMonth(box); else renderWeek(box);
+}
+
+function step(dir){
+  if(state.view === "week"){
+    state.sel = addDays(state.sel, 7*dir);
+  } else {
+    var p = monthOf(state.sel).split("-").map(Number);
+    var d = new Date(Date.UTC(p[0], p[1]-1+dir, 1));
+    var ym = d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1);
+    state.sel = ym === monthOf(todayKey) ? todayKey : ym+"-01";
+  }
+  render();
+}
+document.getElementById("prev").addEventListener("click", function(){ step(-1); });
+document.getElementById("next").addEventListener("click", function(){ step(1); });
+document.getElementById("dlgx").addEventListener("click", closeDay);
+document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
+document.getElementById("vidbtn").addEventListener("click", function(){ state.show = state.show === "video" ? "all" : "video"; render(); });
+document.getElementById("showseg").addEventListener("click", function(ev){
+  var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
+  if(k){ state.show = k; render(); }
+});
+document.getElementById("updated").textContent = "공식 일정 마지막 확인: " + UPDATED + " (한국 시간)";
+render();
+</script>
+</body>
+</html>
