@@ -119,6 +119,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .chip.is-live .ct-short{text-overflow:clip}
 .chip.strong,.chip.strong *{color:#fff !important}
+.item.gbox{--cb:var(--g-bg);--cf:var(--g-fg);--cbar:#6cc08f}
 .chip.gchip{background:var(--g-bg);color:var(--g-fg)}
 .chip.gchip *{color:var(--g-fg)}
 .chip.strong{box-shadow:0 0 0 1px rgba(255,255,255,.18)}
@@ -418,7 +419,7 @@ function fillDay(key, eyebrowId, headId, itemsId){
     return;
   }
   list.forEach(function(e){
-    var li = el("li","item src-"+e.src);
+    var li = el("li","item src-"+e.src+((e.src==="plave" && (/\brelease\b|KEEP IT MANIC|CONCERT|콘서트/i.test(e.title))) ? " gbox" : ""));
     if(e.src === "video") li.className += " no-time";
     else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
     var body = el("div");
@@ -492,8 +493,8 @@ function cellTitle(s, src){
     var c = r.replace(/\[[^\]]*\]\s*/g, "").replace(/^\s*in\s+/i, "").trim();
     return "🎤 " + (c || r);
   }
-  if(/RELEASE|\bM\/V\b|\bMV\b/i.test(r)){   // 발매: 💿 + 이름만
-    var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").replace(/\s*\bM\/V\b/i, "").trim();
+  if(/\bRELEASE\b/i.test(r)){   // 릴리즈만 💿 + 이름 (M/V 등 다른 영상 일정에는 안 붙임)
+    var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").trim();
     return "💿 " + (t || r);
   }
   if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return "📺 " + r;
@@ -541,7 +542,7 @@ function renderMonth(box){
         else if(/'s\s+day/i.test(e.title)){ var sc = memberColor(e.title); c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
-      var bday = /birthday/i.test(e.title) ? "🎂 " : "";   // 생일 관련 제목은 🎂 로 시작
+      var bday = "";   // 생일 관련 칸에는 이모지를 붙이지 않음 (날짜 옆 🎂 만)
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
         var bt = el("b",null,e.time);
         bt.className = "tm";
