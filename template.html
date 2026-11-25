@@ -116,8 +116,6 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more2{display:none}
 .ct-short{display:none}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
-.chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
-.chip.is-live .ct-short{white-space:normal;overflow:visible;text-overflow:clip}
 .chip.strong,.chip.strong *{color:#fff !important}
 .item.gbox{--cb:var(--g-bg);--cf:var(--g-fg);--cbar:#6cc08f}
 .chip.gchip{background:var(--g-bg);color:var(--g-fg)}
@@ -502,7 +500,7 @@ function cellTitle(s, src){
     var t = r.replace(/\s*(?:ALBUM|DIGITAL)?\s*RELEASE\b/i, "").trim();
     return "💿 " + (t || r);
   }
-  if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return "📺 " + r;
+  if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return r;   // 방송: 방송국 이름만
   return r;
 }
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
@@ -546,7 +544,7 @@ function renderMonth(box){
         else if(/'s\s+day/i.test(e.title)){ var sc = memberColor(e.title); c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
-      var bday = (/birthday|b-?day|생일/i.test(e.title) && !/'s\s+day/i.test(e.title)) ? "🎂 " : "";   // 생일 관련 콘텐츠는 제목 앞에 🎂
+      var bday = (/birthday|b-?day|생일/i.test(e.title) && !/'s\s+day/i.test(e.title) && !/\bLIVE\b/i.test(e.title)) ? "🎂 " : "";   // 생일 관련 콘텐츠는 제목 앞에 🎂
       var cat = "";   // 종류 이모지(🎤 콘서트·📺 방송·💿 릴리즈·🎂 생일)는 시간 옆에 작게
       if(e.src === "plave" && !isShort){
         var cm = cellTitle(e.title, "plave").match(/^(🎤|📺|💿|🎙️) /);
