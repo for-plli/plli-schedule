@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--p);outline-offset:2px}
 .wrap{max-width:1040px;margin:0 auto;padding:18px 16px 56px;display:flex;flex-direction:column;gap:16px}
-h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.02em}
 
 .src-plave{--cb:var(--p-bg);--cf:var(--p-fg);--cbar:var(--p-bar)}
 .src-fan{--cb:var(--f-bg);--cf:var(--f-fg);--cbar:var(--f-bar)}
@@ -76,6 +76,10 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .empty{color:var(--muted);font-size:14.5px;margin:0}
 .next{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:14.5px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
 .num,.item .t,.chip b,.seldate .big,.bar .title,.wh .d,.wev .wt,.next .nd,.next .dd{font-weight:600;font-variant-numeric:tabular-nums}
+/* 자간: 프리텐다드는 큰 글씨에서 벌어져 보여서 크기가 클수록 더 좁혀요 */
+body{letter-spacing:-.01em}
+.item .t,.seldate .big,.bar .title,.wh .d,.wev .wt{letter-spacing:-.03em}
+.num,.chip b,.next .nd,.next .dd{letter-spacing:-.02em}
 .next .nl{color:var(--muted);font-size:12.5px;font-weight:700}
 .next .nd{font-family:var(--font-num);font-weight:700}
 .next .nt{color:var(--ink)}
