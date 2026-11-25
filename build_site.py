@@ -435,6 +435,8 @@ def video_view(videos):
             t = hearts + " " + t
         if e.get("short"):
             t = "[Shorts] " + t
+        if e.get("live") and not re.match(r"\s*\[\s*LIVE\s*\]", t, re.I):
+            t = "[LIVE] " + t
         d = dict(e)
         if d.get("channel"):   # 채널 이름은 짧게 ('서울시 · Seoul' -> '서울시')
             d["channel"] = re.split(r"\s*[·|/]\s*", d["channel"])[0].strip() or d["channel"]
@@ -444,7 +446,7 @@ def video_view(videos):
 
 
 def video_filter(videos):
-    """video_exclude.txt: 일반 줄 = 이 단어가 제목에 있으면 뺌, '!' 로 시작 = 이 단어가 있으면 빼지 않음"""
+    """video_exclude.txt: 일반 줄 = 이 단어가 제목에 있으면 라이브 다시보기로 표시, '!' 로 시작 = 이 단어가 있으면 표시하지 않음"""
     bad, keep = [], []
     if os.path.exists(VIDEO_EXCLUDE):
         for ln in open(VIDEO_EXCLUDE, encoding="utf-8"):
@@ -452,11 +454,15 @@ def video_filter(videos):
             if not ln or ln.startswith("#"):
                 continue
             (keep if ln.startswith("!") else bad).append(ln.lstrip("!").strip().lower())
+    def has(word, t):   # 영어 단어는 낱말 단위로만 (Deliver 속 'live' 는 제외)
+        if re.fullmatch(r"[a-z0-9/ ]+", word):
+            return re.search(r"(?<![a-z0-9])" + re.escape(word) + r"(?![a-z0-9])", t) is not None
+        return word in t
     out = []
     for e in videos:
         t = e["title"].lower()
-        if not e.get("manual") and any(b in t for b in bad) and not any(k in t for k in keep):
-            continue
+        if not e.get("manual") and any(has(b, t) for b in bad) and not any(has(k, t) for k in keep):
+            e = dict(e, live=True)   # 라이브 다시보기: 빼지 않고 [LIVE] 로 표시
         out.append(e)
     return out
 

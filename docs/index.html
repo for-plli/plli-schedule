@@ -543,7 +543,7 @@ function renderMonth(box){
         }
         if(lv) c.className += " is-live";
         put("ct-full", lv ? full : bday+full);
-        put("ct-short", lv ? full : bday+pre+stripBracket(rest));
+        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
       }
       b.appendChild(c);
     });
