@@ -535,7 +535,7 @@ function renderMonth(box){
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
       if(e.src === "plave"){   // 릴리즈·생일은 (종일이든 시간이 있든) 진한 색 칸에 흰 글씨
-        var sc = /'s\s+day/i.test(e.title) ? memberColor(e.title) : (/\brelease\b/i.test(e.title) ? "#14172b" : "");
+        var sc = /'s\s+day/i.test(e.title) ? memberColor(e.title) : (/\brelease\b/i.test(e.title) ? "#2f5fc4" : "");
         if(sc){ c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
       var isShort = e.title.indexOf("[Shorts] ") === 0;
@@ -569,8 +569,7 @@ function renderMonth(box){
         function put(cls, text){
           var sp = el("span",cls,"");
           if(cn){
-            sp.appendChild(el("span","lv cn","CON"));
-            sp.appendChild(document.createTextNode(" " + text.slice(2).trim()));
+            sp.appendChild(document.createTextNode(text.slice(2).trim()));   // 콘서트: 도시·회차만 (색으로 구분)
           } else if(lv){
             sp.appendChild(rich(el("span","lv"),"LIVE"));
             var tl = text.slice("LIVE".length).trim();
@@ -579,7 +578,7 @@ function renderMonth(box){
           c.appendChild(sp);
         }
         if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
-        if(cn){ c.className += " strong"; c.style.background = "#2f5fc4"; }
+        if(cn){ c.className += " strong"; c.style.background = "#5878cf"; }
         if(e.allDay) bday = "";
         put("ct-full", lv || cn ? full : bday+full);
         put("ct-short", lv || cn ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
