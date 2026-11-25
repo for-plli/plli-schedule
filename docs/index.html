@@ -533,7 +533,7 @@ function renderMonth(box){
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
-      if(e.allDay && e.src === "plave"){   // 종일 릴리즈·생일은 진한 색 칸에 흰 글씨
+      if(e.src === "plave"){   // 릴리즈·생일은 (종일이든 시간이 있든) 진한 색 칸에 흰 글씨
         var sc = /'s\s+day/i.test(e.title) ? memberColor(e.title) : (/\brelease\b/i.test(e.title) ? "#14172b" : "");
         if(sc){ c.className += " strong"; c.style.background = sc; c.style.borderLeftColor = sc; }
       }
