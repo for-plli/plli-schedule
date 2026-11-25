@@ -111,6 +111,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .more2{display:none}
 .ct-short{display:none}
 .sh{display:inline-block;margin-right:4px;font-weight:700}
+.chip.is-live .ct-full,.chip.is-live .ct-short{font-weight:700}
 .src-video:not(.is-short) .ct-full,.src-video:not(.is-short) .ct-short{font-weight:700}   /* 영상 칸의 첫 줄은 굵게 */
 .ct-hearts{white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cbar)}
@@ -284,7 +285,7 @@ function norm(e, src){
   var allDay = !!e.isAllDay;
   var d = allDay ? new Date(ms) : kst(ms);
   return {
-    id:e.id, title:String(e.title).replace(/💗/g,"🩷"), ms:ms, allDay:allDay, key:keyOf(d), src:src,
+    id:e.id, title:(e.channel && String(e.title).indexOf("[Shorts] ") !== 0 ? "["+e.channel+"] " : "")+String(e.title).replace(/💗/g,"🩷"), ch:(e.channel||""), ms:ms, allDay:allDay, key:keyOf(d), src:src,
     time: allDay ? "종일" : pad(d.getUTCHours())+":"+pad(d.getUTCMinutes()),
     note: e.note || "",
     links:(e.links||[]).map(function(l){return l.url;}).filter(function(u){return typeof u==="string" && u.indexOf("https://")===0;})
@@ -453,7 +454,7 @@ function cellTitle(s, src){
   if(src === "plave" && /\bLIVE\b|라이브/i.test(r) && !/weverse|위버스/i.test(r)){
     var hm = r.match(/^(.*?)\s*((?:💙|💜|🩷|💗|❤️|❤|🖤)+)\s*$/), body = hm ? hm[1] : r, hs = hm ? hm[2] : "";
     var n = (hs.match(/💙|💜|🩷|💗|❤|🖤/g) || []).length;
-    r = "▶️ " + (n && n < 5 ? hs + " " : "") + body;
+    r = "🔴 " + (n && n < 5 ? hs + " " : "") + body;
   } else if(src === "plave" && !/weverse|위버스/i.test(r)){
     if(/KEEP IT MANIC|CONCERT|콘서트/i.test(r)) r = "🎤 " + r;
     else if(/RELEASE|\bM\/V\b|\bMV\b/i.test(r)) r = "💿 " + r;
@@ -506,8 +507,11 @@ function renderMonth(box){
         }
       } else {
         var full = cellTitle(e.title, e.src);
+        var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
+        var rest = pre ? full.slice(pre.length) : full;
+        if(full.indexOf("🔴") === 0) c.className += " is-live";   // 유튜브 라이브는 굵게
         c.appendChild(el("span","ct-full",bday+full));
-        c.appendChild(el("span","ct-short",bday+stripBracket(full)));
+        c.appendChild(el("span","ct-short",bday+pre+stripBracket(rest)));
       }
       b.appendChild(c);
     });

@@ -289,7 +289,45 @@ def lookup_video(vid, manual_title=""):
     if not title:
         t = re.search(r"<title>(.*?)</title>", page, re.S)
         raise ValueError(f"제목을 찾지 못함 (페이지 {len(page)}자, title={t.group(1)[:60] if t else None!r}, 재생불가={('LOGIN_REQUIRED' in page) or ('UNPLAYABLE' in page)})")
-    return title, when
+    return title, when, page
+
+
+def youtube_channel_id_cached():
+    try:
+        return open(YT_ID_FILE, encoding="utf-8").read().strip()
+    except Exception:
+        return ""
+
+
+def video_channel(vid, page, official_id):
+    """공식 채널이 아닌 곳에 올라온 영상이면 채널 이름을, 공식 채널이면 빈 문자열을 돌려줌"""
+    import html as _h
+    cid = None
+    for pat in (r'itemprop="(?:channelId|identifier)" content="(UC[\w-]{22})"', r'"channelId":"(UC[\w-]{22})"', r'"externalChannelId":"(UC[\w-]{22})"'):
+        m = re.search(pat, page)
+        if m:
+            cid = m.group(1)
+            break
+    name = ""
+    for pat in (r'"ownerChannelName":"((?:[^"\\]|\\.)*)"', r'<link itemprop="name" content="([^"]+)"', r'"author":"((?:[^"\\]|\\.)*)"'):
+        m = re.search(pat, page)
+        if m and m.group(1).strip():
+            try:
+                name = _h.unescape(json.loads('"' + m.group(1) + '"') if "\\" in m.group(1) else m.group(1)).strip()
+            except Exception:
+                name = _h.unescape(m.group(1)).strip()
+            break
+    if not name:
+        try:
+            o = json.loads(http_get("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + vid))
+            name = (o.get("author_name") or "").strip()
+        except Exception:
+            pass
+    if cid and official_id:
+        return "" if cid == official_id else (name or "다른 채널")
+    if not name:
+        return None   # 알 수 없음 (다음에 다시 시도)
+    return "" if re.search(r"plave|플레이브", name, re.I) else name
 
 
 def load_extra_videos(offline):
@@ -326,13 +364,27 @@ def load_extra_videos(offline):
             continue
         key = "yt-" + vid
         ent = cache.get(key)
+        if ent and "channel" not in ent and not offline:   # 예전에 저장된 영상: 채널만 다시 확인
+            try:
+                _t, _w, page = lookup_video(vid, ent["title"])
+                ch = video_channel(vid, page, youtube_channel_id_cached())
+                if ch is not None:
+                    ent["channel"] = ch
+                    cache[key] = ent
+                    changed = True
+                    print(f"영상 채널 확인: {ent['title'][:30]} -> {ch or '공식'}")
+            except Exception as ex:
+                print(f"영상 채널을 읽지 못함 ({vid}): {ex}", file=sys.stderr)
         if not ent and not offline:
             try:
-                title, when = lookup_video(vid, parts[1] if len(parts) > 1 else "")
+                title, when, page = lookup_video(vid, parts[1] if len(parts) > 1 else "")
+                ch = video_channel(vid, page, youtube_channel_id_cached())
                 ent = {"id": key, "title": title,
                        "utcStart": (when or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                        "isAllDay": False, "links": [{"url": "https://www.youtube.com/watch?v=" + vid}],
                        "manual": True, "dateGuessed": when is None}
+                if ch is not None:
+                    ent["channel"] = ch
                 if yt_is_short(vid):
                     ent["short"] = True
                 cache[key] = ent
