@@ -107,9 +107,11 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .numrow{display:flex;align-items:center;justify-content:space-between;gap:2px;height:26px}
 .mk{font-size:10px;line-height:1;display:inline-flex;align-items:center;height:100%;margin-right:8px}
 .day:focus,.day:focus-visible{outline:none}
-.num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:2px}
+.num{font-family:var(--font-num);font-weight:700;font-size:15px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
 .day.sun .num{color:var(--sun)} .day.sat .num{color:var(--sat)}
 .day.today .num{background:var(--ink);color:var(--surface)}
+.num .nn{display:block;line-height:1}
+@supports (text-box:trim-both cap alphabetic){.num .nn{text-box:trim-both cap alphabetic}}
 .chip{font-size:11.5px;line-height:1.3;padding:3px 5px;border-radius:2px;background:var(--cb);color:var(--cf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .chip b{font-family:var(--font-num);font-weight:700;font-size:12px;margin-right:4px}
 .more{font-size:11px;color:var(--muted);padding-left:2px}
@@ -549,7 +551,7 @@ function renderMonth(box){
     var isBd = !!bdEv;
     var isRel = list.some(function(e){ return e.src==="plave" && /\brelease\b/i.test(e.title); });
     var nr = el("span","numrow");
-    nr.appendChild(el("span","num",String(d)));
+    var ns = el("span","num"); ns.appendChild(el("span","nn",String(d))); nr.appendChild(ns);
     b.appendChild(nr);
     list.slice(0,3).forEach(function(e){
       var c = el("span","chip src-"+e.src);
