@@ -232,6 +232,7 @@ def refresh_videos(offline):
 
 
 RE_TAIL_TAGS = re.compile(r"(?:\s+[#@]\S+)+\s*$")
+RE_SUB = re.compile(r"\(\s*SUB\s*\)\s*", re.I)
 # 멤버별 상징 컬러 하트 (위버스 라이브 제목의 💙💜💗❤🖤 순서와 같음: 예준·노아·밤비·은호·하민)
 MEMBER_HEART = [
     ("💙", ("yejun", "예준")), ("💜", ("noah", "노아")), ("💗", ("bamby", "밤비")),
@@ -251,7 +252,8 @@ def video_view(videos):
     쇼츠는 앞에 '[Shorts] ' 를 붙임"""
     out = []
     for e in videos:
-        t = RE_TAIL_TAGS.sub("", e["title"]).strip() or e["title"]
+        base = RE_SUB.sub("", e["title"]).strip() or e["title"]      # (SUB) 표시는 뺌
+        t = RE_TAIL_TAGS.sub("", base).strip() or base
         hearts = member_hearts(e["title"])
         if hearts:
             t = hearts + " " + t

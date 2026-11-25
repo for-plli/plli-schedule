@@ -89,7 +89,8 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .cal{display:flex;flex-direction:column;gap:10px}
 .bar{display:flex;align-items:center;gap:8px}
 .bar .title{font-family:var(--font-num);font-size:21px;font-weight:700;min-width:7.5em;text-align:center}
-.nav{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;line-height:1}
+.nav{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
+.nav .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .today-btn{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
 .note{margin:0;font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:8px 12px}
 
@@ -167,6 +168,7 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .seldate{margin-bottom:8px;gap:6px}
   .seldate .big{font-size:17px}
   .seldate .dowl,.badge{font-size:11px;padding:0 8px}
+  .seldate .dowl{position:relative;top:-1px}
   .items{gap:6px}
   .item{grid-template-columns:62px 1fr;gap:8px;padding:6px 8px 6px 10px;border-left-width:4px}
   .item .t{font-size:19px;line-height:1.3}
@@ -183,7 +185,8 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   .seg button{padding:4px 8px;font-size:12px}
   .vidbtn{padding:4px 9px;font-size:12px}
   .lhs{gap:9px}
-  .nav{width:26px;height:26px;font-size:15px;border-radius:7px}
+  .nav{width:26px;height:26px;border-radius:7px}
+  .nav .chev{width:13px;height:13px}
   .bar{gap:4px}
   .bar .title{font-size:13.5px;min-width:5.6em}
   .today-btn{padding:4px 11px;font-size:12px}
@@ -238,9 +241,9 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
       <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false">영상</button>
     </div>
     <div class="bar">
-      <button class="nav" id="prev" type="button" aria-label="이전">‹</button>
+      <button class="nav" id="prev" type="button" aria-label="이전"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <div class="title" id="title" aria-live="polite"></div>
-      <button class="nav" id="next" type="button" aria-label="다음">›</button>
+      <button class="nav" id="next" type="button" aria-label="다음"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
   </div>
 
@@ -471,7 +474,12 @@ function renderMonth(box){
         c.className += " is-short";
         c.appendChild(el("b","sh","[Shorts]"));
         var hm = e.title.slice(9).match(/^((?:💙|💜|💗|❤️|🖤)+)/);   // 쇼츠는 멤버 하트까지만
-        if(hm) c.appendChild(el("span","ct-hearts",hm[1]));
+        if(hm){ c.appendChild(el("span","ct-hearts",hm[1])); }
+        else {   // 하트가 없는 쇼츠는 제목을 이어서 보여줌
+          var sbase = e.title.slice(9);
+          c.appendChild(el("span","ct-full",sbase));
+          c.appendChild(el("span","ct-short",sbase.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || sbase));
+        }
       } else {
         c.appendChild(el("span","ct-full",e.title));
         c.appendChild(el("span","ct-short",e.title.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || e.title));
