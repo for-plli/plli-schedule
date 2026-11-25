@@ -74,7 +74,9 @@ def event(e, alarm_min, category=""):
         lines.append(f"URL:{urls[0]}")
     if category:
         lines.append(f"CATEGORIES:{esc(category)}")
-    if e.get("isAllDay"):   # 종일 일정: 당일 아침 9시에 안내
+    if e.get("quiet"):      # 알림없음 표시가 있는 일정: 알림을 넣지 않음
+        pass
+    elif e.get("isAllDay"):   # 종일 일정: 당일 아침 9시에 안내
         lines += ["BEGIN:VALARM", "ACTION:DISPLAY", f"DESCRIPTION:{esc('오늘 ' + e['title'])}",
                   f"TRIGGER:PT{MORNING_HOUR}H", "END:VALARM"]
     else:
@@ -105,8 +107,9 @@ def monthly_event(r, first_day, until_day):
     if urls:
         lines.append(f"URL:{urls[0]}")
     lines.append("CATEGORIES:플리")
-    lines += morning_alarm(r["hour"] * 60 + r["minute"], f"오늘 {r['hour']:02d}:{r['minute']:02d} {r['title']}")
-    lines += alarm(ALARM_FAN, r["title"])
+    if not r.get("quiet"):
+        lines += morning_alarm(r["hour"] * 60 + r["minute"], f"오늘 {r['hour']:02d}:{r['minute']:02d} {r['title']}")
+        lines += alarm(ALARM_FAN, r["title"])
     lines.append("END:VEVENT")
     return lines
 
