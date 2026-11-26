@@ -429,7 +429,7 @@ footer .alarmbtn{margin:0 0 8px}
       <div class="al-sec">
         <div class="al-h"><b>아이폰</b><a class="al-go" id="al-ios">구독하기</a></div>
         <p>당일 오전 9시와 시작 10분 전에 알려줘요.</p>
-        <p>설정 → 캘린더 → 캘린더 계정 → 구독한 캘린더 → <b>알림 제거</b> 끄기</p>
+        <p>설정 &gt; 캘린더 &gt; 캘린더 계정 &gt; 구독한 캘린더 &gt; 플리 일정에서 <b>알림 제거</b>가 켜져 있으면 꺼 주세요.</p>
       </div>
       <div class="al-sec">
         <div class="al-h"><b>구글 캘린더</b><a class="al-go" id="al-g" target="_blank" rel="noopener noreferrer">구독하기</a></div>
@@ -505,7 +505,7 @@ function splitRelease(list){
   });
   return out;
 }
-var ALL = splitRelease(RAW.concat(PLAVE_EXTRA)).map(function(e){return norm(e,"plave");})
+var ALL = RAW.concat(PLAVE_EXTRA).map(function(e){return norm(e,"plave");})
   .concat(FAN_RAW.concat(monthlyEvents()).map(function(e){return norm(e,"fan");}))
   .concat(VIDEOS.map(function(e){return norm(e,"video");}));
 ALL.sort(function(a,b){
@@ -580,7 +580,7 @@ function nextLine(key){
     var c = cellTitle(n.title, "plave");
     if(/^[💙💜🩷💗❤️❤🖤\s]+$/.test(c)){ t = n.title; }                    // 위버스 라이브: 하트만이면 제목 그대로
     else if(/KEEP IT MANIC|CONCERT|콘서트/i.test(t)){ t = c.replace(/^\S+\s/, "").replace(/\s*Concert$/i, "") + " Concert"; }
-    else if(n.allDay && /\bRELEASE\b/i.test(n.title)){ t = "릴리즈 " + c; }
+    else if(/\bRELEASE\b/i.test(n.title)){ t = "릴리즈 " + c; }
     else if(n.allDay && /'s\s+day/i.test(n.title)){ t = "생일 " + (n.title.match(/happy\s+(.+?)['’]s\s+day/i) || [0, c])[1]; }
   }
   var a = parseKey(key), b = parseKey(n.key);
