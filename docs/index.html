@@ -391,6 +391,15 @@ h1.brand .bs{font-size:13px;font-weight:500;color:var(--muted);line-height:1;mar
 .adl .adt{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--p-fg);background:var(--p-bg);border-radius:999px;padding:1px 8px;line-height:1.6}
 .adl.src-fan .adt{color:var(--f-fg);background:var(--f-bg)}
 .adl .adx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 주요 일정(릴리즈·콘서트): 팝업·오늘 카드에서도 진한 파랑으로 채움 */
+.item.gbox{--cb:var(--p);--cf:var(--p-ink);--cbar:var(--p)}
+.item.gbox,.item.gbox *{color:var(--p-ink) !important}
+.item.gbox a{border-color:currentColor !important;background:transparent !important}
+.item.gbox .ti{font-weight:700}
+.item.bdbox,.item.bdbox *{color:#fff !important}
+.item.bdbox a{border-color:currentColor !important;background:transparent !important}
+.item.bdbox .ti{font-weight:700}
 </style>
 </head>
 <body>
@@ -663,7 +672,7 @@ function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
     var li = el("li","item src-"+e.src+((e.src==="plave" && (/\brelease\b|KEEP IT MANIC|CONCERT|콘서트/i.test(e.title))) ? " gbox" : ""));
     if(e.src==="plave" && /'s\s+day/i.test(e.title)){   // 생일: 달력 칸과 같은 멤버 색
       var mc = memberColor(e.title);
-      li.style.cssText = "--cb:"+mc+"26;--cbar:"+mc+";--cf:var(--ink)";
+      li.className += " bdbox"; li.style.cssText = "--cb:"+mc+";--cbar:"+mc+";--cf:#fff";   // 진한 멤버 색
     }
     if(e.src === "video") li.className += " no-time";
     else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
