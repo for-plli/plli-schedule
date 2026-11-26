@@ -733,7 +733,7 @@ function renderMonth(box){
     var key = y+"-"+pad(m)+"-"+pad(d);
     var wd = (lead + d - 1) % 7;
     var list = byDay[key] || [];
-    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":"")+(key<todayKey?" past":""));
+    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":"")+(key<todayKey && state.show !== "video"?" past":""));   // 영상은 아카이브라 지난 날짜 구분 없음
     b.type = "button";
     b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
     b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
