@@ -244,9 +244,11 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
 .sel .eyebrow{grid-column:1;grid-row:1;justify-self:start;margin:0;font-size:10.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border-radius:999px;padding:2px 9px;line-height:1.5}
 .sel .seldate{grid-column:2;grid-row:1;margin:0}
 .sel .items{grid-column:1 / -1;margin-top:8px}
-.sel .empty{font-size:13px;margin:0 0 0 2px}
-.sel .next{margin:10px 0 0;padding:10px 2px 0;font-size:13px;flex-wrap:nowrap;align-items:center;gap:8px}
-.sel .next .nl{font-size:11px;font-weight:600}
+.sel .empty{font-size:13px;margin:0}
+.sel .next{margin:10px 0 0;padding:10px 0 0;font-size:13px;flex-wrap:nowrap;align-items:center;gap:8px}
+.sel .next .nl{font-size:13px;font-weight:500;color:var(--muted)}
+.sel .next .nd{font-size:13px;font-weight:700}
+.sel .next .nt{font-size:13px;font-weight:400}
 .sel .next .dd{border-radius:999px;padding:1px 9px;font-size:12px}
 .sel .next .nl,.sel .next .nd,.sel .next .dd{flex:0 0 auto;white-space:nowrap}
 .sel .next .nt{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -295,6 +297,9 @@ dialog.daydlg{border-radius:14px}
 .sel .seldate{align-items:baseline}
 /* 깔때기는 윗부분이 넓어 시각 중심이 위로 쏠려서 살짝 내림 */
 .fbtn .fi{transform:translateY(.5px)}
+
+/* 달력과 안내 문구 사이 구분선 */
+footer{border-top:1px solid var(--line);padding-top:16px;margin-top:4px;width:100%}
 
 @media (max-width:600px){
   .wrap{padding:16px 20px 40px;gap:14px}
