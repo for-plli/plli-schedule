@@ -538,7 +538,7 @@ function renderSelected(){
   // 오늘 카드는 필터(플레이브/플리/영상)와 상관없이 항상 '전체' 기준으로 고정
   var keep = state.show;
   state.show = "all";
-  try{ fillDay(todayKey, "eyebrow", "seldate", "items"); }
+  try{ fillDay(todayKey, "eyebrow", "seldate", "items", true); }
   finally{ state.show = keep; }
 }
 
@@ -565,7 +565,7 @@ function nextLine(key){
   line.appendChild(el("span","dd","D-"+days));
   return line;
 }
-function fillDay(key, eyebrowId, headId, itemsId){
+function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
   var p = key.split("-").map(Number);
   var wd = dowOf(key);
   document.getElementById(eyebrowId).textContent = key === todayKey ? "오늘" : "선택한 날짜의 일정";
@@ -577,6 +577,7 @@ function fillDay(key, eyebrowId, headId, itemsId){
   var ul = document.getElementById(itemsId);
   ul.textContent = "";
   var list = eventsOn(key);
+  if(hideAllDay) list = list.filter(function(e){ return !e.allDay; });   // 오늘 카드: 시간대별로 챙길 일정만 (종일 일정은 달력에서 확인)
   if(!list.length){
     var li = el("li");
     var msg = key === todayKey ? "오늘은 일정이 없어요." : "이 날은 일정이 없어요.";
@@ -604,7 +605,6 @@ function fillDay(key, eyebrowId, headId, itemsId){
     if(e.src === "video") li.className += " no-time";
     else li.appendChild(el("div","t"+(e.allDay?" allday":""),e.time));
     var body = el("div");
-    if(state.show === "all") body.appendChild(el("span","who",SRC_NAME[e.src]));
     body.appendChild(el("div","ti",e.title));
     if(e.note) body.appendChild(el("div","memo",e.note));
     if(e.links.length){
