@@ -354,6 +354,26 @@ footer .alarmbtn{margin:0 0 8px}
   .daydlg .seldate .dowl.sun{color:var(--sun)}
   .daydlg .seldate .dowl.sat{color:var(--sat)}
 }
+
+/* 색 2가지(플레이브·플리) + 진한 칸 = 릴리즈·콘서트(생일은 멤버 색), 지난 날짜 흐리게, 폰 아이콘 칩, 범례 */
+:root{--g-bg:var(--p-bg);--g-fg:var(--p-fg)}
+.chip.gchip{background:var(--p);color:var(--p-ink)}
+.chip.gchip *{color:var(--p-ink)}
+.day.past .chip,.day.past .more,.day.past .more2{opacity:.42}
+.day.past .num .nn{opacity:.45}
+.chip .ico{display:none}
+.chip b{word-break:keep-all}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:-6px 0 0;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.lg-p{background:var(--p-bg);box-shadow:inset 0 0 0 1px var(--p-bar)}
+.lg-f{background:var(--f-bg);box-shadow:inset 0 0 0 1px var(--f-bar)}
+.lg-s{background:var(--p)}
+.legend[hidden]{display:none}
+@media (max-width:600px){
+  .chip.has-ico .ct-short{display:none}
+  .chip.has-ico .ico{display:block;line-height:1.35;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -398,6 +418,7 @@ footer .alarmbtn{margin:0 0 8px}
     <p class="note" id="note" hidden></p>
     <div id="cal"></div>
   </section>
+  <p class="legend" id="legend"><span><i class="lg-p"></i>플레이브</span><span><i class="lg-f"></i>플리</span><span><i class="lg-s"></i>릴리즈·콘서트</span></p>
 
   <footer>
     <button type="button" class="alarmbtn" id="alarmbtn"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2V11a4.5 4.5 0 0 0-9 0v4zM10 20h4"/></svg>알람받기</button>
@@ -693,6 +714,18 @@ function cellTitle(s, src){
   if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return r;   // 방송: 방송국 이름만
   return r;
 }
+function icoOf(e, shown){
+  var t = e.title;
+  if(e.src === "fan") return /티켓|예매|예약|응모|추첨/.test(t) ? "🎫" : "";
+  if(e.src !== "plave" || e.allDay) return "";
+  if(/^[💙💜🩷💗❤️❤🖤\s]+$/.test(shown) || shown === "LIVE" || /KEEP IT MANIC|CONCERT|콘서트/i.test(t)) return "";
+  if(/라디오|FM4U|\bFM\b|radio/i.test(t)) return "📻";
+  if(/어워드|AWARD|\bMMA\b|MAMA|시상식/i.test(t)) return "🏆";
+  if(/음악중심|뮤직뱅크|인기가요|COUNTDOWN|엠카|쇼챔|더쇼|\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN)\b/i.test(t)) return "📺";
+  if(/발매/.test(t)) return "💿";
+  if(/birthday|생일/i.test(t)) return "🎂";
+  return "";
+}
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
 var MEMBER_COLOR = [[/yejun|예준/i,"#3b82f6"],[/noah|노아/i,"#8b5cf6"],[/bamby|밤비/i,"#ec6fa5"],[/eunho|은호/i,"#e5484d"],[/hamin|하민/i,"#2fa866"]];
 function memberColor(t){
@@ -717,7 +750,7 @@ function renderMonth(box){
     var key = y+"-"+pad(m)+"-"+pad(d);
     var wd = (lead + d - 1) % 7;
     var list = byDay[key] || [];
-    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":""));
+    var b = el("button","day"+(wd===0?" sun":wd===6?" sat":"")+(key===todayKey?" today":"")+(key<todayKey?" past":""));
     b.type = "button";
     b.setAttribute("aria-pressed", key === state.sel ? "true" : "false");
     b.setAttribute("aria-label", m+"월 "+d+"일, 일정 "+list.length+"건");
@@ -779,7 +812,7 @@ function renderMonth(box){
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
         var lv = false;   // LIVE 는 이제 일반 칸 (🎙️ 이모지만 앞에)
-        if(isYL) c.className += " is-live gchip";
+        if(isYL) c.className += " is-live";
         var cn = cat === "🔥";   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
@@ -795,7 +828,9 @@ function renderMonth(box){
         if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
         if(cn) c.className += " gchip";   // 콘서트: 초록 박스
         put("ct-full", lv ? full : bday+full);
-        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
+        put("ct-short", lv ? full : (cn ? full.replace(/\s*Concert$/i,"") : bday+pre+(e.src === "video" ? rest : stripBracket(rest))));   // 영상은 [] 안 글자도 그대로 / 폰의 콘서트는 도시만
+        var ico = icoOf(e, full);   // 폰: 제목 대신 종류 아이콘 (제목은 날짜 팝업에서)
+        if(ico){ c.className += " has-ico"; c.appendChild(el("span","ico",ico)); }
       }
       b.appendChild(c);
     });
@@ -842,6 +877,7 @@ function render(){
   document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
   var fb = document.getElementById("fbtn");
   fb.className = "fbtn" + (state.show === "plave" || state.show === "fan" ? " on" : state.show === "video" ? " dim" : "");
+  document.getElementById("legend").hidden = state.show === "video";
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");
