@@ -356,7 +356,7 @@ footer .alarmbtn{margin:0 0 8px}
 }
 
 /* 색 2가지(플레이브·플리) + 진한 칸 = 릴리즈·콘서트(생일은 멤버 색), 지난 날짜 흐리게, 범례 */
-:root{--g-bg:var(--p-bg);--g-fg:var(--p-fg)}
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--g-bg:var(--p-bg);--g-fg:var(--p-fg)}
 .chip.gchip{background:var(--p);color:var(--p-ink)}
 .chip.gchip *{color:var(--p-ink)}
 .day.past .num .nn{color:var(--muted);opacity:.35}   /* 지난 날짜: 숫자만 많이 흐리게 (칩은 그대로) */
@@ -385,6 +385,12 @@ h1.brand .bs{font-size:13px;font-weight:500;color:var(--muted);line-height:1;mar
 .pbar.src-fan{background:var(--f-bar)}
 .pbar.ps{left:4px;border-top-left-radius:3px;border-bottom-left-radius:3px}
 .pbar.pe{right:4px;border-top-right-radius:3px;border-bottom-right-radius:3px}
+
+/* 오늘 카드: 종일 일정 한 줄 */
+.adl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:0 2px}
+.adl .adt{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--p-fg);background:var(--p-bg);border-radius:999px;padding:1px 8px;line-height:1.6}
+.adl.src-fan .adt{color:var(--f-fg);background:var(--f-bg)}
+.adl .adx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -621,7 +627,20 @@ function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
   var ul = document.getElementById(itemsId);
   ul.textContent = "";
   var list = eventsOn(key);
-  if(hideAllDay) list = list.filter(function(e){ return !e.allDay; });   // 오늘 카드: 시간대별로 챙길 일정만 (종일 일정은 달력에서 확인)
+  var adl = [];
+  if(hideAllDay){   // 오늘 카드: 종일 일정은 위에 작은 한 줄로, 시간 일정은 카드로
+    adl = list.filter(function(e){ return e.allDay; });
+    list = list.filter(function(e){ return !e.allDay; });
+    adl.forEach(function(e){
+      var bd = e.src === "plave" && /'s\s+day/i.test(e.title);
+      var li = el("li","adl src-"+e.src);
+      var tg = el("span","adt",bd ? "생일" : "종일");
+      if(bd){ tg.style.background = memberColor(e.title); tg.style.color = "#fff"; }
+      li.appendChild(tg);
+      li.appendChild(rich(el("span","adx"), e.title.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || e.title));
+      ul.appendChild(li);
+    });
+  }
   if(!list.length){
     var li = el("li");
     var msg = key === todayKey ? "오늘은 일정이 없어요." : "이 날은 일정이 없어요.";
@@ -632,7 +651,7 @@ function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
     } else if(state.show === "fan" && !ALL.some(function(e){return e.src==="fan";})){
       msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
     }
-    li.appendChild(el("p","empty",msg));
+    if(!(adl.length && /^오늘은 일정이 없어요/.test(msg))) li.appendChild(el("p","empty",msg));   // 종일 일정만 있는 날은 '없어요' 대신 다음 일정만
     if(key === todayKey && state.show !== "video" && /^오늘은 일정이 없어요/.test(msg)){
       var nx = nextLine(key);
       if(nx) li.appendChild(nx);
@@ -774,6 +793,7 @@ function renderMonth(box){
         if(cm) cat = cm[1];
         if(e.allDay && /'s\s+day/i.test(e.title)) cat = "🎂";
       }
+      var isCon = (cat === "🔥"); if(isCon) cat = "";   // 콘서트: 진한 색으로 충분히 강조되니 🔥 없이
       var isYL = (e.src === "plave" && !isShort && cellTitle(e.title, "plave") === "LIVE");   // 유튜브 라이브: 이모지 없이 초록 박스
       if(e.src !== "video"){   // 영상은 칸에 시간을 적지 않아요 (상세 팝업에서만)
         var tlabel = e.time;
@@ -807,13 +827,14 @@ function renderMonth(box){
           var bm = e.title.match(/happy\s+(.+?)['’]s\s+day/i);
           full = "🎂 " + (bm ? bm[1] : full);
         }
-        if(cat && full.indexOf(cat + " ") === 0) full = full.slice(cat.length + 1);   // 이모지는 시간 옆으로 옮겼으니 제목에서는 뺌
-        if(cat === "🔥") full = full + " Concert";   // 콘서트: 지역 뒤에 Concert
+        if(cat && full.indexOf(cat + " ") === 0) full = full.slice(cat.length + 1);
+        if(isCon) full = full.replace(/^🔥\s*/, "");   // 이모지는 시간 옆으로 옮겼으니 제목에서는 뺌
+        if(isCon) full = full + " Concert";   // 콘서트: 지역 뒤에 Concert
         var pre = e.ch ? "["+e.ch+"] " : "";   // 공식 채널이 아닌 영상은 채널 이름을 앞에
         var rest = pre ? full.slice(pre.length) : full;
         var lv = false;   // LIVE 는 이제 일반 칸 (🎙️ 이모지만 앞에)
         if(isYL) c.className += " is-live";
-        var cn = cat === "🔥";   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
+        var cn = isCon;   // 콘서트: 주황 CON 배지 + 도시·회차   // 유튜브 라이브: 어두운 배지로 눈에 띄게
         function put(cls, text){
           var sp = el("span",cls,"");
           if(cn){
