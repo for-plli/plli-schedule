@@ -369,11 +369,27 @@ footer .alarmbtn{margin:0 0 8px}
 .lg-s{background:var(--p)}
 .lg-v{background:var(--v-bg);box-shadow:inset 0 0 0 1px var(--v-bar)}
 .legend[hidden]{display:none}
+
+/* 머리글: 아이콘 + 플리스케줄 + 부제 */
+h1.brand{display:flex;align-items:center;gap:8px}
+h1.brand .logo{width:26px;height:26px;border-radius:7px;box-shadow:0 0 0 1px var(--line);flex:0 0 auto}
+h1.brand .bt{line-height:1}
+h1.brand .bs{font-size:13px;font-weight:500;color:var(--muted);line-height:1;margin-left:2px;position:relative;top:1px}
+/* 필터 켜짐: 버튼 안에 고른 이름 */
+.fbtn .fl{display:none}
+.fbtn.on{width:auto;padding:0 14px 0 11px;gap:5px;border-radius:999px}
+.fbtn.on .fl{display:inline;font-size:13px;font-weight:600}
+/* 기간 일정 막대 */
+.day{position:relative}
+.pbar{position:absolute;left:-1px;right:-1px;height:4px;background:var(--p-bar);opacity:.85;pointer-events:none}
+.pbar.src-fan{background:var(--f-bar)}
+.pbar.ps{left:4px;border-top-left-radius:3px;border-bottom-left-radius:3px}
+.pbar.pe{right:4px;border-top-right-radius:3px;border-bottom-right-radius:3px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>⏱️ 바쁘다 바빠 플리사회 🏃🏻‍♀️</h1>
+  <h1 class="brand"><img class="logo" src="apple-touch-icon.png" alt="" width="26" height="26"><span class="bt">플리스케줄</span><span class="bs">바쁘다 바빠 플리사회</span></h1>
 
   <section class="sel" aria-live="polite" aria-label="선택한 날짜의 일정">
     <p class="eyebrow" id="eyebrow"></p>
@@ -393,7 +409,7 @@ footer .alarmbtn{margin:0 0 8px}
   <div class="row1">
     <div class="lhs">
       <div class="fwrap">
-        <button type="button" class="fbtn" id="fbtn" aria-haspopup="true" aria-expanded="false" aria-label="일정 필터"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg></button>
+        <button type="button" class="fbtn" id="fbtn" aria-haspopup="true" aria-expanded="false" aria-label="일정 필터"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg><span class="fl" id="flabel"></span></button>
         <div class="fpop" id="showseg" role="group" aria-label="보여줄 일정" hidden>
           <button type="button" data-k="all">전체<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
           <button type="button" data-k="plave">플레이브<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
@@ -462,7 +478,7 @@ function norm(e, src){
   var allDay = !!e.isAllDay;
   var d = allDay ? new Date(ms) : kst(ms);
   return {
-    id:e.id, title:(e.channel && String(e.title).indexOf("[Shorts] ") !== 0 ? "["+e.channel+"] " : "")+String(e.title).replace(/💗/g,"🩷"), ch:(e.channel||""), ms:ms, allDay:allDay, key:keyOf(d), src:src,
+    until:e.until||"", id:e.id, title:(e.channel && String(e.title).indexOf("[Shorts] ") !== 0 ? "["+e.channel+"] " : "")+String(e.title).replace(/💗/g,"🩷"), ch:(e.channel||""), ms:ms, allDay:allDay, key:keyOf(d), src:src,
     time: allDay ? "종일" : pad(d.getUTCHours())+":"+pad(d.getUTCMinutes()),
     note: e.note || "",
     links:(e.links||[]).map(function(l){return l.url;}).filter(function(u){return typeof u==="string" && u.indexOf("https://")===0;})
@@ -724,6 +740,7 @@ function renderMonth(box){
     if(monthOf(e.key) !== ym || !visible(e)) return;
     (byDay[e.key] = byDay[e.key] || []).push(e);
   });
+  var periods = ALL.filter(function(e){ return e.until && visible(e); });   // 기간 일정(시작~끝): 칸 아래 막대
   var grid = el("div","grid");
   DOW.forEach(function(d,i){ grid.appendChild(el("div","dow"+(i===0?" sun":i===6?" sat":""),d)); });
   var lead = new Date(Date.UTC(y,m-1,1)).getUTCDay();
@@ -817,6 +834,13 @@ function renderMonth(box){
     });
     if(list.length > 3) b.appendChild(el("span","more","+"+(list.length-3)+"건 더"));
     if(list.length > 2) b.appendChild(el("span","more2","+"+(list.length-2)));
+    var pi = 0;
+    periods.forEach(function(pe){
+      if(key < pe.key || key > pe.until) return;
+      var bar = el("span","pbar src-"+pe.src+(key===pe.key||wd===0?" ps":"")+(key===pe.until||wd===6||d===days?" pe":""));
+      bar.style.bottom = (3 + pi*6) + "px"; pi++;
+      b.appendChild(bar);
+    });
     (function(k){ b.addEventListener("click", function(){ selectKey(k); }); })(key);
     grid.appendChild(b);
   }
@@ -858,6 +882,7 @@ function render(){
   document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
   var fb = document.getElementById("fbtn");
   fb.className = "fbtn" + (state.show === "plave" || state.show === "fan" ? " on" : state.show === "video" ? " dim" : "");
+  document.getElementById("flabel").textContent = state.show === "plave" ? "플레이브" : state.show === "fan" ? "플리" : "";
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");

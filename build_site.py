@@ -142,6 +142,12 @@ def parse_manual(path):
                                     "title": title, "nth": nth, "dow": (wd + 1) % 7,   # 자바스크립트 기준(일=0)
                                     "hour": hh, "minute": mm, "note": note, "links": links, "quiet": quiet})
                     continue
+                until = ""
+                rr = re.match(r"^(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})$", when)   # 기간 일정: 2026-11-23~2026-12-13
+                if rr:
+                    when, until = rr.group(1), rr.group(2)
+                    if until <= when:
+                        raise ValueError("기간의 끝 날짜가 시작보다 앞섬")
                 if len(when) > 10:
                     st = datetime.strptime(when, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
                     all_day = False
@@ -151,7 +157,8 @@ def parse_manual(path):
                     all_day = True
                     iso = st.strftime("%Y-%m-%dT00:00:00.000Z")
                 one.append({"id": "x-" + hashlib.sha1(f"{when}|{title}".encode()).hexdigest()[:10],
-                            "title": title, "utcStart": iso, "isAllDay": all_day, "note": note, "links": links, "quiet": quiet})
+                            "title": title, "utcStart": iso, "isAllDay": all_day, "note": note, "links": links, "quiet": quiet,
+                            **({"until": until} if until else {})})
             except Exception as ex:
                 print(f"{path}:{n}: 건너뜀 ({ex})", file=sys.stderr)
     return one, monthly
