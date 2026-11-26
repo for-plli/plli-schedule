@@ -388,8 +388,8 @@ h1.brand .bs{font-size:13px;font-weight:500;color:var(--muted);line-height:1;mar
 
 /* 오늘 카드: 종일 일정 한 줄 */
 .adl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:0 2px}
-.adl .adt{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--p-fg);background:var(--p-bg);border-radius:999px;padding:1px 8px;line-height:1.6}
-.adl.src-fan .adt{color:var(--f-fg);background:var(--f-bg)}
+.adl .adt{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--p-ink);background:var(--p);border-radius:999px;padding:1px 8px;line-height:1.6}
+.adl.src-fan .adt{color:var(--f-ink);background:var(--f)}
 .adl .adx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 주요 일정(릴리즈·콘서트): 팝업·오늘 카드에서도 진한 파랑으로 채움 */
@@ -582,7 +582,7 @@ function selectKey(k){
 }
 
 function openDay(){
-  fillDay(state.sel, "d-eyebrow", "d-seldate", "d-items");
+  fillDay(state.sel, "d-eyebrow", "d-seldate", "d-items", true);   // 팝업도 종일 일정은 위에 작은 한 줄
   var d = document.getElementById("daydlg");
   document.getElementById("dlgin").scrollTop = 0;
   try{ if(!d.open){ if(d.showModal) d.showModal(); else d.setAttribute("open",""); } }
@@ -646,7 +646,8 @@ function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
       var tg = el("span","adt",bd ? "생일" : "종일");
       if(bd){ tg.style.background = memberColor(e.title); tg.style.color = "#fff"; }
       li.appendChild(tg);
-      li.appendChild(rich(el("span","adx"), e.title.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || e.title));
+      var ax = rich(el("span","adx"), e.title.replace(/^\s*PLAVE\s*(?:\(\s*플레이브\s*\))?\s*[-–:|·]?\s*/i, "") || e.title);
+      li.appendChild(ax);
       ul.appendChild(li);
     });
   }
@@ -660,7 +661,7 @@ function fillDay(key, eyebrowId, headId, itemsId, hideAllDay){
     } else if(state.show === "fan" && !ALL.some(function(e){return e.src==="fan";})){
       msg = "플리 일정은 아직 비어 있어요. 티켓팅·예약 일정이 추가되면 여기에 보여요.";
     }
-    if(!(adl.length && /^오늘은 일정이 없어요/.test(msg))) li.appendChild(el("p","empty",msg));   // 종일 일정만 있는 날은 '없어요' 대신 다음 일정만
+    if(!(adl.length && /^(?:오늘|이 날)은 일정이 없어요/.test(msg))) li.appendChild(el("p","empty",msg));   // 종일 일정만 있는 날은 '없어요' 대신 다음 일정만
     if(key === todayKey && state.show !== "video" && /^오늘은 일정이 없어요/.test(msg)){
       var nx = nextLine(key);
       if(nx) li.appendChild(nx);
