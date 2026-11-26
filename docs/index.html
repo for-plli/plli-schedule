@@ -402,6 +402,19 @@ h1.brand .bs{font-size:13px;font-weight:500;color:var(--muted);line-height:1;mar
 .item.bdbox,.item.bdbox *{color:#fff !important}
 .item.bdbox a{border-color:currentColor !important;background:transparent !important}
 .item.bdbox .ti{font-weight:700}
+
+/* 글자 크기 단계: 19 제목 / 15 본문 / 13 보조 / 11 태그·버튼 · 달력 칸은 폰 10px·PC 12px · PC 오늘 카드 시간만 32px */
+html body .sel .eyebrow,html body .bar .title,html body h1.brand .bt,html body .daydlg .seldate .big,html body .daydlg .seldate .dowl{font-size:19px}
+html body .item .ti,html body .sel .seldate .big,html body .sel .seldate .dowl,html body .num .nn,html body .alarmdlg .al-t,html body .alarmdlg .al-h b,html body .dlg-x{font-size:15px}
+html body .daydlg .item .t,html body .daydlg .item .ti{font-size:15px}
+html body .daydlg .item .memo,html body .item .memo,html body .adl,html body .sel .next,html body .sel .next *,html body .sel .empty,html body .dow,html body h1.brand .bs,html body .alarmdlg .dlg-in,html body .alarmdlg .al-d,html body .fpop button,html body .vidbtn,html body .fbtn.on .fl{font-size:13px}
+html body .sel .next .dd,html body .adl .adt,html body .links a,html body .legend,html body footer,html body .alarmbtn,html body .alarmdlg .al-go,html body .more{font-size:11px}
+html body .chip,html body .chip b{font-size:12px}
+@media (max-width:600px){
+  html body .chip,html body .chip b,html body .chip .sh,html body .more2{font-size:10px}
+  html body .item .t{font-size:19px}
+  html body .daydlg .item .t{font-size:15px}
+}
 </style>
 </head>
 <body>
@@ -756,6 +769,25 @@ function cellTitle(s, src){
   if(/\b(?:MBC|KBS|SBS|Mnet|JTBC|tvN|FM4U)\b|COUNTDOWN|라디오|FM|어워드|AWARD|뮤직뱅크|인기가요|음악중심/i.test(r)) return r;   // 방송: 방송국 이름만
   return r;
 }
+/* 폰 달력 칸에서 잘리는 제목 대신 쓰는 짧은 이름 (팝업·PC는 원래 제목 그대로) */
+var SHORT = [
+  [/별이 빛나는 밤에/, "별밤"], [/키스 ?더 ?라디오/, "키라"], [/아이돌 ?라디오/, "아돌라"],
+  [/M ?COUNTDOWN|엠카/i, "엠카"], [/멜론 뮤직 ?어워드|\bMMA\b/i, "MMA"], [/멜론 뮤직 ?웨이브/, "웨이브"], [/[‘'’]([^‘'’]+)[‘'’]\s*(?:DIGITAL\s*|ALBUM\s*)?RELEASE/i, "$1"],
+  [/더아동페스타/, "아동페"], [/BIRTHDAY GIFT.*Playlist/i, "선곡"], [/BIRTHDAY GIFT.*Cover/i, "커버"],
+  [/Special Video/i, "스페셜"], [/Dance Practice/i, "안무"], [/Fanchants? Guide/i, "응원법"], [/M\/V/, "M/V"],
+  [/KEEP IT MANIC\]\s*Encore/i, "앙코르"], [/KEEP IT MANIC\]\s*in\s+(.+)/i, "$1"],
+  [/재정비/, "재정비"], [/활동 재개/, "재개"],
+  [/인증 시작/, "인증"], [/인증 마감/, "마감"], [/선예매/, "선예매"], [/일반예매/, "일반예매"],
+  [/플레이브 데이/, "플데이"], [/십카페/, "십카페"]
+];
+var CITY = {"kaohsiung":"가오슝","bangkok":"방콕","singapore":"싱가폴","taipei":"타이베이","macao":"마카오","macau":"마카오","u.s.":"미국","usa":"미국","seoul":"서울","tokyo":"도쿄","osaka":"오사카","jakarta":"자카르타","manila":"마닐라","hong kong":"홍콩"};
+function shortOf(t){
+  for(var i=0;i<SHORT.length;i++){
+    var m = t.match(SHORT[i][0]);
+    if(m){ var s = SHORT[i][1].replace("$1", (m[1] || "").trim()); return CITY[s.toLowerCase()] || s; }
+  }
+  return "";
+}
 function stripBracket(s){ return s.replace(/^(\s*\[[^\]]*\]\s*)+/,"") || s; }
 var MEMBER_COLOR = [[/yejun|예준/i,"#3b82f6"],[/noah|노아/i,"#8b5cf6"],[/bamby|밤비/i,"#ec6fa5"],[/eunho|은호/i,"#e5484d"],[/hamin|하민/i,"#2fa866"]];
 function memberColor(t){
@@ -861,7 +893,8 @@ function renderMonth(box){
         if(lv){ c.className += " is-live strong"; c.style.background = "#26304d"; }   // 박스 안의 박스 대신 칸 전체를 진하게
         if(cn) c.className += " gchip";   // 콘서트: 초록 박스
         put("ct-full", lv ? full : bday+full);
-        put("ct-short", lv ? full : bday+pre+(e.src === "video" ? rest : stripBracket(rest)));   // 영상은 [] 안 글자도 그대로
+        var sa = e.src === "video" ? "" : shortOf(e.title);
+        put("ct-short", lv ? full : (sa ? bday+sa : bday+pre+(e.src === "video" ? rest : stripBracket(rest))));   // 영상은 [] 안 글자도 그대로
       }
       b.appendChild(c);
     });
@@ -874,6 +907,7 @@ function renderMonth(box){
       bar.style.bottom = (3 + pi*6) + "px"; pi++;
       b.appendChild(bar);
     });
+    if(pi) b.style.paddingBottom = (8 + pi*6) + "px";   // 막대가 칩에 붙지 않게
     (function(k){ b.addEventListener("click", function(){ selectKey(k); }); })(key);
     grid.appendChild(b);
   }
