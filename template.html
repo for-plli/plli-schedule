@@ -367,6 +367,7 @@ footer .alarmbtn{margin:0 0 8px}
 .lg-p{background:var(--p-bg);box-shadow:inset 0 0 0 1px var(--p-bar)}
 .lg-f{background:var(--f-bg);box-shadow:inset 0 0 0 1px var(--f-bar)}
 .lg-s{background:var(--p)}
+.lg-v{background:var(--v-bg);box-shadow:inset 0 0 0 1px var(--v-bar)}
 .legend[hidden]{display:none}
 </style>
 </head>
@@ -412,7 +413,7 @@ footer .alarmbtn{margin:0 0 8px}
     <p class="note" id="note" hidden></p>
     <div id="cal"></div>
   </section>
-  <p class="legend" id="legend"><span><i class="lg-p"></i>플레이브</span><span><i class="lg-f"></i>플리</span><span><i class="lg-s"></i>주요 일정</span></p>
+  <p class="legend" id="legend"><span><i class="lg-p"></i>플레이브</span><span><i class="lg-s"></i>주요 일정</span><span><i class="lg-f"></i>플리</span><span><i class="lg-v"></i>유튜브 공식 영상</span></p>
 
   <footer>
     <button type="button" class="alarmbtn" id="alarmbtn"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2V11a4.5 4.5 0 0 0-9 0v4zM10 20h4"/></svg>알람받기</button>
@@ -857,7 +858,6 @@ function render(){
   document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
   var fb = document.getElementById("fbtn");
   fb.className = "fbtn" + (state.show === "plave" || state.show === "fan" ? " on" : state.show === "video" ? " dim" : "");
-  document.getElementById("legend").hidden = state.show === "video";
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");
