@@ -495,7 +495,11 @@ function closeDay(){
 }
 
 function renderSelected(){
-  fillDay(todayKey, "eyebrow", "seldate", "items");
+  // 오늘 카드는 필터(플레이브/플리/영상)와 상관없이 항상 '전체' 기준으로 고정
+  var keep = state.show;
+  state.show = "all";
+  try{ fillDay(todayKey, "eyebrow", "seldate", "items"); }
+  finally{ state.show = keep; }
 }
 
 /* 오늘 일정이 없을 때 보여줄 '다음 일정' (영상 제외, 지금 고른 필터를 따름) */
