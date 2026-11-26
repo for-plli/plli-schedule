@@ -359,8 +359,7 @@ footer .alarmbtn{margin:0 0 8px}
 :root{--g-bg:var(--p-bg);--g-fg:var(--p-fg)}
 .chip.gchip{background:var(--p);color:var(--p-ink)}
 .chip.gchip *{color:var(--p-ink)}
-.day.past .chip,.day.past .more,.day.past .more2{opacity:.42}
-.day.past .num .nn{opacity:.45}
+.day.past .num .nn{color:var(--muted);opacity:.35}   /* 지난 날짜: 숫자만 많이 흐리게 (칩은 그대로) */
 .chip b{word-break:keep-all}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:-6px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
@@ -413,7 +412,7 @@ footer .alarmbtn{margin:0 0 8px}
     <p class="note" id="note" hidden></p>
     <div id="cal"></div>
   </section>
-  <p class="legend" id="legend"><span><i class="lg-p"></i>플레이브</span><span><i class="lg-f"></i>플리</span><span><i class="lg-s"></i>릴리즈·콘서트</span></p>
+  <p class="legend" id="legend"><span><i class="lg-p"></i>플레이브</span><span><i class="lg-f"></i>플리</span><span><i class="lg-s"></i>주요 일정</span></p>
 
   <footer>
     <button type="button" class="alarmbtn" id="alarmbtn"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2V11a4.5 4.5 0 0 0-9 0v4zM10 20h4"/></svg>알람받기</button>
