@@ -10,11 +10,11 @@
 /* layout: 선택한 날짜(기본 오늘) 패널 -> 월/주 전환 + 전체/플레이브/플리 선택 -> 월간 또는 주간 달력 */
 :root{
   --g-bg:#d9f1e1; --g-fg:#1d6b3f;
-  --bg:#f5f6fb; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
+  --bg:#ffffff; --surface:#ffffff; --ink:#14172b; --muted:#5a6079; --line:#e0e3ef;
   --p:#5da3de; --p-ink:#ffffff; --p-bg:#e8f4fd; --p-fg:#2a6190; --p-bar:#99c8ee;
   --f:#c9779a; --f-ink:#ffffff; --f-bg:#fcf0f4; --f-fg:#7b3a56; --f-bar:#e3b0c4;
   --v:#8f84d6; --v-bg:#f0eefb; --v-fg:#4b4190; --v-bar:#c1b8ee;
-  --n-bg:#eceef6; --n-fg:#2b2f45;
+  --n-bg:#eef2fb; --n-fg:#2b2f45;
   --sun:#c8707a; --sat:#5da3de; --sun-bg:#fbebee;
   --font-body:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --font-num:"Pretendard",-apple-system,"Apple SD Gothic Neo",sans-serif;
@@ -239,6 +239,74 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
   dialog.daydlg{margin:auto;width:calc(100% - 32px);max-width:420px;border-radius:2px;max-height:70vh}
   .dlg-in{max-height:70vh}
 }
+/* ===== v2 디자인: 박스·선·색을 줄이고 둥글기는 큰 영역 14 / 작은 것 6 ===== */
+.sel{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;border-radius:14px;padding:14px 16px}
+.sel .eyebrow{grid-column:2;grid-row:1;justify-self:start;margin:0;font-size:10.5px;font-weight:700;background:var(--n-bg);color:var(--n-fg);border-radius:999px;padding:2px 9px;line-height:1.5}
+.sel .seldate{grid-column:1;grid-row:1;margin:0}
+.sel .items{grid-column:1 / -1;margin-top:8px}
+.sel .empty{font-size:13px;margin:0 0 0 2px}
+.sel .next{margin:10px 0 0;padding:10px 2px 0;font-size:13px;flex-wrap:nowrap;align-items:center;gap:8px}
+.sel .next .nl{font-size:11px;font-weight:600}
+.sel .next .dd{border-radius:999px;padding:1px 9px;font-size:12px}
+.sel .next .nl,.sel .next .nd,.sel .next .dd{flex:0 0 auto;white-space:nowrap}
+.sel .next .nt{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel .next .dd{margin-left:0}
+.item,.daydlg .item{border-radius:6px;border-left-width:0}
+.item .who{border-radius:999px}
+.links a{border-radius:999px}
+.chip{border-radius:6px}
+.grid{border:0;border-radius:0;background:transparent;gap:0}
+.dow,.dow.sun,.dow.sat{background:transparent;border-bottom:1px solid var(--line)}
+.dow{padding:10px 0;font-size:13px;font-weight:600}
+.day,.blank,.day.sun,.day.sat{background:transparent;border:0;border-bottom:1px solid var(--line)}
+.day:nth-last-child(-n+7),.blank:nth-last-child(-n+7){border-bottom:0}
+.num{justify-content:flex-start}
+.day.today .num{justify-content:center}
+.numrow{padding-left:4px}
+dialog.daydlg{border-radius:14px}
+.dlg-x{width:32px;height:32px;border-radius:50%;background:var(--n-bg);top:16px;right:16px;padding:0;font-size:15px;display:inline-flex;align-items:center;justify-content:center}
+
+/* 컨트롤: 필터 아이콘(전체·플레이브·플리) + 영상 알약 */
+.lhs{display:flex;align-items:center;gap:6px}
+.fwrap{position:relative}
+.fbtn,.vidbtn{height:36px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.fbtn{width:36px;border-radius:50%}
+.vidbtn{gap:5px;padding:0 13px 0 10px;border-radius:999px;font-size:13px;font-weight:600}
+.fi{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.vidbtn .fi{width:16px;height:16px}
+.fbtn.on,.vidbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.fbtn.dim{opacity:.4}
+.fpop{position:absolute;left:0;top:44px;z-index:5;min-width:150px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 28px rgba(20,23,43,.14);padding:6px}
+.fpop[hidden]{display:none}
+.fpop button{display:flex;width:100%;justify-content:space-between;align-items:center;height:40px;padding:0 12px;border:0;border-radius:8px;background:transparent;font-size:14px;color:var(--ink);cursor:pointer;text-align:left}
+.fpop button[aria-pressed="true"]{font-weight:700}
+.fpop .ck{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+.fpop button[aria-pressed="true"] .ck{visibility:visible}
+.bar .nav{border:0;background:transparent;border-radius:0;width:28px;height:28px}
+.bar .nav .chev{width:18px;height:18px;stroke-width:2.8}
+.row1{margin-bottom:-4px}
+
+@media (max-width:600px){
+  .wrap{padding:16px 20px 40px;gap:14px}
+  .sel{padding:14px 16px}
+  .seldate .big,.seldate .dowl{font-size:17px}
+  .item,.daydlg .item{padding:10px 14px}
+  .item .who{font-size:10.5px;padding:0 8px}
+  .bar{gap:0}
+  .bar .title{font-size:13.5px;min-width:0;white-space:nowrap}
+  .lhs{gap:6px}
+  .row1{gap:4px}
+  .day,.blank{min-height:88px;padding:8px 3px 6px;gap:2px}
+  .numrow{height:22px}
+  .num{font-size:14px;width:22px;height:22px}
+  .day.today .num{width:24px;height:24px}
+  .chip{font-size:9.5px;padding:2px 3px;line-height:1.35;letter-spacing:-.03em}
+  .chip b{font-size:10px;margin-right:2px}
+  .more{font-size:9.5px}
+  dialog.daydlg{border-radius:14px}
+  .dlg-in{padding:22px 20px 24px}
+  .daydlg .seldate .big,.daydlg .seldate .dowl{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -262,12 +330,15 @@ footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;ga
 
   <div class="row1">
     <div class="lhs">
-      <div class="seg" id="showseg" role="group" aria-label="보여줄 일정">
-        <button type="button" data-k="all">전체</button>
-        <button type="button" data-k="plave">플레이브<span class="sfx"> 일정</span></button>
-        <button type="button" data-k="fan">플리<span class="sfx"> 일정</span></button>
+      <div class="fwrap">
+        <button type="button" class="fbtn" id="fbtn" aria-haspopup="true" aria-expanded="false" aria-label="일정 필터"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg></button>
+        <div class="fpop" id="showseg" role="group" aria-label="보여줄 일정" hidden>
+          <button type="button" data-k="all">전체<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+          <button type="button" data-k="plave">플레이브<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+          <button type="button" data-k="fan">플리<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+        </div>
       </div>
-      <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false">영상</button>
+      <button type="button" class="vidbtn" id="vidbtn" aria-pressed="false"><svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.8v12.4l10-6.2z"/></svg><span>영상</span></button>
     </div>
     <div class="bar">
       <button class="nav" id="prev" type="button" aria-label="이전"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -700,6 +771,8 @@ function renderWeek(box){
 function render(){
   setPressed("showseg", state.show);
   document.getElementById("vidbtn").setAttribute("aria-pressed", state.show === "video" ? "true" : "false");
+  var fb = document.getElementById("fbtn");
+  fb.className = "fbtn" + (state.show === "plave" || state.show === "fan" ? " on" : state.show === "video" ? " dim" : "");
   renderSelected();
   renderTitleAndNote();
   var box = document.getElementById("cal");
@@ -723,10 +796,23 @@ document.getElementById("next").addEventListener("click", function(){ step(1); }
 document.getElementById("dlgx").addEventListener("click", closeDay);
 document.getElementById("daydlg").addEventListener("click", function(ev){ if(ev.target === this) closeDay(); });
 document.getElementById("vidbtn").addEventListener("click", function(){ state.show = state.show === "video" ? "all" : "video"; render(); });
+function togglePop(open){
+  var pop = document.getElementById("showseg"), fb = document.getElementById("fbtn");
+  var want = open === undefined ? pop.hidden : open;
+  pop.hidden = !want;
+  fb.setAttribute("aria-expanded", want ? "true" : "false");
+}
+document.getElementById("fbtn").addEventListener("click", function(ev){ ev.stopPropagation(); togglePop(); });
 document.getElementById("showseg").addEventListener("click", function(ev){
-  var k = ev.target.getAttribute && ev.target.getAttribute("data-k");
-  if(k){ state.show = k; render(); }
+  var b = ev.target.closest ? ev.target.closest("button") : ev.target;
+  var k = b && b.getAttribute && b.getAttribute("data-k");
+  if(k){ state.show = k; togglePop(false); render(); }
 });
+document.addEventListener("click", function(ev){
+  var w = document.querySelector(".fwrap");
+  if(w && !w.contains(ev.target)) togglePop(false);
+});
+document.addEventListener("keydown", function(ev){ if(ev.key === "Escape") togglePop(false); });
 document.getElementById("updated").textContent = "공식 일정 마지막 확인: " + UPDATED + " (한국 시간)";
 render();
 </script>
