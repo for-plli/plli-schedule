@@ -109,16 +109,6 @@ DESCRIPTION:이 시간 전에 인증 완료\nhttps://weverse.io/plave/notic
  e/41168?hl=ko
 URL:https://weverse.io/plave/notice/41168?hl=ko
 CATEGORIES:플리
-BEGIN:VALARM
-ACTION:DISPLAY
-DESCRIPTION:오늘 23:59 [앙코르] 팬클럽 선예매 인증 마감
-TRIGGER:-PT899M
-END:VALARM
-BEGIN:VALARM
-ACTION:DISPLAY
-DESCRIPTION:[앙코르] 팬클럽 선예매 인증 마감
-TRIGGER:-PT10M
-END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:x-6accd27be6@plli-schedule
@@ -151,16 +141,6 @@ DESCRIPTION:넥스트 크리에이티브 서울 · 무료\nhttps://ddp.or.k
  r/index.html?menuno=239\nhttps://www.youtube.com/watch?v=ZSmWvj1TLWM
 URL:https://ddp.or.kr/index.html?menuno=239
 CATEGORIES:플리
-BEGIN:VALARM
-ACTION:DISPLAY
-DESCRIPTION:오늘 17:30 플레이브 데이 @DDP
-TRIGGER:-PT510M
-END:VALARM
-BEGIN:VALARM
-ACTION:DISPLAY
-DESCRIPTION:플레이브 데이 @DDP
-TRIGGER:-PT10M
-END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:m-5e8b5dd4@plli-schedule
