@@ -417,17 +417,12 @@ html body .chip,html body .chip b{font-size:12px}
   html body .daydlg .item .t{font-size:15px}
 }
 
-/* 터치·포커스·호버 기본기 */
+/* 터치·포커스 기본기 */
 html{-webkit-tap-highlight-color:transparent}
 button,a,.day{touch-action:manipulation}
 dialog.daydlg,.dlg-in{overscroll-behavior:contain}
 .day:focus-visible{outline:2px solid var(--p);outline-offset:-2px;border-radius:6px}
 .dlg-x:focus-visible{outline:2px solid var(--p);outline-offset:2px}
-@media (hover:hover){
-  .day:hover{background:var(--n-bg)}
-  .fbtn:not(.on):hover,.vidbtn[aria-pressed="false"]:hover,.alarmbtn:hover,.dlg-x:hover,.bar .nav:hover{background:var(--n-bg)}
-  .fpop button:hover{background:var(--n-bg)}
-}
 </style>
 </head>
 <body>
