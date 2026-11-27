@@ -6,5 +6,45 @@
   "isAllDay": false,
   "category": "708da38d-5422-4868-8898-378900f93ff9",
   "links": []
+ },
+ {
+  "id": "25569bb1-cabe-4599-93ca-998e04114ae7",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-14T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
+ },
+ {
+  "id": "f6cb2dd8-2b53-4c92-aaad-a59a260febb5",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-17T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
+ },
+ {
+  "id": "073e8edd-bef8-4e20-a0f0-a056baf61089",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-21T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
+ },
+ {
+  "id": "e5b35471-b541-408f-81d3-f2bcd3c5a23c",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-24T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
+ },
+ {
+  "id": "2cdb2ef7-2ea9-4bf1-9eab-9005f9affbe2",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-30T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
  }
 ]

@@ -1,5 +1,13 @@
 [
  {
+  "id": "2cdb2ef7-2ea9-4bf1-9eab-9005f9affbe2",
+  "title": "PLAVE LIVE",
+  "utcStart": "2026-12-30T11:00:00.000Z",
+  "isAllDay": false,
+  "category": "aa3be5ab-8895-456c-a39b-dece94875531",
+  "links": []
+ },
+ {
   "id": "bbe05ce3-47d6-4db8-bbe4-d72314cd4814",
   "title": "[KEEP IT MANIC] Encore",
   "utcStart": "2027-01-22T10:00:00.000Z",
