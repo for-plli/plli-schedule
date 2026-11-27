@@ -42,7 +42,7 @@ order.forEach(function(k){
   });
   var allB=function(){ return g.segs.every(function(s){return bought[kid(s)]}); };
   var a=document.createElement('div'); a.innerHTML='<button type="button" class="mpck" aria-label="구매 완료 표시"></button><span class="mpnm">'+g.name+(g.variant?'<span class="mpv">'+g.variant+'</span>':'')+'</span>'; nm.appendChild(a);
-  var paint=function(){ var on=allB(); a.classList.toggle('got',on); row.classList.toggle('got',on); t.classList.toggle('got',on); };
+  var paint=function(){ var on=allB(); a.classList.toggle('got',on); row.classList.toggle('got',on); t.classList.toggle('got',on); row.querySelectorAll('.mpb b').forEach(function(x){ if(!x.dataset.o) x.dataset.o=x.textContent; x.textContent=on?'✓ 구매 완료':x.dataset.o; }); };
   a.querySelector('.mpck').addEventListener('click',function(ev){ ev.stopPropagation(); var on=!allB(); g.segs.forEach(function(s){ if(on) bought[kid(s)]=1; else delete bought[kid(s)]; }); saveB(); paint(); updSum(); });
   g.paint=paint;
   var t=document.createElement('div'); t.textContent=g.type; ty.appendChild(t); paint();
@@ -62,5 +62,6 @@ window.openM=function(r){
   document.getElementById('mpbuy').addEventListener('click',function(){ if(bought[kid(r)]) delete bought[kid(r)]; else bought[kid(r)]=1; saveB(); this.classList.toggle('on',!!bought[kid(r)]); this.textContent=bought[kid(r)]?'✓ 구매 완료':'구매 완료로 표시'; Object.keys(groups).forEach(function(k){groups[k].paint&&groups[k].paint()}); updSum(); });
   var dlg=document.getElementById('daydlg'); if(!dlg.open) dlg.showModal();
 };
+var sx=document.createElement('style');sx.textContent=".mpc .got .mpck{background:var(--ink) !important;border-color:var(--ink) !important}.mpc .got .mpck::after{border-color:var(--surface) !important}.mpr.got .mpb{opacity:1 !important;background:var(--n-bg) !important;box-shadow:none !important}.mpr.got .mpb b{color:var(--muted) !important;font-weight:600}.mpc.ty .got{opacity:1 !important;color:var(--muted)}.mpc .got .mpnm{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}.mpbuy.on{background:var(--ink) !important;border-color:var(--ink) !important;color:var(--surface) !important}.mpb.hot{box-shadow:inset 0 0 0 2px var(--ink) !important}.mpb.hot + b, .mpr .mpb.hot b{}";document.head.appendChild(sx);
 window.MD=D; window.MB=function(){return bought};
 })();
