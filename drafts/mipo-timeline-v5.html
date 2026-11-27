@@ -1,0 +1,81 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--ink:#14172b;--muted:#6b7085;--faint:#a3a8b8;--line:#eef0f5;--f:#c9709b;--f-past:#ecc9da;--f-bg:#fbeaf2;--f-fg:#8a3d63;--hot:#e0456e;--day:22px;--rh:28px;--ah:24px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;color:var(--ink);background:#fff;font-variant-numeric:tabular-nums}
+.wrap{padding:18px 16px 28px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+h2{font-size:19px;margin:0}
+.sort{display:inline-flex;background:#f3f4f8;border-radius:999px;padding:2px}
+.sort span{font-size:12px;font-weight:600;color:var(--muted);padding:5px 11px;border-radius:999px}
+.sort span.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.sum{display:flex;gap:14px;font-size:13px;color:var(--muted);margin:0 0 14px}
+.sum span{display:inline-flex;align-items:center;gap:6px}.sum b{color:var(--ink)}
+.sum i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.tlw{display:grid;grid-template-columns:72px minmax(0,1fr) 62px}
+.col{padding-top:var(--ah)}
+.col div{height:var(--rh);display:flex;align-items:center;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col.ty div{justify-content:flex-end;font-size:11px;color:var(--muted)}
+.sc{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative;
+   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 16px),transparent 100%)}
+.sc::-webkit-scrollbar{display:none}
+.in{position:relative}
+.ax{height:var(--ah);position:relative}
+.ax span{position:absolute;bottom:5px;font-size:11px;color:var(--faint);white-space:nowrap;padding-left:4px}
+.ax span.m{color:var(--ink);font-weight:700}
+.row{height:var(--rh);position:relative}
+.bar{position:absolute;top:6px;height:16px;border-radius:4px;display:flex;align-items:center;z-index:2}
+.bar.on{background:linear-gradient(90deg,var(--f-past) 0 var(--cut),var(--f) var(--cut) 100%)}
+.bar.hot{background:linear-gradient(90deg,#f4c3d0 0 var(--cut),var(--hot) var(--cut) 100%)}
+.bar.soon{background:var(--f-bg);box-shadow:inset 0 0 0 1px #e7b4cb}
+.bar{overflow:visible}
+.bar b{position:absolute;font-size:11px;white-space:nowrap;padding-left:6px;line-height:16px}
+.bar.on b,.bar.hot b{color:#fff}.bar.soon b{color:var(--f-fg)}
+.wk{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.wk.we{background:#f6f7fa}
+.today{position:absolute;top:2px;bottom:0;width:1.5px;background:var(--ink);z-index:1}
+.today b{position:absolute;top:0;left:5px;font-size:11px;font-weight:700;white-space:nowrap}
+.more{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.hint{font-size:11px;color:var(--faint);text-align:right;margin:-8px 0 6px}
+</style></head><body><div class="wrap">
+<div class="top"><h2>미공포</h2><div class="sort"><span class="on">오픈 순</span><span>마감 순</span></div></div>
+<div class="sum"><span><i style="background:var(--hot)"></i>오늘 마감 <b id="c1"></b></span><span><i style="background:var(--f)"></i>신청 가능 <b id="c2"></b></span><span><i style="background:var(--f-bg);box-shadow:inset 0 0 0 1px #e7b4cb"></i>오픈 예정 <b id="c3"></b></span></div>
+<div class="hint">← 옆으로 밀어서 보기 →</div>
+<div class="tlw"><div class="col nm" id="nm"></div><div class="sc" id="sc"><div class="in" id="in"></div></div><div class="col ty" id="ty"></div></div>
+<div class="more" id="more"></div>
+</div>
+<script>
+var D=[{"name": "판매처 A", "type": "홀로 포카", "s": 15, "e": 33}, {"name": "판매처 B", "type": "미공포 A", "s": 15, "e": 33}, {"name": "판매처 C", "type": "홀로 포카", "s": 6, "e": 24}, {"name": "판매처 D", "type": "영통 응모", "s": 20, "e": 32}, {"name": "판매처 E", "type": "대면 팬싸", "s": 15, "e": 29}, {"name": "판매처 F", "type": "럭드", "s": 3, "e": 21}, {"name": "판매처 G", "type": "홀로 포카", "s": 20, "e": 36}, {"name": "판매처 H", "type": "럭드", "s": 20, "e": 32}, {"name": "판매처 I", "type": "럭드", "s": 17, "e": 28}, {"name": "판매처 J", "type": "미공포 A", "s": 2, "e": 15}, {"name": "판매처 K", "type": "홀로 포카", "s": 20, "e": 30}, {"name": "판매처 L", "type": "미공포 A", "s": 11, "e": 28}, {"name": "판매처 M", "type": "미공포 B", "s": 17, "e": 30}, {"name": "판매처 N", "type": "영통 응모", "s": 16, "e": 26}, {"name": "판매처 O", "type": "특전 포카", "s": 15, "e": 29}, {"name": "판매처 P", "type": "미공포 B", "s": 18, "e": 29}, {"name": "판매처 Q", "type": "미공포 B", "s": 11, "e": 24}, {"name": "판매처 R", "type": "영통 응모", "s": 1, "e": 12}, {"name": "판매처 S", "type": "미공포 B", "s": 13, "e": 24}, {"name": "판매처 T", "type": "럭드", "s": 13, "e": 24}, {"name": "판매처 U", "type": "미공포 A", "s": 1, "e": 14}, {"name": "판매처 V", "type": "특전 포카", "s": 2, "e": 19}, {"name": "판매처 W", "type": "영통 응모", "s": 13, "e": 29}, {"name": "판매처 X", "type": "미공포 B", "s": 19, "e": 32}, {"name": "판매처 Y", "type": "미공포 B", "s": 11, "e": 22}, {"name": "판매처 Z", "type": "특전 포카", "s": 11, "e": 21}, {"name": "판매처 AA", "type": "미공포 A", "s": 4, "e": 16}, {"name": "판매처 AB", "type": "럭드", "s": 4, "e": 14}, {"name": "판매처 AC", "type": "대면 팬싸", "s": 15, "e": 32}, {"name": "판매처 AD", "type": "홀로 포카", "s": 18, "e": 31}], TODAY=12, DAY=16, DOW=["일","월","화","수","목","금","토"];
+function dt(d){return new Date(2026,11,d)}   // 12월 기준 (32일 이후는 1월로 자동 넘어감)
+function lab(d){var x=dt(d);return (x.getMonth()+1)+"/"+x.getDate()}
+var live=D.filter(function(r){return r.e>=TODAY}).sort(function(a,b){return a.s-b.s||a.e-b.e});
+var done=D.filter(function(r){return r.e<TODAY});
+var A=Math.min.apply(null,live.map(function(r){return r.s}))-1, B=Math.max.apply(null,live.map(function(r){return r.e}))+2, N=B-A+1;
+var inn=document.getElementById('in'); inn.style.width=(N*DAY)+'px';
+var h='<div class="ax">';
+for(var d=A;d<=B;d++){ var w=dt(d).getDay();
+  if(w===1) h+='<span style="left:'+((d-A)*DAY)+'px">'+lab(d)+' 월</span>';
+}
+h+='</div>'; inn.innerHTML=h;
+for(var d2=A;d2<=B;d2++){ if(dt(d2).getDay()===1){ var g=document.createElement('div');g.className='wk';g.style.left=((d2-A)*DAY)+'px';inn.appendChild(g);} }
+var nm=document.getElementById('nm'), ty=document.getElementById('ty'), c1=0,c2=0,c3=0;
+live.forEach(function(r){
+  var soon=r.s>TODAY, hot=!soon&&r.e-TODAY<=1; if(r.e===TODAY)c1++; if(!soon)c2++; else c3++;
+  var cls=soon?'soon':hot?'hot':'on';
+  var txt=soon?(lab(r.s)+' 오픈'):(r.e===TODAY?'오늘 마감':r.e===TODAY+1?'내일 마감':'~'+lab(r.e));
+  var cut=soon?0:((TODAY-r.s)/(r.e-r.s+1)*100);
+  var row=document.createElement('div');row.className='row';
+  var left=(r.s-A)*DAY, width=(r.e-r.s+1)*DAY-3;
+  var tl = soon ? 0 : (TODAY-r.s)*DAY+2;   // 진행 중: 글자는 오늘 선 옆에서
+  row.innerHTML='<span class="bar '+cls+'" style="left:'+left+'px;width:'+width+'px;--cut:'+cut+'%"><b style="left:'+tl+'px">'+txt+'</b></span>';
+  inn.appendChild(row);
+  var bb=row.querySelector('b'), bar=row.querySelector('.bar');
+  if(tl + bb.offsetWidth > width){ bb.style.left=(width+2)+'px'; bb.style.color=hot?'var(--hot)':'var(--f-fg)'; }   // 막대에 안 들어가면 막대 뒤로
+  var a=document.createElement('div');a.textContent=r.name;nm.appendChild(a);
+  var t=document.createElement('div');t.textContent=r.type;ty.appendChild(t);
+});
+var td=document.createElement('div');td.className='today';td.style.left=((TODAY-A)*DAY)+'px';td.innerHTML='<b>오늘</b>';inn.appendChild(td);
+var sc=document.getElementById('sc'); sc.scrollLeft=Math.max(0,(TODAY-A-2)*DAY);   // 처음엔 오늘 2일 전부터 보이게
+document.getElementById('c1').textContent=c1;document.getElementById('c2').textContent=c2;document.getElementById('c3').textContent=c3;
+document.getElementById('more').textContent='마감된 곳 '+done.length+' ▾';
+</script></body></html>
