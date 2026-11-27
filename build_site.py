@@ -122,6 +122,7 @@ def parse_manual(path):
             c += [""] * (6 - len(c))
             when, title, note, url, tzname, flag = c[:6]
             quiet = flag.replace(" ", "") in ("알림없음", "알림끔", "무음")   # 6번째 칸: 알림 없이 캘린더에만 넣기
+            want_alarm = flag.replace(" ", "") in ("알림", "알림받기")   # 6번째 칸(plave_extra): 이 플레이브 일정도 알림 캘린더에 넣기
             try:
                 if not title:
                     raise ValueError("제목이 비어 있음")
@@ -158,7 +159,7 @@ def parse_manual(path):
                     iso = st.strftime("%Y-%m-%dT00:00:00.000Z")
                 one.append({"id": "x-" + hashlib.sha1(f"{when}|{title}".encode()).hexdigest()[:10],
                             "title": title, "utcStart": iso, "isAllDay": all_day, "note": note, "links": links, "quiet": quiet,
-                            **({"until": until} if until else {})})
+                            **({"until": until} if until else {}), **({"alarm": True} if want_alarm else {})})
             except Exception as ex:
                 print(f"{path}:{n}: 건너뜀 ({ex})", file=sys.stderr)
     return one, monthly

@@ -132,7 +132,7 @@ def write_all(outdir, official, plave_extra, fan_once, fan_monthly, first_day, u
     rows = [(e["utcStart"], e["id"], event(e, ALARM_FAN, "플리")) for e in fan_once]
     since = f"{first_day:%Y-%m-%d}T00:00:00"
     for e in official + plave_extra:   # 알림을 줄 플레이브 일정 (지난 일정은 빼요)
-        if PLAVE_ALARM_RE.search(e["title"]) and e["utcStart"] >= since:
+        if (PLAVE_ALARM_RE.search(e["title"]) or e.get("alarm")) and e["utcStart"] >= since:   # 릴리즈 + 6번째 칸에 '알림'
             rows.append((e["utcStart"], e["id"], event(e, ALARM_FAN, "플레이브")))
     lines = []
     for _, _, ev in sorted(rows, key=lambda r: (r[0], r[1])):
