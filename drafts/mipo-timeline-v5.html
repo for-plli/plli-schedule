@@ -37,15 +37,31 @@ h2{font-size:19px;margin:0}
 .today b{position:absolute;top:0;left:5px;font-size:11px;font-weight:700;white-space:nowrap}
 .more{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 .hint{font-size:11px;color:var(--faint);text-align:right;margin:-8px 0 6px}
+.row,.col div{cursor:pointer}
+dialog{border:0;border-radius:16px;padding:0;width:min(360px,calc(100% - 32px));box-shadow:0 10px 40px rgba(20,23,43,.18)}
+dialog::backdrop{background:rgba(20,23,43,.35)}
+.dl{padding:20px 20px 18px}
+.dl .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.dl h3{margin:0;font-size:19px}
+.dl .tg{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--f-fg);background:var(--f-bg);border-radius:999px;padding:2px 9px}
+.dl .x{border:0;background:#f3f4f8;width:32px;height:32px;border-radius:50%;font-size:15px;color:var(--muted);flex:0 0 auto}
+.dl .per{margin:16px 0 4px;padding:12px 14px;border-radius:12px;background:var(--f-bg)}
+.dl .per .k{font-size:11px;font-weight:600;color:var(--f-fg)}
+.dl .per .v{font-size:15px;font-weight:700;margin-top:2px}
+.dl .per .dd{font-size:12px;font-weight:700;color:var(--hot);margin-top:4px}
+.dl dl{display:grid;grid-template-columns:64px 1fr;gap:9px 10px;margin:14px 0 18px;font-size:13px}
+.dl dt{color:var(--muted)}.dl dd{margin:0;font-weight:500}
+.dl a.go{display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-size:14px;font-weight:700;text-decoration:none}
 </style></head><body><div class="wrap">
 <div class="top"><h2>미공포</h2><div class="sort"><span class="on">오픈 순</span><span>마감 순</span></div></div>
 <div class="sum"><span><i style="background:var(--hot)"></i>오늘 마감 <b id="c1"></b></span><span><i style="background:var(--f)"></i>신청 가능 <b id="c2"></b></span><span><i style="background:var(--f-bg);box-shadow:inset 0 0 0 1px #e7b4cb"></i>오픈 예정 <b id="c3"></b></span></div>
 <div class="hint">← 옆으로 밀어서 보기 →</div>
 <div class="tlw"><div class="col nm" id="nm"></div><div class="sc" id="sc"><div class="in" id="in"></div></div><div class="col ty" id="ty"></div></div>
 <div class="more" id="more"></div>
+<dialog id="dlg"><div class="dl" id="dl" tabindex="-1" autofocus style="outline:none"></div></dialog>
 </div>
 <script>
-var D=[{"name": "판매처 A", "type": "홀로 포카", "s": 15, "e": 33}, {"name": "판매처 B", "type": "미공포 A", "s": 15, "e": 33}, {"name": "판매처 C", "type": "홀로 포카", "s": 6, "e": 24}, {"name": "판매처 D", "type": "영통 응모", "s": 20, "e": 32}, {"name": "판매처 E", "type": "대면 팬싸", "s": 15, "e": 29}, {"name": "판매처 F", "type": "럭드", "s": 3, "e": 21}, {"name": "판매처 G", "type": "홀로 포카", "s": 20, "e": 36}, {"name": "판매처 H", "type": "럭드", "s": 20, "e": 32}, {"name": "판매처 I", "type": "럭드", "s": 17, "e": 28}, {"name": "판매처 J", "type": "미공포 A", "s": 2, "e": 15}, {"name": "판매처 K", "type": "홀로 포카", "s": 20, "e": 30}, {"name": "판매처 L", "type": "미공포 A", "s": 11, "e": 28}, {"name": "판매처 M", "type": "미공포 B", "s": 17, "e": 30}, {"name": "판매처 N", "type": "영통 응모", "s": 16, "e": 26}, {"name": "판매처 O", "type": "특전 포카", "s": 15, "e": 29}, {"name": "판매처 P", "type": "미공포 B", "s": 18, "e": 29}, {"name": "판매처 Q", "type": "미공포 B", "s": 11, "e": 24}, {"name": "판매처 R", "type": "영통 응모", "s": 1, "e": 12}, {"name": "판매처 S", "type": "미공포 B", "s": 13, "e": 24}, {"name": "판매처 T", "type": "럭드", "s": 13, "e": 24}, {"name": "판매처 U", "type": "미공포 A", "s": 1, "e": 14}, {"name": "판매처 V", "type": "특전 포카", "s": 2, "e": 19}, {"name": "판매처 W", "type": "영통 응모", "s": 13, "e": 29}, {"name": "판매처 X", "type": "미공포 B", "s": 19, "e": 32}, {"name": "판매처 Y", "type": "미공포 B", "s": 11, "e": 22}, {"name": "판매처 Z", "type": "특전 포카", "s": 11, "e": 21}, {"name": "판매처 AA", "type": "미공포 A", "s": 4, "e": 16}, {"name": "판매처 AB", "type": "럭드", "s": 4, "e": 14}, {"name": "판매처 AC", "type": "대면 팬싸", "s": 15, "e": 32}, {"name": "판매처 AD", "type": "홀로 포카", "s": 18, "e": 31}], TODAY=12, DAY=16, DOW=["일","월","화","수","목","금","토"];
+var D=[{"name": "판매처 A", "type": "홀로 포카", "s": 15, "e": 33, "album": "디지팩 세트", "price": 62000, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "14:00", "et": "12:00"}, {"name": "판매처 B", "type": "영통 응모", "s": 16, "e": 28, "album": "디지팩 세트", "price": 18900, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "11:00", "et": "12:00"}, {"name": "판매처 C", "type": "홀로 포카", "s": 2, "e": 18, "album": "포카앨범", "price": 12900, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "11:00", "et": "12:00"}, {"name": "판매처 D", "type": "럭드", "s": 3, "e": 13, "album": "포토북 세트", "price": 17500, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "20:00", "et": "18:00"}, {"name": "판매처 E", "type": "미공포 A", "s": 15, "e": 28, "album": "디지팩 (랜덤)", "price": 59800, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "11:00", "et": "18:00"}, {"name": "판매처 F", "type": "영통 응모", "s": 9, "e": 25, "album": "디지팩 (랜덤)", "price": 18900, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "18:00", "et": "23:59"}, {"name": "판매처 G", "type": "특전 포카", "s": 3, "e": 14, "album": "포토북 (랜덤)", "price": 18900, "rule": "선착순 소진 시 종료", "st": "11:00", "et": "23:59"}, {"name": "판매처 H", "type": "미공포 A", "s": 1, "e": 14, "album": "포토북 (랜덤)", "price": 59800, "rule": "선착순 소진 시 종료", "st": "20:00", "et": "18:00"}, {"name": "판매처 I", "type": "미공포 B", "s": 3, "e": 16, "album": "디지팩 (랜덤)", "price": 16800, "rule": "1장당 응모권 1장", "st": "18:00", "et": "23:59"}, {"name": "판매처 J", "type": "대면 팬싸", "s": 14, "e": 25, "album": "포토북 세트", "price": 12900, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "11:00", "et": "23:59"}, {"name": "판매처 K", "type": "대면 팬싸", "s": 15, "e": 32, "album": "포카앨범", "price": 17500, "rule": "선착순 소진 시 종료", "st": "14:00", "et": "12:00"}, {"name": "판매처 L", "type": "특전 포카", "s": 5, "e": 21, "album": "포토북 (랜덤)", "price": 59800, "rule": "선착순 소진 시 종료", "st": "14:00", "et": "23:59"}, {"name": "판매처 M", "type": "럭드", "s": 9, "e": 23, "album": "포토북 세트", "price": 17500, "rule": "선착순 소진 시 종료", "st": "11:00", "et": "23:59"}, {"name": "판매처 N", "type": "홀로 포카", "s": 5, "e": 18, "album": "디지팩 (랜덤)", "price": 16800, "rule": "1장당 응모권 1장", "st": "18:00", "et": "18:00"}, {"name": "판매처 O", "type": "영통 응모", "s": 3, "e": 14, "album": "포토북 세트", "price": 62000, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "11:00", "et": "12:00"}, {"name": "판매처 P", "type": "홀로 포카", "s": 12, "e": 27, "album": "포토북 세트", "price": 62000, "rule": "선착순 소진 시 종료", "st": "14:00", "et": "18:00"}, {"name": "판매처 Q", "type": "미공포 B", "s": 6, "e": 18, "album": "포토북 세트", "price": 62000, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "14:00", "et": "23:59"}, {"name": "판매처 R", "type": "특전 포카", "s": 18, "e": 31, "album": "디지팩 세트", "price": 62000, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "20:00", "et": "23:59"}, {"name": "판매처 S", "type": "럭드", "s": 4, "e": 15, "album": "포카앨범", "price": 18900, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "20:00", "et": "18:00"}, {"name": "판매처 T", "type": "미공포 B", "s": 14, "e": 31, "album": "포카앨범", "price": 17500, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "14:00", "et": "23:59"}, {"name": "판매처 U", "type": "영통 응모", "s": 16, "e": 34, "album": "디지팩 (랜덤)", "price": 17500, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "11:00", "et": "23:59"}, {"name": "판매처 V", "type": "홀로 포카", "s": 9, "e": 25, "album": "포토북 세트", "price": 16800, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "14:00", "et": "18:00"}, {"name": "판매처 W", "type": "대면 팬싸", "s": 12, "e": 30, "album": "포토북 (랜덤)", "price": 18900, "rule": "세트 구매 시 미공포 5종 풀세트", "st": "20:00", "et": "18:00"}, {"name": "판매처 X", "type": "럭드", "s": 17, "e": 29, "album": "포토북 (랜덤)", "price": 59800, "rule": "1장당 응모권 1장", "st": "18:00", "et": "23:59"}, {"name": "판매처 Y", "type": "홀로 포카", "s": 1, "e": 12, "album": "포토북 (랜덤)", "price": 12900, "rule": "1장당 응모권 1장", "st": "18:00", "et": "23:59"}, {"name": "판매처 Z", "type": "홀로 포카", "s": 3, "e": 14, "album": "포카앨범", "price": 18900, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "14:00", "et": "18:00"}, {"name": "판매처 AA", "type": "홀로 포카", "s": 12, "e": 23, "album": "포토북 (랜덤)", "price": 59800, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "20:00", "et": "12:00"}, {"name": "판매처 AB", "type": "특전 포카", "s": 1, "e": 17, "album": "포카앨범", "price": 16800, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "11:00", "et": "23:59"}, {"name": "판매처 AC", "type": "특전 포카", "s": 4, "e": 18, "album": "디지팩 (랜덤)", "price": 59800, "rule": "선착순 소진 시 종료", "st": "20:00", "et": "18:00"}, {"name": "판매처 AD", "type": "럭드", "s": 18, "e": 29, "album": "디지팩 (랜덤)", "price": 62000, "rule": "앨범 1장당 미공포 1장 (랜덤)", "st": "20:00", "et": "23:59"}], TODAY=12, DAY=16, DOW=["일","월","화","수","목","금","토"];
 function dt(d){return new Date(2026,11,d)}   // 12월 기준 (32일 이후는 1월로 자동 넘어감)
 function lab(d){var x=dt(d);return (x.getMonth()+1)+"/"+x.getDate()}
 var live=D.filter(function(r){return r.e>=TODAY}).sort(function(a,b){return a.s-b.s||a.e-b.e});
@@ -73,7 +89,19 @@ live.forEach(function(r){
   if(tl + bb.offsetWidth > width){ bb.style.left=(width+2)+'px'; bb.style.color=hot?'var(--hot)':'var(--f-fg)'; }   // 막대에 안 들어가면 막대 뒤로
   var a=document.createElement('div');a.textContent=r.name;nm.appendChild(a);
   var t=document.createElement('div');t.textContent=r.type;ty.appendChild(t);
+  [row,a,t].forEach(function(n){ n.addEventListener('click',function(){ openD(r); }); });
 });
+function fmt(n){return n.toLocaleString('ko-KR')+'원'}
+function wd(d){return DOW[dt(d).getDay()]}
+function openD(r){
+  var soon=r.s>TODAY, left=r.e-TODAY;
+  var dd = soon ? (r.s-TODAY)+'일 뒤 오픈' : (left===0?'오늘 '+r.et+' 마감':left===1?'내일 '+r.et+' 마감':'마감까지 '+left+'일');
+  document.getElementById('dl').innerHTML='<div class="hd"><div><h3>'+r.name+'</h3><span class="tg">'+r.type+'</span></div><button class="x" onclick="document.getElementById(\'dlg\').close()">✕</button></div>'+
+   '<div class="per"><div class="k">신청 기간</div><div class="v">'+lab(r.s)+'('+wd(r.s)+') '+r.st+' ~ '+lab(r.e)+'('+wd(r.e)+') '+r.et+'</div><div class="dd">'+dd+'</div></div>'+
+   '<dl><dt>앨범</dt><dd>'+r.album+'</dd><dt>가격</dt><dd>'+fmt(r.price)+'</dd><dt>조건</dt><dd>'+r.rule+'</dd></dl>'+
+   '<a class="go" href="#">구매처 열기</a>';
+  document.getElementById('dlg').showModal();
+}
 var td=document.createElement('div');td.className='today';td.style.left=((TODAY-A)*DAY)+'px';td.innerHTML='<b>오늘</b>';inn.appendChild(td);
 var sc=document.getElementById('sc'); sc.scrollLeft=Math.max(0,(TODAY-A-2)*DAY);   // 처음엔 오늘 2일 전부터 보이게
 document.getElementById('c1').textContent=c1;document.getElementById('c2').textContent=c2;document.getElementById('c3').textContent=c3;
