@@ -1,0 +1,68 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--ink:#14172b;--muted:#6b7085;--line:#e6e8f0;--f:#c9709b;--f-bg:#fbeaf2;--f-fg:#8a3d63;--surface:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;color:var(--ink);background:#fff}
+.wrap{padding:16px}
+h2{font-size:19px;margin:0 0 4px}
+.sum{font-size:13px;color:var(--muted);margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap}
+.sum b{color:var(--ink)}
+.seg{display:flex;gap:6px;margin-bottom:12px}
+.seg span{font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.seg span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tl{position:relative;border-top:1px solid var(--line)}
+.hd,.r{display:grid;grid-template-columns:104px 1fr;align-items:center}
+.hd{position:sticky;top:0;background:#fff;z-index:0;height:30px;border-bottom:1px solid var(--line)}
+.days{position:relative;height:100%}
+.days i{position:absolute;top:8px;font-size:10px;color:var(--muted);font-style:normal;transform:translateX(-50%)}
+.r{height:38px;border-bottom:1px solid #f1f2f6}
+.nm{font-size:12.5px;line-height:1.25;overflow:hidden;padding-right:6px}
+.nm small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{position:relative;height:100%}
+.bar{position:absolute;top:11px;height:16px;border-radius:5px;background:var(--f)}
+.lb{position:absolute;top:11px;line-height:16px;font-size:10.5px;font-weight:700;color:var(--f-fg);white-space:nowrap;padding:0 4px}
+.lb.done{color:#9aa0b2;font-weight:500}.lb.last{color:#e0456e}
+.bar.soon{background:var(--f-bg);color:var(--f-fg);box-shadow:inset 0 0 0 1px #e9b9cf}
+.bar.done{background:#eceef3;color:#9aa0b2}
+.bar.last{background:#e0456e}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);z-index:1}
+.today b{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;background:var(--ink);color:#fff;border-radius:999px;padding:1px 6px;white-space:nowrap}
+.week{position:absolute;top:0;bottom:0;width:1px;background:#f1f2f6}
+.lg{display:flex;gap:12px;font-size:11px;color:var(--muted);margin:10px 0}
+.lg span{display:inline-flex;gap:5px;align-items:center}.lg i{width:12px;height:8px;border-radius:2px;display:inline-block}
+.bar{display:block;padding:0;top:11px;height:16px}
+.lb{position:absolute;top:11px;line-height:16px;font-size:10.5px;font-weight:700;color:var(--f-fg);white-space:nowrap;padding:0 5px;z-index:2}
+.lb.done{color:#9aa0b2;font-weight:500}.lb.last{color:#e0456e}
+.hd,.r{grid-template-columns:76px 1fr}
+.r{height:26px}
+.nm{font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.nm small{display:none}
+.bar{top:5px;height:16px}
+.lb{top:5px;font-size:10.5px}
+.lb em{font-style:normal;font-weight:500;opacity:.8;margin-left:3px}
+.today{width:1.5px}
+</style></head><body><div class="wrap">
+<h2>미공포 <span style="font-size:13px;color:var(--muted);font-weight:500">12월 (예시 데이터)</span></h2>
+<div class="sum"><span>오늘 마감 <b id="c1"></b></span><span>신청 가능 <b id="c2"></b></span><span>오픈 예정 <b id="c3"></b></span></div>
+<div class="seg"><span class="on">마감 빠른 순</span><span>오픈 순</span><span>지난 것 숨기기</span></div>
+<div class="lg"><span><i style="background:#e0456e"></i>오늘·내일 마감</span><span><i style="background:var(--f)"></i>신청 가능</span><span><i style="background:var(--f-bg);box-shadow:inset 0 0 0 1px #e9b9cf"></i>오픈 예정</span><span><i style="background:#eceef3"></i>마감</span></div>
+<div class="tl" id="tl"></div></div>
+<script>
+var D=[{"name": "판매처 A", "type": "특전 포카", "s": 11, "e": 16}, {"name": "판매처 B", "type": "영통 응모", "s": 2, "e": 6}, {"name": "판매처 C", "type": "럭키드로우", "s": 12, "e": 24}, {"name": "판매처 D", "type": "럭키드로우", "s": 17, "e": 23}, {"name": "판매처 E", "type": "특전 포카", "s": 3, "e": 12}, {"name": "판매처 F", "type": "영통 응모", "s": 3, "e": 9}, {"name": "판매처 G", "type": "럭키드로우", "s": 18, "e": 27}, {"name": "판매처 H", "type": "럭키드로우", "s": 4, "e": 10}, {"name": "판매처 I", "type": "미공포 A", "s": 13, "e": 16}, {"name": "판매처 J", "type": "대면 팬싸", "s": 2, "e": 13}, {"name": "판매처 K", "type": "대면 팬싸", "s": 10, "e": 19}, {"name": "판매처 L", "type": "미공포 B", "s": 18, "e": 22}, {"name": "판매처 M", "type": "영통 응모", "s": 18, "e": 23}, {"name": "판매처 N", "type": "영통 응모", "s": 7, "e": 15}, {"name": "판매처 O", "type": "럭키드로우", "s": 18, "e": 22}, {"name": "판매처 P", "type": "특전 포카", "s": 7, "e": 17}, {"name": "판매처 Q", "type": "홀로그램 포카", "s": 11, "e": 21}, {"name": "판매처 R", "type": "미공포 A", "s": 12, "e": 19}, {"name": "판매처 S", "type": "영통 응모", "s": 6, "e": 12}, {"name": "판매처 T", "type": "홀로그램 포카", "s": 10, "e": 21}, {"name": "판매처 U", "type": "미공포 B", "s": 11, "e": 21}, {"name": "판매처 V", "type": "특전 포카", "s": 3, "e": 7}, {"name": "판매처 W", "type": "대면 팬싸", "s": 6, "e": 14}, {"name": "판매처 X", "type": "럭키드로우", "s": 16, "e": 25}, {"name": "판매처 Y", "type": "미공포 C", "s": 3, "e": 14}, {"name": "판매처 Z", "type": "홀로그램 포카", "s": 11, "e": 19}, {"name": "판매처 AA", "type": "영통 응모", "s": 15, "e": 19}, {"name": "판매처 AB", "type": "영통 응모", "s": 9, "e": 19}, {"name": "판매처 AC", "type": "홀로그램 포카", "s": 2, "e": 9}, {"name": "판매처 AD", "type": "미공포 C", "s": 10, "e": 19}], TODAY=10, N=30;
+function x(d){return ((d-1)/N*100)+"%"}
+var tl=document.getElementById('tl');
+var hd='<div class="hd"><div style="font-size:11px;color:var(--muted)">판매처</div><div class="days">';
+for(var d=1;d<=N;d+=3) hd+='<i style="left:'+((d-0.5)/N*100)+'%">'+d+'</i>';
+hd+='</div></div>'; tl.innerHTML=hd;
+D.sort(function(a,b){var ad=a.e<TODAY,bd=b.e<TODAY; if(ad!==bd) return ad?1:-1; return a.e-b.e||a.s-b.s;});
+var c1=0,c2=0,c3=0;
+D.forEach(function(r){
+ var cls = r.e<TODAY?'done':(r.s>TODAY?'soon':(r.e-TODAY<=1?'last':''));
+ if(r.e===TODAY)c1++; if(r.s<=TODAY&&r.e>=TODAY)c2++; if(r.s>TODAY)c3++;
+ var T=r.type.replace('럭키드로우','럭드').replace('홀로그램 포카','홀로 포카'); var lab0 = cls==='soon' ? r.s+'일~'+r.e+'일' : cls==='done' ? '마감' : (cls==='last' ? (r.e===TODAY?'오늘 마감':'내일 마감') : '~'+r.e+'일'); var lab = lab0+'<em>'+T+'</em>';
+ var row=document.createElement('div');row.className='r';
+ row.innerHTML='<div class="nm">'+r.name+'</div><div class="track"><span class="bar '+cls+'" style="left:'+x(r.s)+';width:calc('+((r.e-r.s+1)/N*100)+'% - 2px)"></span>'+(r.e<=21?'<span class="lb '+cls+'" style="left:'+(r.e/N*100)+'%">'+lab+'</span>':'<span class="lb '+cls+'" style="left:'+x(r.s)+';padding-left:7px">'+lab+'</span>')+'</div>';
+ tl.appendChild(row);
+});
+var t=document.createElement('div');t.className='today';t.style.left='calc(76px + (100% - 76px) * '+((TODAY-0.5)/N)+')';t.innerHTML='<b>오늘 12/'+TODAY+'</b>';tl.appendChild(t);
+document.getElementById('c1').textContent=c1;document.getElementById('c2').textContent=c2;document.getElementById('c3').textContent=c3;
+</script></body></html>
