@@ -1,0 +1,84 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--ink:#14172b;--muted:#6b7085;--faint:#a3a8b8;--line:#eef0f5;--f:#c9709b;--f-past:#ecc9da;--f-bg:#fbeaf2;--f-fg:#8a3d63;--hot:#e0456e;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;color:var(--ink);background:var(--bg);font-variant-numeric:tabular-nums}
+.wrap{padding:18px 16px 28px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+h2{font-size:19px;margin:0;letter-spacing:-.01em}
+.sort{display:inline-flex;background:#f3f4f8;border-radius:999px;padding:2px}
+.sort span{font-size:12px;font-weight:600;color:var(--muted);padding:5px 11px;border-radius:999px}
+.sort span.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.sum{display:flex;gap:14px;font-size:13px;color:var(--muted);margin:0 0 14px}
+.sum span{display:inline-flex;align-items:center;gap:6px}
+.sum b{color:var(--ink);font-weight:700}
+.sum i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.tl{position:relative}
+.axis{display:grid;grid-template-columns:var(--nw) 1fr;height:24px;align-items:end}
+.ticks{position:relative;height:100%}
+.ticks span{position:absolute;bottom:5px;font-size:11px;color:var(--faint);white-space:nowrap}
+.rows{position:relative}
+.r{display:grid;grid-template-columns:var(--nw) 1fr;height:28px;align-items:center}
+.nm{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.track{position:relative;height:100%}
+.bar{position:absolute;top:6px;height:16px;border-radius:4px}
+.bar.on{background:linear-gradient(90deg,var(--f-past) 0 var(--cut),var(--f) var(--cut) 100%)}
+.bar.hot{background:linear-gradient(90deg,#f4c3d0 0 var(--cut),var(--hot) var(--cut) 100%)}
+.bar.soon{background:var(--f-bg);box-shadow:inset 0 0 0 1px #e7b4cb}
+.bar.done{background:#eceef3}
+.tx{position:absolute;top:6px;line-height:16px;font-size:11px;white-space:nowrap;padding-left:6px}
+.tx b{font-weight:700}
+.tx em{font-style:normal;color:var(--muted);margin-left:5px}
+.on-tx b{color:#fff}.hot-tx b{color:#fff}.soon-tx b{color:var(--f-fg)}
+.out b{color:var(--f-fg)!important}.hot-tx.out b{color:var(--hot)!important}
+.wk{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.today{position:absolute;top:-22px;bottom:0;width:1.5px;background:var(--ink);z-index:1}
+.today b{position:absolute;top:0;left:4px;font-size:11px;font-weight:700;white-space:nowrap}
+.bar,.tx{z-index:2}
+.more{display:flex;align-items:center;gap:6px;margin-top:8px;padding:8px 0 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.r.done .nm{color:var(--faint)}
+.r.done .tx b{color:var(--faint)!important;font-weight:600}
+</style></head><body><div class="wrap">
+<div class="top"><h2>미공포</h2><div class="sort"><span class="on">오픈 순</span><span>마감 순</span></div></div>
+<div class="sum"><span><i style="background:var(--hot)"></i>오늘 마감 <b id="c1"></b></span><span><i style="background:var(--f)"></i>신청 가능 <b id="c2"></b></span><span><i style="background:var(--f-bg);box-shadow:inset 0 0 0 1px #e7b4cb"></i>오픈 예정 <b id="c3"></b></span></div>
+<div class="tl" id="tl" style="--nw:72px"></div>
+<div class="more" id="more"></div>
+</div>
+<script>
+var D=[{"name": "판매처 A", "type": "특전 포카", "s": 11, "e": 16}, {"name": "판매처 B", "type": "영통 응모", "s": 2, "e": 6}, {"name": "판매처 C", "type": "럭키드로우", "s": 12, "e": 24}, {"name": "판매처 D", "type": "럭키드로우", "s": 17, "e": 23}, {"name": "판매처 E", "type": "특전 포카", "s": 3, "e": 12}, {"name": "판매처 F", "type": "영통 응모", "s": 3, "e": 9}, {"name": "판매처 G", "type": "럭키드로우", "s": 18, "e": 27}, {"name": "판매처 H", "type": "럭키드로우", "s": 4, "e": 10}, {"name": "판매처 I", "type": "미공포 A", "s": 13, "e": 16}, {"name": "판매처 J", "type": "대면 팬싸", "s": 2, "e": 13}, {"name": "판매처 K", "type": "대면 팬싸", "s": 10, "e": 19}, {"name": "판매처 L", "type": "미공포 B", "s": 18, "e": 22}, {"name": "판매처 M", "type": "영통 응모", "s": 18, "e": 23}, {"name": "판매처 N", "type": "영통 응모", "s": 7, "e": 15}, {"name": "판매처 O", "type": "럭키드로우", "s": 18, "e": 22}, {"name": "판매처 P", "type": "특전 포카", "s": 7, "e": 17}, {"name": "판매처 Q", "type": "홀로그램 포카", "s": 11, "e": 21}, {"name": "판매처 R", "type": "미공포 A", "s": 12, "e": 19}, {"name": "판매처 S", "type": "영통 응모", "s": 6, "e": 12}, {"name": "판매처 T", "type": "홀로그램 포카", "s": 10, "e": 21}, {"name": "판매처 U", "type": "미공포 B", "s": 11, "e": 21}, {"name": "판매처 V", "type": "특전 포카", "s": 3, "e": 7}, {"name": "판매처 W", "type": "대면 팬싸", "s": 6, "e": 14}, {"name": "판매처 X", "type": "럭키드로우", "s": 16, "e": 25}, {"name": "판매처 Y", "type": "미공포 C", "s": 3, "e": 14}, {"name": "판매처 Z", "type": "홀로그램 포카", "s": 11, "e": 19}, {"name": "판매처 AA", "type": "영통 응모", "s": 15, "e": 19}, {"name": "판매처 AB", "type": "영통 응모", "s": 9, "e": 19}, {"name": "판매처 AC", "type": "홀로그램 포카", "s": 2, "e": 9}, {"name": "판매처 AD", "type": "미공포 C", "s": 10, "e": 19}], TODAY=10, M=12, DOW=["일","월","화","수","목","금","토"];
+var A=TODAY-4, B=Math.max.apply(null,D.map(function(r){return r.e}))+1, N=B-A+1;   // 오늘 4일 전부터 보여 줌
+function px(d){return ((d-A)/N*100)+"%"}
+function dow(d){return DOW[new Date(2026,M-1,d).getDay()]}
+var tl=document.getElementById('tl');
+var ax='<div class="axis"><div></div><div class="ticks" id="ticks">';
+for(var d=A;d<=B-3;d++){ if(dow(d)==="월" && Math.abs(d-TODAY)>2) ax+='<span style="left:'+px(d)+';transform:translateX(3px)">'+M+'/'+d+'</span>'; }
+ax+='</div></div><div class="rows" id="rows"></div>'; tl.innerHTML=ax;
+var rows=document.getElementById('rows');
+var live=D.filter(function(r){return r.e>=TODAY}).sort(function(a,b){return a.s-b.s||a.e-b.e});
+var done=D.filter(function(r){return r.e<TODAY});
+var c1=0,c2=0,c3=0;
+live.forEach(function(r){
+  var soon=r.s>TODAY, hot=!soon&&r.e-TODAY<=1;
+  if(r.e===TODAY)c1++; if(!soon)c2++; else c3++;
+  var T=r.type.replace('럭키드로우','럭드').replace('홀로그램 포카','홀로 포카');
+  var s=Math.max(r.s,A), cls=soon?'soon':hot?'hot':'on';
+  var date=soon?(r.s+'일 오픈'):(r.e===TODAY?'오늘 마감':r.e===TODAY+1?'내일 마감':'~'+r.e+'일');
+  var cut=soon?0:((TODAY-s)/(r.e-s+1)*100);
+  var el=document.createElement('div'); el.className='r';
+  el.innerHTML='<div class="nm">'+r.name+'</div><div class="track"><span class="bar '+cls+'" style="left:'+px(s)+';width:calc('+((r.e-s+1)/N*100)+'% - 2px);--cut:'+cut+'%"></span><span class="tx '+cls+'-tx"><b>'+date+'</b><em>'+T+'</em></span></div>';
+  rows.appendChild(el);
+  var tx=el.querySelector('.tx'), bar=el.querySelector('.bar'), tr=el.querySelector('.track');
+  var start = soon ? bar.offsetLeft : tr.clientWidth*((TODAY-A)/N);   // 글자는 '오늘' 선(또는 오픈일)에서 시작
+  tx.style.left=(start+1)+'px';
+  var bEnd=bar.offsetLeft+bar.offsetWidth, bw=tx.querySelector('b').offsetWidth+8;
+  if(start+bw>bEnd){ tx.classList.add('out'); tx.style.left=(bEnd+2)+'px'; }   // 막대가 짧으면 날짜도 막대 뒤로
+  else { var em=tx.querySelector('em'); em.style.marginLeft=(bEnd-start-bw+10)+'px'; }   // 종류는 막대 뒤
+});
+for(var d2=A;d2<=B;d2++){ if(dow(d2)==="월"){ var w=document.createElement('div');w.className='wk';w.style.left='calc(72px + (100% - 72px) * '+((d2-A)/N)+')';tl.appendChild(w);} }
+var t=document.createElement('div');t.className='today';t.style.left='calc(72px + (100% - 72px) * '+((TODAY-A)/N)+')';t.innerHTML='<b>오늘</b>';rows.appendChild(t);
+t.style.left='calc((100%) * '+((TODAY-A)/N)+')'; t.style.marginLeft='0'; rows.style.setProperty('position','relative');
+// 오늘 선은 track 기준으로 다시 배치
+t.remove(); var tw=document.createElement('div'); tw.style.cssText='position:absolute;left:72px;right:0;top:0;bottom:0;pointer-events:none'; tw.appendChild(t); t.style.left=((TODAY-A)/N*100)+'%'; rows.appendChild(tw);
+document.getElementById('c1').textContent=c1;document.getElementById('c2').textContent=c2;document.getElementById('c3').textContent=c3;
+document.getElementById('more').innerHTML='마감된 곳 '+done.length+' <span style="font-size:10px">▾</span>';
+</script></body></html>
